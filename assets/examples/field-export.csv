@@ -1,0 +1,2 @@
+source,windowStart,windowEnd,url,pageType,device,country,samples,lcp,inp,cls,ttfb,fcp
+shopify-rum,2026-10-01,2026-10-18,https://example.myshopify.com/products/example,product,mobile,US,500,3100,240,0.05,600,1700

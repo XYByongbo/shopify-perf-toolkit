@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "changes": [
+    {
+      "target": "layout/theme.liquid",
+      "kind": "liquid-dedupe-resource-hint",
+      "parameters": { "firstStart": 0, "duplicateStart": 0 },
+      "reason": "Replace paths, offsets and evidence after reviewing the actual duplicate hints.",
+      "evidence": {
+        "sourceHash": "REPLACE_WITH_CURRENT_SHA256",
+        "summary": "REPLACE_WITH_ACTUAL_REVIEW",
+        "renderedTogether": false,
+        "responseHeadersReviewed": false,
+        "resourceTimingReviewed": false,
+        "domReferencesReviewed": false
+      }
+    },
+    {
+      "target": "sections/critical-style.liquid",
+      "kind": "liquid-critical-css-sync",
+      "parameters": { "tagStart": 0 },
+      "reason": "Replace with an actual critical stylesheet and initial viewport evidence.",
+      "evidence": {
+        "sourceHash": "REPLACE_WITH_CURRENT_SHA256",
+        "summary": "REPLACE_WITH_ACTUAL_REVIEW",
+        "initialViewportStylesConfirmed": false,
+        "cascadeReviewed": false,
+        "mediaAllIntended": false,
+        "domReferencesReviewed": false
+      }
+    },
+    {
+      "target": "assets/input.js",
+      "kind": "js-passive-listener",
+      "parameters": { "registrationStart": 0 },
+      "reason": "Replace with a reviewed input listener that never cancels default behavior.",
+      "evidence": {
+        "sourceHash": "REPLACE_WITH_CURRENT_SHA256",
+        "summary": "REPLACE_WITH_ACTUAL_REVIEW",
+        "cancellationNotRequired": false,
+        "listenerLifecycleOwned": false,
+        "capturedStateReviewed": false
+      }
+    },
+    {
+      "target": "assets/motion.css",
+      "kind": "css-transition-properties",
+      "parameters": { "selector": ".REPLACE", "properties": [] },
+      "reason": "Replace with the actual selector and explicitly reviewed animated properties.",
+      "evidence": {
+        "sourceHash": "REPLACE_WITH_CURRENT_SHA256",
+        "summary": "REPLACE_WITH_ACTUAL_REVIEW",
+        "animatedPropertiesReviewed": false,
+        "allStatesReviewed": false,
+        "visualBehaviorReviewed": false
+      }
+    }
+  ]
+}

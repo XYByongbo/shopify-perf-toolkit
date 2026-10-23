@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "changes": [
+    {
+      "target": "assets/main.js",
+      "kind": "js-raf-listener",
+      "parameters": { "registrationStart": 120 },
+      "reason": "Replace with a confirmed scroll/resize rendering bottleneck",
+      "evidence": {
+        "sourceHash": "REPLACE_WITH_CURRENT_ANALYSIS_SOURCE_HASH",
+        "summary": "Describe timing, latest-state behavior and listener ownership after review",
+        "timingChangeReviewed": false,
+        "listenerLifecycleOwned": false,
+        "handlerReadsLatestState": false
+      }
+    },
+    {
+      "target": "assets/component.css",
+      "kind": "css-dedupe-declarations",
+      "parameters": {},
+      "reason": "Remove confirmed adjacent identical declarations",
+      "evidence": {
+        "sourceHash": "REPLACE_WITH_CURRENT_ANALYSIS_SOURCE_HASH",
+        "summary": "Confirm no code depends on CSSOM enumeration",
+        "cssomIndependent": false
+      }
+    },
+    {
+      "target": "assets/details.css",
+      "kind": "css-offscreen-rendering",
+      "parameters": { "selector": ".details", "intrinsicBlockSize": 600 },
+      "reason": "Skip initial rendering of a measured offscreen flow-root block",
+      "evidence": {
+        "sourceHash": "REPLACE_WITH_CURRENT_ANALYSIS_SOURCE_HASH",
+        "summary": "Record viewport, measured size, effective display and containment behavior",
+        "offscreen": false,
+        "nonLcp": false,
+        "containmentReviewed": false
+      }
+    },
+    {
+      "target": "sections/cards.liquid",
+      "kind": "liquid-limit-guarded-loop",
+      "parameters": { "loopStart": 0 },
+      "reason": "Stop iterating after the existing output limit",
+      "evidence": {
+        "sourceHash": "REPLACE_WITH_CURRENT_ANALYSIS_SOURCE_HASH",
+        "summary": "Confirm collection output and surrounding loop-variable scope",
+        "loopScopeReviewed": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "plan": "/absolute/task/plan.json",
+  "diagnosis": "/absolute/task/diagnosis.json",
+  "candidateId": "replace-with-current-diagnosis-candidate-id",
+  "runs": 3,
+  "history": [],
+  "budget": { "maxWallTimeMs": 1200000, "maxAttempts": 6, "maxFailures": 1, "maxCandidateRounds": 2 },
+  "before": {
+    "schemaVersion": 1, "engine": "lighthouse",
+    "pages": [{ "id": "product", "url": "https://example.myshopify.com/products/example?preview_theme_id=123" }],
+    "devices": ["mobile"],
+    "deployment": { "project": "/absolute/baseline-theme", "store": "example.myshopify.com", "themeId": "123" }
+  },
+  "after": {
+    "schemaVersion": 1, "engine": "lighthouse",
+    "pages": [{ "id": "product", "url": "https://example.myshopify.com/products/example?preview_theme_id=456" }],
+    "devices": ["mobile"],
+    "deployment": { "project": "/absolute/candidate-theme", "store": "example.myshopify.com", "themeId": "456" }
+  },
+  "regressionBefore": {
+    "schemaVersion": 1,
+    "url": "https://example.myshopify.com/products/example?preview_theme_id=123",
+    "viewports": [{ "name": "mobile", "width": 390, "height": 844 }],
+    "scenarios": [{ "name": "first-product-action", "steps": [
+      { "action": "click", "selector": "button[data-product-zoom]" },
+      { "action": "assert-visible", "selector": "[data-product-zoom-dialog]", "visible": true },
+      { "action": "checkpoint", "selector": "#MainContent", "key": "zoom-open" }
+    ] }]
+  },
+  "regressionAfter": {
+    "schemaVersion": 1,
+    "url": "https://example.myshopify.com/products/example?preview_theme_id=456",
+    "viewports": [{ "name": "mobile", "width": 390, "height": 844 }],
+    "scenarios": [{ "name": "first-product-action", "steps": [
+      { "action": "click", "selector": "button[data-product-zoom]" },
+      { "action": "assert-visible", "selector": "[data-product-zoom-dialog]", "visible": true },
+      { "action": "checkpoint", "selector": "#MainContent", "key": "zoom-open" }
+    ] }]
+  }
+}

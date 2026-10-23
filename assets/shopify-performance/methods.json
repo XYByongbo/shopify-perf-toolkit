@@ -1,0 +1,747 @@
+[
+  {
+    "id": "never-lazy-load-lcp-image",
+    "topic": "images",
+    "action": "仅对已定位的首屏 LCP 取消懒加载；保留非首屏策略。",
+    "validate": "真实 LCP、共享实例、资源发现时间和响应式选择。",
+    "executors": [
+      "domain:image-eager",
+      "site:liquid-image-tag-loading"
+    ],
+    "reviewedSourceHash": "fe3bbcb5bda206c3665b5871ea8739ce6f0b3bdbff07f9b47d6d7a618f755655",
+    "evidenceDomain": "browser"
+  },
+  {
+    "id": "set-fetchpriority-high-on-lcp-image",
+    "topic": "images",
+    "action": "给确认的 LCP 提高请求优先级，不能同时 lazy。",
+    "validate": "优先级、下载竞争和独立 LCP 收益。",
+    "executors": [
+      "domain:image-priority"
+    ],
+    "reviewedSourceHash": "686e49a83d64c109cb5c4b68a9bcb3bbecb992e0e50a97d8756c49ab1a9e5334",
+    "evidenceDomain": "browser"
+  },
+  {
+    "id": "prevent-image-layout-shift",
+    "topic": "images",
+    "action": "依据真实图片比例预留尺寸，保留响应式缩放。",
+    "validate": "同图片加载完成后的最终布局及首次加载 CLS。",
+    "executors": [
+      "domain:image-dimensions",
+      "domain:image-aspect-ratio"
+    ],
+    "reviewedSourceHash": "975d256cf7045746cd4b1aa8825e917299f6f3ea3cfb8b1f1a32b079d93def52",
+    "evidenceDomain": "browser"
+  },
+  {
+    "id": "use-picture-for-art-directed-heroes",
+    "topic": "images",
+    "action": "相邻移动/桌面图片转 picture，保留设置、裁切和缺图回退。",
+    "validate": "两断点、DPR、currentSrc、只加载匹配图片。",
+    "executors": [
+      "site:liquid-picture-pair"
+    ],
+    "reviewedSourceHash": "1925620651e36a0cf6096961b944c718970597c8692e78b4227a3cbeee17b082",
+    "evidenceDomain": "browser"
+  },
+  {
+    "id": "use-responsive-images",
+    "topic": "images",
+    "action": "用实际布局推导 sizes/widths；eager LCP 不依赖 lazy-only 的 sizes=auto。",
+    "validate": "跨断点显示宽度、DPR、currentSrc 与视觉清晰度。",
+    "executors": [
+      "site:image-responsive"
+    ],
+    "reviewedSourceHash": "ed31d74a4f436da92aa3b1f145164df59bcfdee70e581386d9f5698717c43a8a",
+    "evidenceDomain": "browser"
+  },
+  {
+    "id": "use-shopify-image-filters-efficiently",
+    "topic": "images",
+    "action": "把已确认图片对象接入 image_url/image_tag，保留焦点及原配置。",
+    "validate": "尺寸、alt、srcset、nil 数据与布局；禁止凭 URL 猜图片对象。",
+    "executors": [],
+    "reviewedSourceHash": "a4b1c21f52f06aed6f1ea46845531a931077dbd72ceb854ea142cb835f498a5a",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "use-filter-chains",
+    "topic": "images",
+    "action": "改写手拼 CDN URL 为图片过滤器链；请求最大宽度必须覆盖目标候选。",
+    "validate": "版本参数、焦点、合法 srcset、实际下载宽度。",
+    "executors": [],
+    "reviewedSourceHash": "2fd53ffe47efb8cefe102a61ef7ff2c424df6317536b6e642d7824b9ecddf3d4",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "avoid-background-images-hero",
+    "topic": "images",
+    "action": "将 LCP 背景迁移为 HTML img，匹配 object-fit/position 与原叠层。",
+    "validate": "加载发现、裁切、焦点、布局及内容一致性。",
+    "executors": [],
+    "reviewedSourceHash": "dfd0944710bebeb935d2c4ad6b10542383a3b159d69bce4941dd0d0a2b2ae0f0",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "dont-hide-lcp-image-behind-animations",
+    "topic": "images",
+    "action": "只解除实际 LCP 的初始显示门槛，保留其它交互状态。",
+    "validate": "初始可见性、动画用途、最终样式、LCP render delay。",
+    "executors": [
+      "site:css-lcp-reveal"
+    ],
+    "reviewedSourceHash": "2b0ca88435caacd27b5492d125fa20fad455261f093a2b414e1533ff2a3ca31d",
+    "evidenceDomain": "browser"
+  },
+  {
+    "id": "prevent-popups-hijacking-lcp",
+    "topic": "apps",
+    "action": "按业务契约调整弹窗尺寸或交互触发，不能隐藏关键内容骗分。",
+    "validate": "弹窗业务、焦点、键盘、实际 LCP 与显示时机。",
+    "executors": [],
+    "reviewedSourceHash": "724d9a769f329c2463509f0f69b29e47bf6bc21881f840fee00808438f026d3d",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "use-section-index",
+    "topic": "images",
+    "action": "按 section.index/location 分层加载；nil 保持 eager/sync 并输出完整内容。",
+    "validate": "编辑器、静态区块、Section API、disabled section 和共享实例。",
+    "executors": [],
+    "reviewedSourceHash": "c60dd060690d4843e1e62dde19cd323b30e73040427f7203538d50544eb104ca",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "render-essential-content-server-side",
+    "topic": "liquid",
+    "action": "将必要首屏内容输出为 Liquid/HTML，保留数据与交互增强。",
+    "validate": "无 JS 内容、商品状态、SEO、首屏和 hydration 一致性。",
+    "executors": [
+      "domain:section-liquid-initial",
+      "domain:section-liquid-inline"
+    ],
+    "reviewedSourceHash": "08e061869754d3a2c948b9ee49a10bb54cc3d95b7a7ec33374a7e1008e8ab6dd",
+    "evidenceDomain": "browser",
+    "supportedSubset": "Reuse a current literal snippet render with global inputs in an empty section container; remove only a direct startup call and retain dynamic Section API calls. Require no-JS, initial-request absence and dynamic content-transition evidence."
+  },
+  {
+    "id": "avoid-deeply-nested-liquid-loops",
+    "topic": "liquid",
+    "action": "用实际热点选择预过滤或索引以减少重复遍历，避免盲目替换早停循环。",
+    "validate": "空/短/长目录、输出顺序、作用域及真实 Liquid profile。",
+    "executors": [],
+    "reviewedSourceHash": "aee2012634e0be6ed5aa39c4f89675a5c48cf8697ec5e6b75de915026f22f7d9",
+    "evidenceDomain": "liquid-server",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "move-metafield-access-outside-loops",
+    "topic": "liquid",
+    "action": "只缓存迭代不变的 metafield；逐商品输入不能跨循环共享。",
+    "validate": "零迭代语义、输入写入、作用域、原始服务端采样。",
+    "executors": [
+      "domain:liquid-cache-metafield",
+      "site:liquid-cache-metafield"
+    ],
+    "reviewedSourceHash": "75956b47781489be7714437c2819bb12c2aa145cbffa3ae72be6fb5eca580a9c",
+    "evidenceDomain": "liquid-server"
+  },
+  {
+    "id": "move-operations-outside-loops",
+    "topic": "liquid",
+    "action": "缓存不变 assign/filter；不提升依赖循环项或被重赋值的表达式。",
+    "validate": "空/短/长集合及变量语义、服务端和导航双验证。",
+    "executors": [
+      "domain:liquid-cache-loop-filter",
+      "site:liquid-cache-loop-filter"
+    ],
+    "reviewedSourceHash": "bad8e286f65432875fb43c81a9a41d218a079870b342514687c7f8caf36bd717",
+    "evidenceDomain": "liquid-server"
+  },
+  {
+    "id": "avoid-repetitive-filter-calls",
+    "topic": "liquid",
+    "action": "同参数同作用域的纯过滤结果只计算一次。",
+    "validate": "确认无输入变化；比较输出与原始 self-time。",
+    "executors": [
+      "domain:liquid-cache-loop-filter",
+      "site:liquid-cache-loop-filter"
+    ],
+    "reviewedSourceHash": "aae452959d85b4dbeb3b277dc0b37e4d407d8be921f3d7c4ba3acc7a124a4612",
+    "evidenceDomain": "liquid-server"
+  },
+  {
+    "id": "liquid-performance-patterns",
+    "topic": "liquid",
+    "action": "根据 Theme Inspector 热点选择不变量缓存、受限循环或语义保持重构。",
+    "validate": "服务器采样独立于浏览器 TTFB，真实采样才可确认收益。",
+    "executors": [
+      "domain:liquid-cache-loop-filter",
+      "domain:liquid-cache-metafield"
+    ],
+    "reviewedSourceHash": "c81b36850859cf2bab05f022df5250664a6eb3f6cef1dd3b05a95214071cd9db",
+    "evidenceDomain": "liquid-server"
+  },
+  {
+    "id": "assign-block-settings-to-variable",
+    "topic": "liquid",
+    "action": "在当前 block 作用域缓存 settings；不能跨不同 block 复用。",
+    "validate": "空设置、block 顺序、动态重载和模板输出。",
+    "executors": [],
+    "reviewedSourceHash": "046c253f8262cfe3d40bb5dbc0eb7a7fde55d3d55d0f52698f98662bc0c15533",
+    "evidenceDomain": "liquid-server",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "use-echo-for-concatenation",
+    "topic": "liquid",
+    "action": "只将立即输出的连接拆成输出语句；需要字符串变量时保留原逻辑。",
+    "validate": "escape、空白、nil、后续字符串消费者及实际 profile。",
+    "executors": [],
+    "reviewedSourceHash": "d9d719c6f699e4d0aab804dd6dcc4fdbeeb41d565f37042af02a172840ce08ba",
+    "evidenceDomain": "liquid-server",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "avoid-conditionals-in-loops",
+    "topic": "liquid",
+    "action": "按实际筛选逻辑预过滤，保留顺序和需要的复合判断。",
+    "validate": "forloop 元数据、数量、空集合与早停语义。",
+    "executors": [],
+    "reviewedSourceHash": "1288f16085b2cb10e9e3d07322e2aa78a3d46ede2de81636215e7d0374299532",
+    "evidenceDomain": "liquid-server",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "avoid-nested-renders",
+    "topic": "liquid",
+    "action": "只内联热点中可证明等价的简单嵌套调用，保留复杂组件边界。",
+    "validate": "render 隔离、参数、include 副作用、schema 与重复实例。",
+    "executors": [],
+    "reviewedSourceHash": "c6a83cbfc0466c79bf2dce0d6f02c3f071c01a6f2bec6a9efe23f7658039b54d",
+    "evidenceDomain": "liquid-server",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "avoid-variant-overfetching",
+    "topic": "liquid",
+    "action": "初始输出必要变体与选项，选择后按上下文增量取数据。",
+    "validate": "高变体产品、无库存组合、价格、选择、加购与 URL。",
+    "executors": [],
+    "reviewedSourceHash": "90ba29c8912a95bc6174361b18e92677fd4e5c1cca9b79272bc48c2f22e01730",
+    "evidenceDomain": "liquid-server",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "limit-product-queries-with-pagination",
+    "topic": "liquid",
+    "action": "collection.products/collections 使用有限循环；其它数组按平台语义考虑 paginate。",
+    "validate": "原有页码、数量、forloop、固定轮播及数据查询。",
+    "executors": [
+      "domain:query-limit",
+      "domain:query-paginate"
+    ],
+    "reviewedSourceHash": "b0cd2191761373d0dff264a8c9b6fd9460a70759ddb441eeaa79ba99ae329e90",
+    "evidenceDomain": "liquid-server",
+    "supportedSubset": "Preserve a capped products query or convert explicit (current_page - 1) * page-size manual offset pagination; no pagination of fixed carousels."
+  },
+  {
+    "id": "limit-pagination-depth",
+    "topic": "liquid",
+    "action": "减少深页查询并提供筛选或明确分页；保持完整访问路径。",
+    "validate": "平台分页边界、键盘、Load more、URL 和内容范围。",
+    "executors": [],
+    "reviewedSourceHash": "042d20bd9ec74486b08f7f1abd29dcd7f080cbd926d5bca72b2f1d51430a1930",
+    "evidenceDomain": "liquid-server",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "defer-modal-content-loading",
+    "topic": "liquid",
+    "action": "首开再请求隐藏弹窗昂贵 Liquid；按正确 API 上下文渲染。",
+    "validate": "首次打开、关闭再开、错误重试、recommendations 专用上下文。",
+    "executors": [],
+    "reviewedSourceHash": "60e41d0c617fb9ebd3ea07842eb60651ac4dc461b73d531c296d5934963ccccd",
+    "evidenceDomain": "liquid-server",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "defer-combined-listing-products",
+    "topic": "liquid",
+    "action": "用选项的子产品 URL 按需加载 combined listings，保留普通选项路径。",
+    "validate": "资格、nil、所选变体、商品跳转和购买行为。",
+    "executors": [],
+    "reviewedSourceHash": "0c1babefec079c7ed61852a5e49d085c9f38e3814d78a404fa3839e767bac57a",
+    "evidenceDomain": "liquid-server",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "use-section-rendering-api",
+    "topic": "liquid",
+    "action": "用真实 section.id 和语言/页面上下文更新局部，处理失败和 null。",
+    "validate": "Section 生命周期、多实例、最多五区块、设置保留与历史导航。",
+    "executors": [
+      "domain:section-fetch-single",
+      "domain:section-fetch-json"
+    ],
+    "reviewedSourceHash": "adba430b7005a5b6c673e903d63c9b955cbdd4e91c4692f6084a238dd170d6cb",
+    "evidenceDomain": "browser",
+    "supportedSubset": "Scope a measured initial full-page GET fetch used only for one real LCP section; retain caller text parsing and fall back to original request."
+  },
+  {
+    "id": "load-critical-resources-before-content-for-header",
+    "topic": "delivery",
+    "action": "把独立首屏样式或字体预载移到原样保留的 content_for_header 前。",
+    "validate": "级联、Shopify 全局依赖；streaming 收益只能在支持的 live 场景核验。",
+    "executors": [
+      "site:liquid-hoist-head-resource"
+    ],
+    "reviewedSourceHash": "83081b9545f3ec08714fa459aee3d13e039838dfea41ab7e2b3f47b4ac7115d4",
+    "evidenceDomain": "browser"
+  },
+  {
+    "id": "use-preload-resource-hints-sparingly",
+    "topic": "delivery",
+    "action": "预载只用于确实发现晚的关键资源，清理确定相同的重复 hint。",
+    "validate": "Link 头、as/type/media/CORS、请求复用及优先级竞争。",
+    "executors": [
+      "site:liquid-dedupe-resource-hint"
+    ],
+    "reviewedSourceHash": "c99dcfe5326baa469394f1c0e2aea22e39e2e5ed52a4e4ce6b72c0b9ddde273b",
+    "evidenceDomain": "browser",
+    "supportedSubset": "Remove only an exact duplicate hint of the matching rel; does not infer unused hints or automatically add hints."
+  },
+  {
+    "id": "use-preconnect",
+    "topic": "delivery",
+    "action": "只对需要的第三方连接预热，避免重复的平台 CDN 连接提示。",
+    "validate": "连接时序、CORS、实际使用域与网络收益。",
+    "executors": [
+      "site:liquid-dedupe-resource-hint"
+    ],
+    "reviewedSourceHash": "3aadf771853f5ae6ed7e69f8735cd23dc9007c1bcef40fd832b5e485b2b0f7eb",
+    "evidenceDomain": "browser",
+    "supportedSubset": "Remove only an exact duplicate hint of the matching rel; does not infer unused hints or automatically add hints."
+  },
+  {
+    "id": "use-shopify-cdn",
+    "topic": "delivery",
+    "action": "在有合法本地资产时使用 asset_url/font_url/image_url；不批量复制远程素材。",
+    "validate": "内容版本、缓存、实际请求、资产许可与 CSP。",
+    "executors": [],
+    "reviewedSourceHash": "99e266d04ce9cffd00daf6f1e62cfc6f472d6ed97929b256a82f732b2c40957b",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "use-speculation-rules",
+    "topic": "delivery",
+    "action": "在平台已有规则基础上审查页面预测，不重复注入或预取写操作。",
+    "validate": "浏览器支持、导航命中、流量、隐私及现有平台配置。",
+    "executors": [],
+    "reviewedSourceHash": "50ea6557aee126da4a531ef5faba30bd1cc534432e0d5552bc844dd4c9923754",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "avoid-request-proxies",
+    "topic": "platform",
+    "action": "定位代理导致的额外往返，优先恢复受支持的直达 Shopify 交付。",
+    "validate": "路由、域名、缓存、安全与平台拥有者协作；非主题单文件修复。",
+    "executors": [],
+    "reviewedSourceHash": "719c0b3d90abcb9b88c08eac23703149ffac832cce6635690a367d40af608364",
+    "evidenceDomain": "platform",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "stylesheet-subsetting",
+    "topic": "css",
+    "action": "根据实际 section/block/snippet 渲染树组织原生 stylesheet，保留动态使用。",
+    "validate": "平台原生子集与手工 critical CSS 分别验证，不能混同。",
+    "executors": [],
+    "reviewedSourceHash": "92c363554ec427bb049664a430c77155b1a0af3a48806ff384e446924bc03515",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "reduce-stylesheet-count",
+    "topic": "css",
+    "action": "在依赖和级联明确时合并相关样式或消除重复加载。",
+    "validate": "跨模板、首个实例、动态 section、优先级、样式表和 DOM 消费者。",
+    "executors": [],
+    "reviewedSourceHash": "8f9791569af2b9713367e7d3fdfc9f5383b02994c7d6914b0d23a320f3391446",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "load-critical-css-synchronously",
+    "topic": "css",
+    "action": "首屏样式保持同步；只延迟证实非关键部分。",
+    "validate": "无 JS、FOUC、CLS、冷缓存和跨状态计算样式。",
+    "executors": [
+      "site:liquid-critical-css-sync",
+      "demand:critical-css",
+      "split:css"
+    ],
+    "reviewedSourceHash": "939c8daa5e4bd85efa588d69b2fa23fa05dee58c9f8a42519c60704107c25016",
+    "evidenceDomain": "browser"
+  },
+  {
+    "id": "use-transform-for-animations",
+    "topic": "css",
+    "action": "对审阅过的动画收窄变化属性，复杂布局动画需要保持语义重构。",
+    "validate": "hover/focus/open/close、reduced motion、布局及呈现耗时。",
+    "executors": [
+      "site:css-transition-properties"
+    ],
+    "reviewedSourceHash": "3a887a5de5db7cf1027d3cf3e315aa6d69d18e035271e70814ca75cc7d33a2e7",
+    "evidenceDomain": "browser",
+    "supportedSubset": "Only narrow an existing transition-property:all to transform/opacity already used by the component; does not migrate layout animations."
+  },
+  {
+    "id": "reduce-cls-font-swapping",
+    "topic": "fonts",
+    "action": "用实测 fallback 度量匹配文本，保持明确 line-height 和换行。",
+    "validate": "实际 fallback 使用、字号、语言、断点和冷字体加载 CLS。",
+    "executors": [
+      "site:css-font-fallback"
+    ],
+    "reviewedSourceHash": "79245369b43b83d30ca6b35bd59770ba974600a18cb1f0b94ceb1c7242a44dae",
+    "evidenceDomain": "browser",
+    "supportedSubset": "Create a measured local fallback face and wire it after the primary family in one selected literal font stack. No metric guessing or hosting migration."
+  },
+  {
+    "id": "self-host-web-fonts",
+    "topic": "fonts",
+    "action": "在许可允许时将已有字体经 Shopify CDN 提供，正确设置显示与预载。",
+    "validate": "WOFF2/CORS、字体功能、实际使用、文字 LCP 与回退布局。",
+    "executors": [],
+    "reviewedSourceHash": "22f011d03bf71a1d722fc3b7bcbdebabcf7866302a282b94016703e022cd9e87",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "use-system-fonts",
+    "topic": "fonts",
+    "action": "仅按商户设计要求改系统字体并省去多余字体请求。",
+    "validate": "字体外观、font_picker、system? 分支、空 href 和页面布局。",
+    "executors": [],
+    "reviewedSourceHash": "3d0de35d006a3a88aabbdcb4c34f11dd3905c3ddadaf931cd957e40d542cef14",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "reserve-space-app-injected",
+    "topic": "apps",
+    "action": "按目标 App 的双断点实测尺寸预留局部空间。",
+    "validate": "全部状态稳定高度、正常文档流、业务完整性、CLS。",
+    "executors": [
+      "domain:app-reserve-space"
+    ],
+    "reviewedSourceHash": "b4c8e4005d76a7731bad7ca64284f85ad329edcce5971e03e162e826e06cb8f6",
+    "evidenceDomain": "browser"
+  },
+  {
+    "id": "remove-render-blocking-apps",
+    "topic": "apps",
+    "action": "为有明确归属的主题可控 App loader 调整调度；平台注入交给拥有者。",
+    "validate": "原脚本字节、依赖、业务状态变化和全资源独立测量。",
+    "executors": [
+      "domain:app-defer",
+      "domain:app-async"
+    ],
+    "reviewedSourceHash": "28c2f22e3774f22b49bd01970dbff988e98b7c142400c64b2d7c065c2a0e3a27",
+    "evidenceDomain": "browser"
+  },
+  {
+    "id": "audit-remove-third-party-scripts",
+    "topic": "apps",
+    "action": "跨模板与真实交互确认第三方用途，再进行已授权的条件加载或调整。",
+    "validate": "不以阻断域名的测分作为验收；保留统计、同意和购买功能。",
+    "executors": [
+      "domain:app-defer",
+      "domain:app-async"
+    ],
+    "reviewedSourceHash": "6bd56b5c3f10631df27588f50fccdd85267fb171ed5aa9b528677eef291fc476",
+    "evidenceDomain": "browser",
+    "supportedSubset": "Defer or async a reviewed theme-owned loader; does not uninstall apps or remove merchant business behavior."
+  },
+  {
+    "id": "fake-performance-apps",
+    "topic": "measurement",
+    "action": "审查测试环境与真实访客资源差异，保留所有内容及正常请求。",
+    "validate": "识别 UA 特供、屏蔽和隐藏内容；不允许伪造优化成绩。",
+    "executors": [],
+    "reviewedSourceHash": "759258286cd22503b9fb1e8d46a5f14e55a0f3155660620f58411fe4497c9a7b",
+    "evidenceDomain": "measurement"
+  },
+  {
+    "id": "disable-ab-testing-when-inactive",
+    "topic": "apps",
+    "action": "先确认实验停止及拥有者授权，再移除无效 anti-flicker 行为。",
+    "validate": "活动实验、首屏可见性、转化埋点与配置；不能自动停业务。",
+    "executors": [],
+    "reviewedSourceHash": "815d42fbca9e4ae94a871f36ed37b03edc77a06a911ba627befdbcefa1867ed6",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "defer-scripts",
+    "topic": "javascript",
+    "action": "非关键依赖链使用 defer；只有完全独立脚本使用 async。",
+    "validate": "执行顺序、首次操作、inline consumer、DOM ready 与写文档依赖。",
+    "executors": [
+      "domain:app-defer",
+      "domain:app-async",
+      "site:liquid-defer-script"
+    ],
+    "reviewedSourceHash": "a5abfb5f6d1d0dda7fcd566dd29fc51046d74aa8904f280fcd5c6f03cfff58eb",
+    "evidenceDomain": "browser"
+  },
+  {
+    "id": "load-javascript-on-user-interaction",
+    "topic": "javascript",
+    "action": "将已确认非首屏的私有组件脚本改为首次交互加载，保留首次操作与生命周期。",
+    "validate": "首个点击/键盘、重复初始化、卸载、动态插入、失败重试。",
+    "executors": [
+      "split:interaction"
+    ],
+    "reviewedSourceHash": "9ba95b55bab837cc7df90ed7e45079266a0c3f5373bd2f04a35055686c9f88d1",
+    "evidenceDomain": "browser"
+  },
+  {
+    "id": "lazy-dom-rendering",
+    "topic": "javascript",
+    "action": "隐藏组件优先以单份 HTML 停放原节点，首次操作恢复；旧 template 入口仅供对照。",
+    "validate": "初始加载实测、首开延迟、无 JS 原始结构、内联 CSP、初始化依赖、状态恢复及内存；不以减少节点宣称收益。",
+    "executors": [
+      "domain:hidden-detach",
+      "domain:hidden-template",
+      "domain:hidden-template-chunked"
+    ],
+    "reviewedSourceHash": "e2ad6cc592e0a774c2bf30d45b9f6e77d7680864e53fa44e9b0728f9aeca6ed5",
+    "evidenceDomain": "browser",
+    "supportedSubset": "Closed native details with one summary and one body; only static markup and escaped Liquid output/control flow, no executable or arbitrary rich HTML; preserve no-JS content and first/repeated opening."
+  },
+  {
+    "id": "request-critical-data-before-dom-ready",
+    "topic": "javascript",
+    "action": "把确需首屏 JS 数据请求与 DOM 写入拆开，处理脚本早到和晚到。",
+    "validate": "readyState、错误恢复、Shopify 依赖及真实 LCP；不能一律 defer。",
+    "executors": [],
+    "reviewedSourceHash": "efa1c97f933765f3fa9675da7f091b23875c49e8c8d4272fa97b1041817052be",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "defer-non-critical-resources",
+    "topic": "javascript",
+    "action": "对已审阅的非关键工作安排调度和分包，保留首屏和首次交互依赖。",
+    "validate": "非关键证据、CSP、无 JS、FOUC、依赖顺序和业务响应。",
+    "executors": [
+      "site:liquid-defer-script",
+      "site:js-idle-init",
+      "demand:critical-css",
+      "split:css"
+    ],
+    "reviewedSourceHash": "535b2feb7a61046def6724fb16c2720a2ba0c9c81a74c33e1754216b3796a31c",
+    "evidenceDomain": "browser",
+    "supportedSubset": "Explicit noncritical script/CSS scheduling; js-idle-init delays execution only and does not make its script download nonblocking."
+  },
+  {
+    "id": "finding-worst-offenders",
+    "topic": "measurement",
+    "action": "结合真实 CPU、Coverage、请求和归属定位可控源文件。",
+    "validate": "不能把字节或单状态未使用等同收益；核实测得函数与修改位置。",
+    "executors": [],
+    "reviewedSourceHash": "b495c35a398abb695f205cedd4a30f9e250787fe49285f1ee454a507273105fe",
+    "evidenceDomain": "measurement"
+  },
+  {
+    "id": "understanding-inp",
+    "topic": "measurement",
+    "action": "区分输入延迟、处理和呈现，针对具体操作优化。",
+    "validate": "独立 Event Timing、真实目标、输入响应和原导航门槛。",
+    "executors": [],
+    "reviewedSourceHash": "5cd86aeac48a41b09aa2115d8f27b668f1e94793864a686f923a36af11a1b164",
+    "evidenceDomain": "measurement"
+  },
+  {
+    "id": "debounce-throttle-event-handlers",
+    "topic": "javascript",
+    "action": "按事件契约合并/节流工作；需要 preventDefault 的监听不能 passive。",
+    "validate": "最新输入状态、首个/重复事件、取消、卸载和响应延迟。",
+    "executors": [
+      "site:js-raf-listener"
+    ],
+    "reviewedSourceHash": "60590c26df99d19933cd2013b570b5a625b3cb1f2c9bc09e3abedc18a7696764",
+    "evidenceDomain": "browser"
+  },
+  {
+    "id": "cancel-view-transitions-on-interaction",
+    "topic": "javascript",
+    "action": "在快速输入或 reduced-motion 时取消待完成的视图过渡。",
+    "validate": "pointer/keyboard、双端 opt-in、无 API 回退和连续导航。",
+    "executors": [],
+    "reviewedSourceHash": "63f89ca782f77b8c83671f2a6ef65695ad218aa8c9cd4f6e8852f2b83458c1cb",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "use-import-maps-for-modules",
+    "topic": "javascript",
+    "action": "统一 importmap 与 asset_url 版本依赖，避免重复加载平台 shim。",
+    "validate": "map 位于模块前、共享模块请求、动态导入和解析错误。",
+    "executors": [],
+    "reviewedSourceHash": "f9fad5ff46f2dfb1eedbd76323aea3abb5bf0dfc5129cb3ee5346011fe11ac1c",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "reduce-mega-menu-dom-overhead",
+    "topic": "mobile",
+    "action": "在业务与可访问性一致时复用菜单结构，减少重复 DOM。",
+    "validate": "移动/桌面导航、焦点、触控、键盘和编辑器重载。",
+    "executors": [],
+    "reviewedSourceHash": "34f8b3a6bc3965a68c3b790165a3943ceef1cda271987083f6e1873948b196af",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "ensure-content-parity-mobile-desktop",
+    "topic": "mobile",
+    "action": "保持两端核心内容及信息结构一致，只按布局调整展示。",
+    "validate": "相同产品信息、图像、SEO、键盘与读屏。",
+    "executors": [],
+    "reviewedSourceHash": "b955324a310d4f9040bc20a7b4792a4dd5954bdc7e7a1764fabcc56d39675430",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "fix-content-wider-than-mobile-screen",
+    "topic": "mobile",
+    "action": "定位具体溢出元素并修复宽度/布局约束，避免全局裁切掩盖问题。",
+    "validate": "长文本、表格、图片、横屏与放大后的完整内容。",
+    "executors": [],
+    "reviewedSourceHash": "12ea40294d0cadf25889181bf11169cfd059128e2322de6f681b2425eb9207ef",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "implement-responsive-design",
+    "topic": "mobile",
+    "action": "以主题既有断点组织响应式组件，减少重复内容和不必要请求。",
+    "validate": "全断点、orientation、焦点及性能同条件对比。",
+    "executors": [],
+    "reviewedSourceHash": "4eab9439b024154a501b2ef0e8e65764bbe66952157f62ef0e6e7d0191c3029e",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "improve-mobile-page-load-speed",
+    "topic": "measurement",
+    "action": "在移动 CPU/网络条件下独立采样并核查真实用户数据。",
+    "validate": "固定设备/引擎/条件，保留失败样本，不把桌面结果外推。",
+    "executors": [],
+    "reviewedSourceHash": "d645785120575e02fec03c19a83fd5c3a3a23a0e84157224d78c0b4874e3466d",
+    "evidenceDomain": "measurement"
+  },
+  {
+    "id": "increase-tap-target-size",
+    "topic": "mobile",
+    "action": "根据实际交互控件扩大有效区域和间隔，保持布局与语义。",
+    "validate": "触控、键盘、遮挡、缩放及目标之间的误触。",
+    "executors": [],
+    "reviewedSourceHash": "cded5bae16a50f38747b9587d7a569fc70f8558e17b17cfffd7911587cd23dff",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "remove-intrusive-interstitials",
+    "topic": "mobile",
+    "action": "按业务要求调整遮挡内容的插页，保持必要同意及可访问性。",
+    "validate": "显示时机、关闭/焦点、内容可见和业务事件。",
+    "executors": [],
+    "reviewedSourceHash": "3287d96b598cd6dae3149832b90b05248d8e9635a858b571d7fbb5cdf7c62bf9",
+    "evidenceDomain": "browser",
+    "implementation": "operator-authored-replacement; no automatic generator for this method"
+  },
+  {
+    "id": "lab-vs-field",
+    "topic": "measurement",
+    "action": "区分受控实验与真实用户 p75，按相同页面设备分组。",
+    "validate": "时间窗口、样本量、地域、版本与不可比群体；不混池。",
+    "executors": [],
+    "reviewedSourceHash": "7bd57e1b47077ccece23f1612ef2cc1d2d4b1e1d525428cd28a40bb9fa545145",
+    "evidenceDomain": "measurement"
+  },
+  {
+    "id": "performance-gaps",
+    "topic": "measurement",
+    "action": "用 TTFB/FCP/LCP 间隔缩小调查范围，再用 trace 证实。",
+    "validate": "流式文档下载包含 Liquid 与传输，间隔不是直接因果。",
+    "executors": [],
+    "reviewedSourceHash": "50a7bf9556cfc12e8786edac5262806fdd5713e29219a30150a35b471d2fe58d",
+    "evidenceDomain": "measurement"
+  },
+  {
+    "id": "sustainable-performance",
+    "topic": "measurement",
+    "action": "维护假设、预算、前后独立测量、回滚和正式验收。",
+    "validate": "无收益切换机制，原始证据固定，不重复磨分。",
+    "executors": [],
+    "reviewedSourceHash": "74160c2ab2e49f1a5b0ba24b210827ad1ed225adad98f371ae59e9b470c2ee3f",
+    "evidenceDomain": "measurement"
+  },
+  {
+    "id": "testing-for-performance",
+    "topic": "measurement",
+    "action": "固定配置多次采样，比较中位数并检验功能及部署身份。",
+    "validate": "实验室/线上分开；工具阈值不冒充 Shopify 官方门槛。",
+    "executors": [],
+    "reviewedSourceHash": "011b0e34b10fc16ffcd2581b60a2bf4c68dcf357c431719355ebe35b63f022d9",
+    "evidenceDomain": "measurement"
+  },
+  {
+    "id": "theme-check-tool",
+    "topic": "measurement",
+    "action": "运行官方 Theme Check 定位静态性能问题并保留有效配置。",
+    "validate": "静态检查通过不等于性能收益或完整行为验证。",
+    "executors": [],
+    "reviewedSourceHash": "163b12a73925eaf85fd257880347a084b2dc48b98364d25a29ddc31a27f1d97a",
+    "evidenceDomain": "measurement"
+  },
+  {
+    "id": "platform",
+    "topic": "platform",
+    "action": "区分 Shopify CDN、流式输出、原生子集等平台能力与主题责任。",
+    "validate": "真实可用上下文；不在预览上宣称 streaming 收益。",
+    "executors": [],
+    "reviewedSourceHash": "c691b4989158706785aafc20052954a6c52cc79b9efa8bbdb74ee33a1d647682",
+    "evidenceDomain": "platform"
+  },
+  {
+    "id": "hydrogen-performance",
+    "topic": "external",
+    "action": "转入 Hydrogen 应用与其服务端/客户端性能流程。",
+    "validate": "该文章不属于 Liquid 主题生成器，不能对主题自动套用。",
+    "executors": [],
+    "reviewedSourceHash": "3e5199370ce225a25241f9ad8c842d30319afccc00f8b72906d3ed96a33b32de",
+    "evidenceDomain": "external"
+  },
+  {
+    "id": "optimize-checkout-extensions",
+    "topic": "external",
+    "action": "由 checkout extension 拥有者审查其网络、数据和代码路径。",
+    "validate": "需对应扩展项目及业务测试，不作为主题代码改写。",
+    "executors": [],
+    "reviewedSourceHash": "76cf8869847f055f63433ccdbf25c330348819f180f9f4e639be83a646f5b1b7",
+    "evidenceDomain": "external"
+  }
+]

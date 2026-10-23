@@ -1,0 +1,65 @@
+{
+  "name": "shopify-perf-toolkit",
+  "version": "0.12.0",
+  "private": true,
+  "type": "module",
+  "description": "Whole-theme Shopify performance diagnosis, reviewed patches, rollback, real Lighthouse/PSI measurement and score acceptance",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "bin": {
+    "perfkit": "scripts/perfkit.mjs"
+  },
+  "files": [
+    "README.md",
+    "SKILL.md",
+    "AGENTS.md",
+    "theme-code-generation",
+    "CHANGELOG.md",
+    "package-lock.json",
+    "agents",
+    "assets",
+    "lib",
+    "scripts",
+    "references",
+    "tests",
+    "integrations"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "test:lighthouse": "PYTHONPATH=scripts PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_*.py'",
+    "test:site": "node scripts/validate_site_pipeline.mjs",
+    "release": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/build_release.py",
+    "test:execution": "node --test tests/execution.test.mjs tests/batch-integration.test.mjs tests/measure.test.mjs tests/site-verify.test.mjs tests/run-evidence.test.mjs tests/cli.test.mjs",
+    "test:browser": "PERF_KIT_BROWSER_TESTS=1 node --test --test-concurrency=1 tests/runtime-browser.test.mjs tests/demand-browser.test.mjs tests/performance-browser.test.mjs tests/p1-performance-browser.test.mjs tests/domain-browser.test.mjs tests/extended-browser.test.mjs tests/section-liquid-browser.test.mjs",
+    "test:shopify-p1": "node --test tests/p1-performance.test.mjs",
+    "test:demand": "node --test tests/demand-engine.test.mjs",
+    "test:demand-live": "node scripts/validate_demand_pipeline.mjs",
+    "test:architecture": "node scripts/validate_architecture_pipeline.mjs",
+    "test:improvement": "node --test tests/improvement-session.test.mjs",
+    "test:improvement-live": "node scripts/validate_improvement_pipeline.mjs",
+    "test:p0p1": "node --test tests/p0-p1.test.mjs",
+    "test:domains": "node --test tests/domain-engine.test.mjs",
+    "test:domains-browser": "PERF_KIT_BROWSER_TESTS=1 node --test --test-concurrency=1 tests/domain-browser.test.mjs",
+    "test:domains-live": "node scripts/validate_domain_pipeline.mjs",
+    "test:official-methods": "node --test tests/official-methods.test.mjs tests/domain-engine.test.mjs tests/improvement-session.test.mjs",
+    "test:extended": "node --test tests/extended-methods.test.mjs",
+    "test:extended-browser": "PERF_KIT_BROWSER_TESTS=1 node --test --test-concurrency=1 tests/extended-browser.test.mjs",
+    "test:extended-live": "node scripts/validate_extended_pipeline.mjs",
+    "test:section-liquid": "node --test tests/section-liquid.test.mjs",
+    "test:section-liquid-browser": "PERF_KIT_BROWSER_TESTS=1 node --test --test-concurrency=1 tests/section-liquid-browser.test.mjs",
+    "test:section-liquid-live": "node scripts/validate_section_liquid.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "@shopify/liquid-html-parser": "2.10.2",
+    "acorn": "8.15.0",
+    "chrome-devtools-mcp": "1.11.0",
+    "lighthouse": "13.5.0",
+    "playwright-core": "1.64.1",
+    "postcss": "8.5.30"
+  },
+  "devDependencies": {
+    "liquidjs": "10.30.0"
+  }
+}

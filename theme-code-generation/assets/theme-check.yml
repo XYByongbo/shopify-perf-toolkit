@@ -1,0 +1,22 @@
+# 普通 Shopify 主题的起始模板；合并到目标主题配置，勿直接覆盖已有配置。
+# 官方推荐规则集；具体规则以安装的 Theme Check 版本为准。
+extends: theme-check:recommended
+
+# PROJ：维护性复核线。官方当前默认值分别为 120 / 10。
+LiquidComplexity:
+  enabled: true
+  severity: warning
+  maxComplexity: 60
+LiquidNestingDepth:
+  enabled: true
+  severity: warning
+  maxDepth: 5
+
+# OFF-CHECK：显式保留当前官方默认阈值。
+ExcessiveSettingsCount:
+  enabled: true
+  severity: warning
+  maxSettings: 40
+MaxFileSize:
+  enabled: true
+  severity: error

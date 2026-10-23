@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "action": "verify",
+  "project": "/absolute/theme",
+  "plan": "/absolute/run/plan.json",
+  "reviewedPlanHash": "REPLACE_WITH_REVIEWED_PLAN_HASH",
+  "before": "/absolute/run/verified-baseline",
+  "measurement": {
+    "schemaVersion": 1,
+    "engine": "lighthouse",
+    "pages": [
+      {
+        "id": "home",
+        "url": "https://example.myshopify.com/?preview_theme_id=123"
+      }
+    ],
+    "devices": [
+      "mobile",
+      "desktop"
+    ],
+    "purpose": "acceptance",
+    "runs": 5,
+    "deployment": {
+      "project": "/absolute/theme",
+      "store": "example.myshopify.com",
+      "themeId": "123"
+    }
+  },
+  "scenarios": {
+    "schemaVersion": 1,
+    "url": "https://example.myshopify.com/?preview_theme_id=123",
+    "scenarios": [
+      {
+        "name": "REPLACE_WITH_ACTUAL_AFFECTED_INTERACTIONS",
+        "steps": [
+          {
+            "action": "assert-visible",
+            "selector": "main"
+          }
+        ]
+      }
+    ]
+  },
+  "review": {
+    "sourceHash": "REPLACE_WITH_CANDIDATE_SOURCE_HASH",
+    "contentPreserved": false,
+    "visualsPreserved": false,
+    "summary": "REPLACE_WITH_ACTUAL_REVIEW_EVIDENCE"
+  },
+  "exploreFirst": true,
+  "rollbackOnFailure": false
+}

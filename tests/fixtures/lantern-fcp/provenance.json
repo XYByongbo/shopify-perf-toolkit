@@ -1,0 +1,25 @@
+{
+  "purpose": "Frozen browser replay regression fixtures; screenshots and unused LHR audits omitted. Not merchant performance acceptance.",
+  "samples": [
+    {
+      "name": "low",
+      "source": "/private/tmp/perfkit-section-fcp-jmDGwD/sample-2-after/groups/home/mobile",
+      "fcp": 629.7316,
+      "originalSha256": [
+        "16edf554ca9158f8ef764147d0b13ab201f30782fe0eefd638ae88fb41e89a01",
+        "f1c517428e313265c1e7f9b437cd8971491e0d4f99bd75e35826762bcdf9eb7c",
+        "c251b97d743eac0caceb2593a85edf0f1ea9dbf41108b4ff5f93b78f6c612368"
+      ]
+    },
+    {
+      "name": "high",
+      "source": "/private/tmp/perfkit-section-fcp-jmDGwD/sample-3-after/groups/home/mobile",
+      "fcp": 769.441,
+      "originalSha256": [
+        "8e4c8f38f4f5f3e7abdf6d9c091d1a4cd490233259c0c3c0180d9236bb21626e",
+        "727cc9c3d45e10e5cefce144542d155ad223f16c9f193b070c82f5bd6ae290e2",
+        "34630ff4b0d3c17326b5bf6c1b80d12487a83d60d8f3e2ab0dd31170ae4e3633"
+      ]
+    }
+  ]
+}

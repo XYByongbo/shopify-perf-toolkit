@@ -1,0 +1,4 @@
+interface:
+  display_name: "Shopify Section 生产与检查"
+  short_description: "从日常 Section 生成到后置检查，统一约束结构、配置、样式和交互"
+  default_prompt: "使用 $theme-code-generation 按目标主题约定生产 Section，从第一版控制长度、嵌套与重复，并完成生成后的质量检查。"

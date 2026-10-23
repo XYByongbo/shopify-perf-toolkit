@@ -1,0 +1,8 @@
+{
+  "rounds": [
+    {"before": "/absolute/baseline/measurement", "after": "/absolute/candidate-1/measurement"},
+    {"before": "/absolute/candidate-1/measurement", "after": "/absolute/candidate-2/measurement"}
+  ],
+  "maxCandidateRounds": 2,
+  "earlyStop": {"patience": 2, "minimumScoreGain": 3, "minimumLcpGainMs": 200, "noiseMultiplier": 1}
+}

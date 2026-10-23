@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "agents": 1,
+  "before": "/absolute/baseline/measurement",
+  "history": [],
+  "measurement": {
+    "schemaVersion": 1,
+    "engine": "lighthouse",
+    "purpose": "exploration",
+    "pages": [{"id": "product", "url": "https://your-store.example/products/replace-with-real-handle"}],
+    "devices": ["mobile"],
+    "runs": 3,
+    "timeoutMs": 120000
+  },
+  "budget": {"maxWallTimeMs": 1800000, "maxAttempts": 3, "maxFailures": 1, "maxCandidateRounds": 2},
+  "earlyStop": {"patience": 2, "minimumScoreGain": 3, "minimumLcpGainMs": 200, "noiseMultiplier": 1}
+}

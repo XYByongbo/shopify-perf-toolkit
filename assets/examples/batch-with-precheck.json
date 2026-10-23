@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "agents": 1,
+  "project": "/absolute/theme",
+  "run": "/absolute/baseline/measurement",
+  "precheck": {
+    "maxComplexity": 120,
+    "maxDepth": 10,
+    "timeoutMs": 120000
+  },
+  "quality": true,
+  "resources": {"probe": false},
+  "budget": {"maxWallTimeMs": 3600000, "maxAttempts": 80, "maxFailures": 3, "maxCandidateRounds": 2}
+}

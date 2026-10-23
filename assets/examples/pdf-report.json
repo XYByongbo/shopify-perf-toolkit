@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "project": "/absolute/theme",
+  "title": "Shopify 主题代码、SEO 与性能专项评估",
+  "context": "填写本次版本、复核范围与未测项。可选 checks、baseline、review、before、run 的契约见 references/pdf-report.md。"
+}

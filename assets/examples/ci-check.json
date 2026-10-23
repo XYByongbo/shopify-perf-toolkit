@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "before": "/absolute/task/before",
+  "after": "/absolute/task/after",
+  "beforeRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "afterRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "goal": { "kind": "score" }
+}

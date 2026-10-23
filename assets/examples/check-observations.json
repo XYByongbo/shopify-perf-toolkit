@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "kind": "check-observations",
+  "source": { "type": "example", "note": "Illustrative report claims, not a measured theme or source audit." },
+  "findings": [
+    { "ruleId": "ImgWidthAndHeight", "severity": "error", "count": 2, "message": "Report claims two images lack dimensions", "sourcePage": 3 },
+    { "ruleId": "DeprecatedFilter", "severity": "suggestion", "count": 1, "message": "Report claims img_url is deprecated", "sourcePage": 4 }
+  ]
+}

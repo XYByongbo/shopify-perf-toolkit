@@ -1,0 +1,234 @@
+# Shopify 整站性能优化工具包
+
+当前源码版本 **0.12.0**。面向 Shopify Liquid 主题源码目录（主题 ZIP 先解压），将源码依赖、运行耗时、可逆代码补丁和单补丁收益验证连接起来，保留原有 JS/CSS/Liquid 策略、扫描、SEO 和报告功能。新增流程见 [源码归因、按需加载与单补丁实验](references/demand-engine.md)。
+
+新增官方性能方法库：已读取 161 个相关官方页面，整理 70 篇性能专题；27 篇接入 35 个有边界的执行入口。`sync-shopify-docs` 刷新来源，`shopify-methods` 导出机器合同，`plan-official` 或 `improve prepare official` 生成真实补丁并保留原实测闭环。自动生成、人工实现、测量与平台职责分开报告。使用方式见 [官方知识库与可执行补丁](references/shopify-knowledge.md)。
+
+分页查询、隐藏 DOM 和 Section Rendering API 现有九个执行入口（含两个旧版隐藏 DOM 对照入口）。新增 `section-liquid-initial` 将首屏 Ajax 改为复用已有 snippet 的 Liquid 输出；`section-liquid-inline` 针对小型独立控制器进一步消除外部请求，后续更新保留 Section API。要求无 JS 内容、真实请求与内容变化验证。入口见 [三类优化闭环](references/extended-optimization.md)，首轮失败后调整方案并正式通过的记录见 [Liquid 首屏实测](references/section-liquid-validation.md)。
+
+新增 `improve` 优化会话：低分时按实测指标丢分和源码证据定位；生成并应用补丁后运行真实实验，无收益或回归则回滚、记录已排除方案并重新诊断。有收益但仍低于门槛时，仅在其他正式门禁全部通过后保留中间基线，继续下一轮；最终另与最初基线比较累计收益。会话保留历史、预算和显式预览同步边界，不承诺任意主题必然提分。见 [可执行改进流程](references/improvement-workflow.md) 与 [实际查阅的 Shopify 官方资料](references/shopify-recovery-sources.md)。
+
+Liquid 首屏与内联控制器的后续审查已修复共享依赖、CSP、编辑器卸载/请求竞态，以及正式无收益报告未进入重诊断的问题。修复版通过原门槛复验，详见 [复审记录](references/section-liquid-review.md)。
+
+图片 LCP、图片/应用容器 CLS、Liquid 热点和主题可控 App loader 现接入 `profile-domain`、`plan-domain` 与 `experiment-liquid`：部署绑定定位、实际生成补丁、独立收益验证，支持会话内无收益回滚并选择另一种方法。适用范围、配置及验证边界见 [四类性能优化闭环](references/domain-optimization.md)；跨候选重试、App 脚本/业务证据和 Liquid 采样的修复与反例测试见 [全面审查记录](references/domain-review.md)。
+
+当前未发布扩展：`check-performance` 执行 11 项官方检查；`audit-performance` 覆盖 11 组 P0 和 16 组 P1 候选，补齐资源提示、CSS/字体交付、交互与隐藏组件诊断。通用策略共 19 项，包括新增的重复资源提示清理、关键 CSS 恢复同步、受限 passive 监听器和过渡属性收窄。沿用源码证据、审阅、应用及回滚机制。覆盖范围与命令见 [Shopify 官方性能检查与 P0/P1 规则](references/shopify-performance-rules.md)。
+
+默认优化路径：复用有效基线 → 定位影响分数的主题代码 → 应用可逆补丁 → 受影响页面小样本测分与回归 → 有收益后正式验收。`batch` 是测量/诊断编排器，不会自动修改源码。代码任务不额外下载图片或视频素材，也不每轮重跑无关的全站截图和业务套件；Lighthouse 正常加载图片，不能通过阻断资源换分数。详见 [代码优化工作流](references/site-workflow.md)。
+
+默认每个页面、每种设备前后各至少 5 次独立测量，候选端要求：**移动端每次最低分 ≥75、中位数 ≥80；桌面端每次最低分 ≥85、中位数 ≥90**，门槛可配置。工具离线测试与隔离主题验证只证明相应工具流程，不能保证任意店铺都达到目标。
+
+## 当前架构与各层职责
+
+根目录独立技能 [theme-code-generation](theme-code-generation/SKILL.md) 提供 [主题代码生成规范](theme-code-generation/theme-code-generation.md)，区分官方规则与项目预算，重点复核代码长度、复杂度、嵌套和重复。根目录 `AGENTS.md`、主技能及补丁文档已接入生成前阅读与生成后复核；技能目录可单独复制使用。此接入约束操作者流程，不代表 CLI 自动执行 Markdown 中的所有规则，也未安装到全局技能目录。
+
+同一技能包含 [日常 Section 生产规范](theme-code-generation/section-production.md)：新建 Section 时先组织内容模型、主题复用和配置，再按规范编写 Liquid、CSS、必要 JS 与媒体加载，最后执行共享质量检查。无须先运行审计或提供已有代码。
+
+工具包以本地 Node.js CLI 为核心，Python 承担评分汇总、PDF 与打包；证据、计划和执行回执通过文件串联。核心流程是：证据采集 → 诊断决策 → 可逆修改 → 分层验收。下图表示逻辑分层和主工作流，节点属于同一工具包；可选步骤按配置启用，部署身份检查贯穿测量前后。
+
+```mermaid
+flowchart TB
+  entry["入口：Codex Skill / perfkit CLI"]
+  entry --> batch["batch：测量与诊断编排"]
+  entry --> optimize["optimize：补丁与完整验收编排"]
+  batch --> precheck["可选前置预检：Liquid 复杂度与嵌套"]
+  precheck --> collect["证据采集与导入"]
+  source["主题源码 / Theme Check / 既有报告"] --> collect
+  browser["Lighthouse / Chrome / Liquid Profile"] --> collect
+  field["RUM / CrUX 汇总文件"] --> collect
+  collect --> contract["证据校验：哈希、范围、环境、完整性、部署身份"]
+  contract --> decision["统一诊断：加载阶段、交互、源码、CSS、App 归属"]
+  decision --> plan["生成待审补丁计划"]
+  optimize --> plan
+  plan --> review["审阅差异与验证要求"]
+  review --> apply["apply：本地应用与执行回执"]
+  apply -.->|"调用方显式同步"| sync["候选预览已同步"]
+  sync --> experiment["单补丁实验：收益与内容、布局、交互保留"]
+  experiment -->|"promising 后进入正式验证"| acceptance["正式验收：原评分门槛 + 目标收益 + 身份与功能呈现"]
+  optimize -.->|"verify 阶段编排"| acceptance
+  visual["人工审阅：候选内容与视觉证据"] --> acceptance
+  acceptance --> result["JSON / HTML / PDF / 验收结果"]
+  acceptance -->|"失败后修复或回滚"| rollback["rollback：本地回滚与冲突回执"]
+  ci["CI 工作流 + 前后测量产物"] --> ciGate["ci-check：评分、退步与声明目标门禁"]
+  ciGate --> result
+```
+
+“自动执行”指调用方提供配置并启动后由程序完成；审阅由用户或获授权的操作者完成。哈希校验不能代替业务、语义或视觉判断。
+
+完整验收会重新校验计划及其前后文件；功能回归必须绑定候选源码、店铺/主题、页面/设备和实际完成的全部声明步骤，回归结束后再核验远端源码。缺少内容/视觉审阅时保留 `not-accepted`，可审阅已有产物后用 `verify-optimization` 复核，无需重跑 Lighthouse。旧回归记录缺少身份、稳定性或结束时间时需重新采集，不能补填通过字段；原导航评分规则不变。
+
+新增 `npm run test:architecture`，用隔离主题将预检、batch、待审计划、apply、显式同步、单补丁实验、正式验证和审阅交接连通；审阅后继续验证 CI 与回滚。运行环境、两段命令及实测覆盖见 [架构端到端验证](references/architecture-e2e.md)。
+
+| 层与职责 | 自动执行 | 需要人工审阅或外部操作 |
+| --- | --- | --- |
+| 入口与编排：CLI / Skill / batch / optimize | 校验配置、串行编排、控制预算、记录状态 | 确定目标、主题、页面/设备矩阵与业务状态 |
+| 源码与结构：precheck / scan / audit-* / source-graph | 结构预检、源码清单、依赖图、代码/SEO/资源候选检查 | 复核动态引用、共享组件及业务影响；告警不等于性能收益 |
+| 证据采集：measure / profile-* / measure-interactions / import-field | 真实导航与运行采集、交互重复采样、线上汇总文件导入 | 准备有效基线、预览 URL、登录/同意状态、线上字段与 App 归属映射 |
+| 证据契约：run-evidence / lhr-contract / deployment | 校验完整性、环境、时间、哈希及测量前后部署身份 | 确认地区、内容、App 配置和机器负载等外部状态 |
+| 诊断决策：diagnose-performance / audit-stylesheets / attribute-apps | 关联源码、按目标和对应线上影响排序、输出策略建议 | 确认关键路径、因果关系、复杂 CSS 依赖和 App 用途 |
+| 补丁执行：plan-site / plan-demand / plan-split / apply / rollback | 对支持模式生成差异、检查漂移、应用和回滚本地文件 | 审阅 diff、证据与验证范围；复杂替换由操作者准备；显式同步预览 |
+| 实验与验收：experiment / scenarios / verify-* / ci-check | 重复测量、断言、checkpoint 比较、收益/退步及身份检查 | 选择有意义的交互断言，完成内容视觉审阅及所需业务验证 |
+| 输出：summarize / report / report-pdf | 生成摘要、JSON、HTML、PDF 和回执 | 判断未测项、待复核项与交付范围 |
+
+`batch` 可生成待审计划并执行评分检查，不应用补丁；`optimize` 分 prepare/apply/verify 推进，预览同步是外部步骤。诊断绑定计划的正式验收必须重算单补丁证据；其他计划可先做探索验证。时间/尝试/失败预算、源码漂移检查、历史早停和回执记录贯穿各层。
+
+## 各阶段的验收标准
+
+| 阶段 | 通过条件与边界 |
+| --- | --- |
+| 结构预检与诊断 | 启用预检时，官方两规则执行完整、无告警才可标为预检通过；缺少规则支持或运行失败终止该 batch。候选须关联当前源码与实际耗时；告警、动态依赖和未知归属独立保留待复核 |
+| 采集与证据 | 前后引擎、页面/设备矩阵和环境可比，保留原始报告及失败；完整优化的测量前后部署身份已核验。缺测、运行警告、重复/无效样本或源码漂移不自动通过 |
+| 计划、应用与预览 | 审阅差异和验证要求，计划与当前源码匹配；以成功 receipt 确认本地应用，再由调用方同步预览并核验候选身份 |
+| 单补丁实验 | 一个假设、一个代表页面/设备、源码差异仅含计划；导航前后交替各 3 或 4 次；目标收益成立、无关键指标退步、双侧内容/几何/样式/交互保留，才是 promising，仍需正式验收 |
+| 正式优化验收 | 每页每设备前后各至少 5 次导航样本；候选端移动每次最低 75/中位 80，桌面每次最低 85/中位 90；声明收益、无关键指标退步、前后身份、功能覆盖与源码绑定的内容视觉审阅全部通过，才是 optimization-accepted |
+| CI 与交付 | CI 的 passed 表示回归门禁通过；默认 score 可持平，loading/interaction 另需目标收益。报告分别展示评分、完整验收、待复核及未测项；回滚后仍须显式同步预览 |
+
+完整优化默认 `score` 要求可测分数提升；`loading` 要求声明的 LCP/FCP/TBT/CLS/SI 收益；`interaction` 另需每侧 5–10 次完整、独立、不重叠的交互采样，与导航源码/店铺/主题/页面/设备一致，并对目标执行同类 click/press 后紧接 UI 断言。三种模式均保留原导航评分与退步检查，95→80 即使达到门槛仍不通过。
+
+详细模块映射、阶段状态、默认收益下限、数据契约与 CI 接入见 [架构与验收说明](references/evidence-driven-architecture.md)。
+
+0.11.1 二次审计补齐交互执行/独立性/部署范围门禁、目标交互 UI 断言与键盘回归；修复线上元素范围匹配、CSV 空值和布局会话边界。旧交互记录缺少新增动作时间与目标信息时须重新采集；原导航评分数据与默认 score 流程继续可用。
+
+## 能力与输出
+
+| 命令 | 用途 |
+| --- | --- |
+| `improve` | 带历史与预算的 start/refresh/prepare/apply/experiment/verify/rollback 会话；无收益回滚重诊断，支持已验证的低分中间基线 |
+| `import-field` | 规范 RUM/CrUX JSON 和汇总 CSV 导入，保留时间、设备、国家、p75 与未知样本范围 |
+| `audit-stylesheets` / `attribute-apps` | 原生样式作用域兼容检查；按审阅映射归属资源与分阶段 CPU |
+| `measure-interactions` / `verify-interactions` | 哈希绑定、部署包围、独立重复 Event Timing 采样与目标交互收益 |
+| `ci-check` | 明确基线/候选的原评分与退步门禁，可叠加目标收益 |
+| `source-graph` / `diagnose-performance` | 模板→组件→资源依赖图；正文/AST 核验的 JS、静态内联脚本 CPU 定位，保留未关联及低收益线索 |
+| `plan-demand` | 自动提取自定义元素及私有依赖，按实际 Liquid 组件加载；根据多状态覆盖率生成关键 CSS，保留完整样式回退 |
+| `experiment` / `verify-patch` | 一个假设、精确补丁差异、交替采样、目标耗时与分数收益、失败历史及早停 |
+| `verify-preservation` | 比较 scenarios 的 checkpoint：内容、媒体引用、表单值、几何尺寸、计算样式和相同交互断言 |
+| `profile-runtime` | Chrome CPU 调用栈、trace、JS/CSS 覆盖率、请求发起链、LCP 分段、源码正文哈希映射 |
+| `profile-devtools` / `profile-liquid` | 官方 Chrome DevTools MCP/LCP skill、Shopify Liquid 服务端分析 |
+| `plan-split` / `optimize` | CSS 拆分、组件首次交互加载、新资产可逆创建；prepare/apply/verify 分阶段闭环 |
+| `verify-deployment` / `verify-gain` / `verify-optimization` | 候选身份、实测分数收益和关键指标退步拦截，结合功能与视觉证据验收 |
+| `batch` | 串行导入规范报告、分析外链/脚本、测量、审计与评分验收；共用预算 |
+| `summarize` / `evaluate-iteration` | 离线精简摘要、全部候选收益与早停判断 |
+| `doctor` | 检查本机依赖与测量配置 |
+| `scan` / `inspect` | 全主题资源/模板清单及文件级候选问题 |
+| `precheck` | 官方 Liquid 复杂度/控制流嵌套预检，源码快照、路径解释、PageFly/共享组件待复核线索 |
+| `import-check` | 导入 Theme Check 或报告陈述，保留告警、校正依据及同口径基线差异 |
+| `audit-quality` | 代码、SEO、JS/CSS 语法树、架构与能力覆盖分析 |
+| `audit-resources` | 外链清单、可选 HEAD 核查、脚本加载及依赖候选 |
+| `capture` / `map` | 浏览器证据与 Liquid 源码候选关联 |
+| `measure` | 按页面 × 设备串行执行真实 Lighthouse 或 PSI，保存原始报告和失败记录 |
+| `audit-site` | 联合源码与实测，定位 LCP、主线程、第三方及资源机会 |
+| `code-strategies` / `analyze-code` | 列出可执行策略，分析指定代码文件的结构候选和拒绝原因 |
+| `plan-site` | 根据代码策略、图片策略或已审阅替换生成多文件补丁 |
+| `apply` / `rollback` | 指纹校验、逐文件原子写入、回滚及失败恢复记录 |
+| `scenarios` / `verify` | 显式交互断言、内容与几何回归 |
+| `verify-site` | 校验完整测量矩阵，逐页逐设备检查评分门槛 |
+| `report-pdf` | 按参考版式生成 A4 PDF，附问题编号、文件、行号、代码及可选前后实测；[使用说明](references/pdf-report.md) |
+| `report` | HTML 报告，保留完整 JSON 证据 |
+| `plan-image` / `plan-component` | 单图和单组件工作流 |
+| `lighthouse` / `score-target` | 汇总、验收已有原始 Lighthouse 报告 |
+
+静态结果是候选；资源同名不等于已确定源码位置。按指标加权丢分和版本匹配的评分曲线安排优先级，Lighthouse 机会估值不相加。十项 [可执行代码策略](references/code-strategies.md) 和两类拆分计划生成真实补丁；每项仍需结合主题逻辑和页面证据审阅，不支持的模式明确拒绝。95 分降到 80 分会被退步门槛拒绝；单纯“分数达标”不能冒充“已提分”。
+
+## 安装与运行
+
+需要 Node.js **22.19+**、Python **3.9+**。在工具目录安装锁定的解析器及 Lighthouse 13.5.0：
+
+```sh
+npm ci --ignore-scripts
+export PERF_KIT_BROWSER_EXECUTABLE="/absolute/path/to/chrome"
+node scripts/perfkit.mjs doctor
+node scripts/perfkit.mjs --help
+```
+
+工具自动查找本机常见 Chrome 路径，也支持 PERF_KIT_BROWSER_EXECUTABLE / CHROME_PATH 显式覆盖。采集和场景回归已内置 Playwright Core；可用 PERF_KIT_PLAYWRIGHT_MODULE 指定其他绝对模块路径，PERF_KIT_PYTHON 指定 Python。依赖安装在工具目录，不下载浏览器。
+
+复制 [测量配置](assets/examples/measurement.json)，填入真实首页、商品页、集合页等地址。选择 PSI 时将 engine 改为 psi，使用公开可访问页面；API key 仅通过 PERF_KIT_PSI_API_KEY 环境变量传入。PSI 无法访问本地地址或绕过店铺密码。两种引擎不会自动替换。
+
+## 默认用一次批处理
+
+默认单 agent、串行测量，终端只给约 4 KiB 摘要；完整报告与失败留盘。复制 [batch.json](assets/examples/batch.json) 后填入真实路径/地址。基线省略 before；候选必须先同步到预览，再填真实 baseline 的 measurement 目录。
+
+```sh
+node scripts/perfkit.mjs batch --config /absolute/batch.json --out /absolute/new-run
+```
+
+提供 project 时默认离线分析外链与脚本；用 checks.input 接入原生 Theme Check 或已结构化的报告陈述，metadata / baseline 可选。完整示例见 [batch-with-checks.json](assets/examples/batch-with-checks.json)。PDF 需先提取为结构化陈述。resources.probe=true 才联网，resources=false 可关闭分析。诊断 JSON/HTML 自动保存并附入整站报告；reviewRequired 与评分分别记录，待复核时即使评分达标也返回 3。
+
+默认预算为一小时、80 次尝试、batch 最多 3 次失败、2 轮候选。时间/尝试耗尽保留部分证据并标为 stopped，不能通过验收。新增候选先用 [exploration.json](assets/examples/exploration.json) 小样本探索；低收益早停只限制继续探索，**不降低正式每组前后各 5 次和 75/80、85/90 门槛**。完整配置、模型 token 计量边界、续轮 history 和离线导入见 [执行协议](references/execution.md)。
+
+## 一次完整优化
+
+以下为逐步命令，适合必要的定点调试；正常整站任务优先 batch。以下路径均为占位符；建立独立运行目录，输出文件和测量子目录必须尚不存在。
+
+用于完整优化验收时，前后 measurement 配置均启用 deployment，核验必须包围各自采样；不能事后为旧基线补填身份。诊断绑定计划先完成匹配的单补丁实验，goal 与正式验证保持一致。
+
+```sh
+node scripts/perfkit.mjs scan --project /absolute/theme --out /absolute/run/scan.json
+node scripts/perfkit.mjs measure --config /absolute/run/measurement.json --out /absolute/run/before
+node scripts/perfkit.mjs audit-site --project /absolute/theme --run /absolute/run/before --out /absolute/run/audit.json
+node scripts/perfkit.mjs report --input /absolute/run/audit.json --out /absolute/run/audit.html
+node scripts/perfkit.mjs plan-site --project /absolute/theme --recipe /absolute/run/recipe.json --out /absolute/run/plan.json
+node scripts/perfkit.mjs apply --project /absolute/theme --plan /absolute/run/plan.json --out /absolute/run/apply.json
+```
+
+根据 audit 选择瓶颈，准备 [补丁 recipe](references/site-patches.md) 并审阅 diff。应用只修改本地源码；**确认预览页面已同步候选源码**后，用相同页面、设备、业务状态和配置复测。工具不自动 push/publish。
+
+```sh
+node scripts/perfkit.mjs scenarios --config /absolute/run/scenarios.json --out /absolute/run/scenarios-after
+node scripts/perfkit.mjs measure --config /absolute/run/measurement.json --out /absolute/run/after
+node scripts/perfkit.mjs verify-site --before /absolute/run/before --after /absolute/run/after --out /absolute/run/verification.json
+node scripts/perfkit.mjs report --input /absolute/run/verification.json --out /absolute/run/verification.html
+```
+
+这里的 verification.json 是评分检查结果。已有完整证据时，按 [执行引擎](references/performance-engine.md) 准备含 before/after、expectedSourceHash、regression、review 及所需 plan/patchEvidence/goal/interactionEvidence 的验证配置，再进行完整验收：
+
+```sh
+node scripts/perfkit.mjs verify-optimization --config /absolute/run/optimization-verification.json --out /absolute/run/optimization-result.json
+```
+
+只有 optimization-result.json 的 outcome 为 optimization-accepted 才表示声明范围内完整优化通过。使用分阶段编排时，按 [optimization-verify.json](assets/examples/optimization-verify.json) 填写真实配置并运行 optimize；该模板用于 optimize verify，不直接作为 verify-optimization 输入。
+
+功能或画面回归时修复或回滚；未达标时按剩余瓶颈继续小批修改：
+
+```sh
+node scripts/perfkit.mjs rollback --project /absolute/theme --plan /absolute/run/plan.json --out /absolute/run/rollback.json
+```
+
+多文件操作不是跨文件事务。全部文件先预检，失败时尝试恢复已写入文件；并发修改或恢复失败会留下明确 receipt。评分通过仅表示这批实验室样本达标，功能、画面和真实用户 CWV 需要各自证据。
+
+## 使用资料
+
+- [报告接入、误报校正与资源依赖](references/code-quality.md)
+- [完整命令](references/commands.md)、[整站工作流](references/site-workflow.md)、[测量约定](references/measurement.md)
+- [多文件补丁](references/site-patches.md)、[单文件补丁](references/changes.md)
+- [评分验收](references/score-acceptance.md)、[浏览器验证](references/verification.md)、[业务验收](references/acceptance.md)
+- [自动化边界](references/automation.md)、[更新记录](CHANGELOG.md)
+
+真实测速正常加载页面脚本和请求；capture/scenarios 限制写请求，其通过不能证明真实支付、加购、统计或 App 写操作通过。
+
+## 开发、验证与发行
+
+```sh
+npm run test:p0p1
+npm run test:execution # 本次新增流程的必要离线测试
+npm run test:demand
+npm run test:browser
+npm test
+npm run test:lighthouse
+npm run test:site
+npm run release
+```
+
+test:lighthouse 是 Python 汇总、评分与打包测试，合成报告不算店铺测速。test:site 使用隔离本地测试主题，运行首页/商品页 × 移动/桌面 × 前后各 5 次，共 40 次真实 Lighthouse，并验证补丁、交互、内容和回滚；需要 Chrome、Playwright，运行需数分钟。无 Playwright 时普通测试明确跳过浏览器集成。
+
+项目仅保留最新工具源码、测试、使用文档、配置模板和运行依赖。报告、测量结果、主题快照与回滚资料通过输出路径保存到工具目录之外的独立任务目录；工具目录不保留这些任务数据或生成的发行包。
+
+需要发行 ZIP 时可按上述命令打包；白名单包含源码、测试、说明、配置示例及 lockfile，排除 node_modules、报告、回滚资料和其他 ZIP，解压后运行 npm ci。本机 Codex 技能入口 `/Users/admin/.codex/skills/shopify-perf-toolkit` 通过符号链接指向本项目，安装入口与项目 CLI 共用当前 package.json 版本的源码和依赖，仅保留这一份安装。
+
+### 代码、SEO 与分析型 PDF
+
+`audit-quality` 增加 SEO 源码引用分析、JS/CSS 语法树检查、嵌套路径、重复 schema 与可访问性线索；batch 显式配置 `quality: true` 接入。`report-pdf` 自动使用这些能力，按参考专项报告结构组织根因、代码例子、整改与验证，完整数据另存 JSON。检测覆盖、解析失败和线上待验证项单独展示。见 [PDF 报告契约](references/pdf-report.md)。
+
+### Liquid 前期预检
+
+在现有 batch 配置中增加 `precheck: true`（需要 Shopify CLI），即可在测量前检查 LiquidComplexity / LiquidNestingDepth，默认 120 / 10。使用独立两规则配置，不继承主题忽略项；支持显式阈值。报告保留官方结果与本地解释，待复核状态与性能评分分开。单独只读检查用 `precheck --project /absolute/theme --out /absolute/run/precheck.json`。详见 [预检流程](references/precheck.md) 与 [批次示例](assets/examples/batch-with-precheck.json)。

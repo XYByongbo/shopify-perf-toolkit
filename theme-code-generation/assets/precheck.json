@@ -1,0 +1,5 @@
+{
+  "maxComplexity": 60,
+  "maxDepth": 5,
+  "timeoutMs": 120000
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "engine": "lighthouse",
+  "pages": [
+    {"id": "home", "url": "https://your-store.example/"},
+    {"id": "product", "url": "https://your-store.example/products/replace-with-real-handle"},
+    {"id": "collection", "url": "https://your-store.example/collections/replace-with-real-handle"}
+  ],
+  "devices": ["mobile", "desktop"],
+  "runs": 5,
+  "timeoutMs": 120000
+}

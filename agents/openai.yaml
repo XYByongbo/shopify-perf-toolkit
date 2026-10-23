@@ -1,0 +1,6 @@
+interface:
+  display_name: "Shopify 整站性能优化"
+  short_description: "结合线上与源码证据诊断 JS/CSS/Liquid，生成可逆补丁并验证目标收益"
+  default_prompt: "使用 $shopify-perf-toolkit，单 agent 复用已有真实用户报告与有效基线，定位并修改影响性能的主题代码。默认保留 score 模式与原正式验收标准；声明加载或交互目标时使用对应独立证据。不额外下载图片素材，先验证受影响页面及相关功能，再完成正式验收，保留内容与视觉。"
+policy:
+  allow_implicit_invocation: true

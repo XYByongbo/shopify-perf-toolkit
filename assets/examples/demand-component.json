@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "mode": "component",
+  "source": "assets/theme.js",
+  "newAsset": "assets/product-zoom.js",
+  "component": "product-zoom",
+  "candidateId": "replace-with-current-diagnosis-candidate-id"
+}

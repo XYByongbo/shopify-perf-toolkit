@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "changes": [{
+    "target": "assets/theme.js",
+    "kind": "reviewed-replacement",
+    "replacementFile": "reviewed/theme.js",
+    "reason": "替换为基于真实主题逻辑审阅后的候选代码",
+    "evidence": {
+      "summary": "占位示例：请填写实际瓶颈、源码位置、报告及保留功能的依据，另行准备 reviewed/theme.js",
+      "report": "audit.json"
+    }
+  }]
+}

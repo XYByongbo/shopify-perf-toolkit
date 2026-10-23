@@ -1,0 +1,5 @@
+{
+  "before": "/absolute/task/interactions-before",
+  "after": "/absolute/task/interactions-after",
+  "goal": { "kind": "interaction", "target": "#product-details-toggle", "event": "click" }
+}

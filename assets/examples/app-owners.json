@@ -1,0 +1,10 @@
+[
+  {
+    "id": "review-widget",
+    "name": "Reviewed review provider",
+    "host": "cdn.example.com",
+    "pathPrefix": "/review-widget/",
+    "purpose": "Product reviews",
+    "evidence": "Replace with actual App embed, vendor documentation and inspected script evidence."
+  }
+]

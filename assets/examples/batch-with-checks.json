@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "agents": 1,
+  "project": "/absolute/theme",
+  "run": "/absolute/candidate/measurement",
+  "before": "/absolute/baseline/measurement",
+  "checks": {
+    "input": "/absolute/reports/theme-check.json",
+    "metadata": "/absolute/reports/check-metadata.json",
+    "baseline": "/absolute/baseline/checks.json"
+  },
+  "resources": {
+    "probe": false
+  },
+  "budget": {
+    "maxWallTimeMs": 3600000,
+    "maxAttempts": 80,
+    "maxFailures": 3,
+    "maxCandidateRounds": 2
+  }
+}

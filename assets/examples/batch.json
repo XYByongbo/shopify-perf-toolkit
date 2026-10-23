@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "agents": 1,
+  "project": "/absolute/theme",
+  "precheck": true,
+  "officialChecks": true,
+  "before": "/absolute/baseline/measurement",
+  "measurement": {
+    "schemaVersion": 1,
+    "engine": "lighthouse",
+    "purpose": "acceptance",
+    "pages": [
+      {
+        "id": "home",
+        "url": "https://your-store.example/"
+      },
+      {
+        "id": "product",
+        "url": "https://your-store.example/products/replace-with-real-handle"
+      },
+      {
+        "id": "collection",
+        "url": "https://your-store.example/collections/replace-with-real-handle"
+      },
+      {
+        "id": "cart",
+        "url": "https://your-store.example/cart"
+      }
+    ],
+    "devices": [
+      "mobile",
+      "desktop"
+    ],
+    "runs": 5,
+    "timeoutMs": 120000
+  },
+  "budget": {
+    "maxWallTimeMs": 3600000,
+    "maxAttempts": 40,
+    "maxFailures": 3,
+    "maxCandidateRounds": 2
+  },
+  "resources": {
+    "probe": false
+  },
+  "quality": true
+}

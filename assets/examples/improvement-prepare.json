@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "action": "prepare",
+  "previous": "/absolute/step-00/session.json",
+  "candidateId": "REPLACE_WITH_CURRENT_RECOVERY_CANDIDATE_ID",
+  "method": "component-demand-loading",
+  "rationale": "Replace global startup execution with loading at the verified component render site; preserve the first action and lifecycle.",
+  "demand": {
+    "schemaVersion": 1,
+    "mode": "component",
+    "source": "assets/main.js",
+    "newAsset": "assets/component.js",
+    "component": "REPLACE_WITH_ACTUAL_CUSTOM_ELEMENT_NAME",
+    "candidateId": "REPLACE_WITH_CURRENT_RECOVERY_CANDIDATE_ID"
+  }
+}

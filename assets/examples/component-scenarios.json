@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "url": "https://your-authorized-preview.example/products/example",
+  "timeoutMs": 10000,
+  "scenarios": [
+    {
+      "name": "首次和重复点击",
+      "steps": [
+        { "action": "click", "selector": "#example-section .toggle" },
+        { "action": "assert-attribute", "selector": "#example-section .toggle", "name": "aria-expanded", "value": "true" },
+        { "action": "click", "selector": "#example-section .toggle", "times": 2 },
+        { "action": "assert-attribute", "selector": "#example-section .toggle", "name": "aria-expanded", "value": "true" }
+      ]
+    },
+    {
+      "name": "三个实例、重复加载、卸载与原节点重连（需组件诊断属性）",
+      "steps": [
+        { "action": "assert-count", "selector": "example-component", "count": 3 },
+        { "action": "dispatch", "selector": "#example-section", "event": "shopify:section:load", "detail": { "sectionId": "example-section" } },
+        { "action": "dispatch", "selector": "#example-section", "event": "shopify:section:load", "detail": { "sectionId": "example-section" } },
+        { "action": "assert-attribute", "selector": "#example-section", "name": "data-active-timers", "value": "3" },
+        { "action": "dispatch", "selector": "#example-section", "event": "shopify:section:unload", "detail": { "sectionId": "example-section" } },
+        { "action": "detach", "selector": "#example-section", "key": "original-section" },
+        { "action": "assert-count", "selector": "#example-section", "count": 0 },
+        { "action": "assert-attribute", "selector": "body", "name": "data-example-active-timers", "value": "0" },
+        { "action": "reconnect", "key": "original-section" },
+        { "action": "dispatch", "selector": "#example-section", "event": "shopify:section:load", "detail": { "sectionId": "example-section" } },
+        { "action": "assert-count", "selector": "example-component", "count": 3 },
+        { "action": "assert-attribute", "selector": "#example-section", "name": "data-active-timers", "value": "3" }
+      ]
+    }
+  ]
+}

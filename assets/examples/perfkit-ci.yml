@@ -1,0 +1,90 @@
+# Copy to a THEME repository's .github/workflows/perfkit-gate.yml.
+# Call after an upstream job uploads complete perfkit measure run directories.
+# This gate reads artifacts; it does not sync themes, publish, or require store secrets.
+name: Perfkit formal regression gate
+on:
+  workflow_call:
+    inputs:
+      toolkit_repository:
+        type: string
+        required: true
+      toolkit_ref:
+        description: Pin a reviewed toolkit commit or tag
+        type: string
+        required: true
+      toolkit_subdirectory:
+        type: string
+        default: shopify-perf-toolkit
+      before_artifact:
+        type: string
+        required: true
+      after_artifact:
+        type: string
+        required: true
+      before_revision:
+        type: string
+        required: true
+      after_revision:
+        type: string
+        required: true
+permissions:
+  contents: read
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.toolkit_repository }}
+          ref: ${{ inputs.toolkit_ref }}
+          path: toolkit
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --ignore-scripts
+        working-directory: toolkit/${{ inputs.toolkit_subdirectory }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.before_artifact }}
+          path: evidence/before
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.after_artifact }}
+          path: evidence/after
+      - name: Verify complete before and after measurements
+        env:
+          BEFORE_REVISION: ${{ inputs.before_revision }}
+          AFTER_REVISION: ${{ inputs.after_revision }}
+          TOOLKIT_SUBDIRECTORY: ${{ inputs.toolkit_subdirectory }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          fs.writeFileSync('ci-config.json', JSON.stringify({
+            schemaVersion: 1,
+            before: path.resolve('evidence/before'),
+            after: path.resolve('evidence/after'),
+            beforeRevision: process.env.BEFORE_REVISION,
+            afterRevision: process.env.AFTER_REVISION
+          }));
+          NODE
+          node "toolkit/$TOOLKIT_SUBDIRECTORY/scripts/perfkit.mjs" ci-check --config "$GITHUB_WORKSPACE/ci-config.json" --out "$RUNNER_TEMP/perfkit-ci.json"
+      - name: Save report
+        if: always()
+        env:
+          TOOLKIT_SUBDIRECTORY: ${{ inputs.toolkit_subdirectory }}
+        run: |
+          if test -f "$RUNNER_TEMP/perfkit-ci.json"; then
+            node "toolkit/$TOOLKIT_SUBDIRECTORY/scripts/perfkit.mjs" report --input "$RUNNER_TEMP/perfkit-ci.json" --out "$RUNNER_TEMP/perfkit-ci.html"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perfkit-ci-result
+          path: |
+            ${{ runner.temp }}/perfkit-ci.json
+            ${{ runner.temp }}/perfkit-ci.html

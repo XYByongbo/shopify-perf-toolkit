@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "project": "/absolute/theme",
+  "before": "/absolute/run/verified-baseline",
+  "agents": 1,
+  "measurement": {
+    "schemaVersion": 1,
+    "engine": "lighthouse",
+    "pages": [
+      {
+        "id": "home",
+        "url": "https://example.myshopify.com/?preview_theme_id=123"
+      }
+    ],
+    "devices": [
+      "mobile",
+      "desktop"
+    ],
+    "purpose": "acceptance",
+    "runs": 5,
+    "deployment": {
+      "project": "/absolute/theme",
+      "store": "example.myshopify.com",
+      "themeId": "123",
+      "timeoutMs": 120000
+    }
+  },
+  "resources": {
+    "probe": false
+  },
+  "quality": true,
+  "runtimeProfiles": [
+    {
+      "schemaVersion": 1,
+      "url": "https://example.myshopify.com/?preview_theme_id=123",
+      "device": "mobile",
+      "state": "initial",
+      "actions": []
+    }
+  ],
+  "liquidProfile": {
+    "schemaVersion": 1,
+    "input": "/absolute/run/liquid.speedscope.json"
+  },
+  "devtoolsProfile": {
+    "schemaVersion": 1,
+    "url": "https://example.myshopify.com/?preview_theme_id=123",
+    "device": "mobile",
+    "timeoutMs": 60000
+  }
+}

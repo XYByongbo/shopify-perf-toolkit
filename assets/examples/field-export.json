@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "source": "shopify-rum",
+  "window": { "start": "2026-10-01", "end": "2026-10-18" },
+  "groups": [
+    {
+      "url": "https://example.myshopify.com/products/example",
+      "scope": "url",
+      "pageType": "product",
+      "device": "mobile",
+      "country": "US",
+      "samples": 500,
+      "metrics": { "lcp": 3100, "inp": 240, "cls": 0.05, "ttfb": 600, "fcp": 1700 }
+    }
+  ]
+}

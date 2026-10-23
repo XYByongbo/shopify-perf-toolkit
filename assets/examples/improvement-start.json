@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "action": "start",
+  "project": "/absolute/candidate-theme",
+  "run": "/absolute/baseline-measurement",
+  "profiles": ["/absolute/baseline-runtime/profile.json"],
+  "goal": {"kind": "score"},
+  "budget": {"maxWallTimeMs": 3600000, "maxAttempts": 40, "maxFailures": 4, "maxCandidateRounds": 4}
+}

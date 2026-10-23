@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "purpose": "acceptance",
+  "runs": 5,
+  "profile": {
+    "schemaVersion": 1,
+    "url": "https://example.myshopify.com/products/example?preview_theme_id=123",
+    "project": "/absolute/theme",
+    "device": "mobile",
+    "state": "open-product-details",
+    "readOnly": true,
+    "settleMs": 1500,
+    "timeoutMs": 45000,
+    "actions": [{ "type": "click", "selector": "#product-details-toggle" }]
+  },
+  "deployment": { "project": "/absolute/theme", "store": "example.myshopify.com", "themeId": "123", "timeoutMs": 120000 },
+  "budget": { "maxWallTimeMs": 900000, "maxAttempts": 5, "maxFailures": 1 }
+}

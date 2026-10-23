@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "url": "https://example.myshopify.com/?preview_theme_id=123",
+  "project": "/absolute/theme",
+  "device": "mobile",
+  "state": "initial",
+  "expectedThemeId": "123",
+  "readOnly": true,
+  "settleMs": 1500,
+  "timeoutMs": 45000,
+  "actions": []
+}
