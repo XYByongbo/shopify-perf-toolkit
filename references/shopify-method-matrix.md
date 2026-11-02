@@ -40,9 +40,9 @@
 | [assign-block-settings-to-variable](https://shopify.dev/docs/storefronts/themes/best-practices/performance/assign-block-settings-to-variable) | 需编写替换补丁 | — | 在当前 block 作用域缓存 settings；不能跨不同 block 复用。 空设置、block 顺序、动态重载和模板输出。 |
 | [use-echo-for-concatenation](https://shopify.dev/docs/storefronts/themes/best-practices/performance/use-echo-for-concatenation) | 需编写替换补丁 | — | 只将立即输出的连接拆成输出语句；需要字符串变量时保留原逻辑。 escape、空白、nil、后续字符串消费者及实际 profile。 |
 | [avoid-conditionals-in-loops](https://shopify.dev/docs/storefronts/themes/best-practices/performance/avoid-conditionals-in-loops) | 需编写替换补丁 | — | 按实际筛选逻辑预过滤，保留顺序和需要的复合判断。 forloop 元数据、数量、空集合与早停语义。 |
-| [avoid-nested-renders](https://shopify.dev/docs/storefronts/themes/best-practices/performance/avoid-nested-renders) | 需编写替换补丁 | — | 只内联热点中可证明等价的简单嵌套调用，保留复杂组件边界。 render 隔离、参数、include 副作用、schema 与重复实例。 |
+| [avoid-nested-renders](https://shopify.dev/docs/storefronts/themes/best-practices/performance/avoid-nested-renders) | 有受限生成器 | `domain:liquid-collapse-forwarder` | 只绕过命名参数逐个原样转发的单 render 包装层，保留叶子 render 隔离；真实调用关系及合计 self time 验收。 |
 | [avoid-variant-overfetching](https://shopify.dev/docs/storefronts/themes/best-practices/performance/avoid-variant-overfetching) | 需编写替换补丁 | — | 初始输出必要变体与选项，选择后按上下文增量取数据。 高变体产品、无库存组合、价格、选择、加购与 URL。 |
-| [limit-product-queries-with-pagination](https://shopify.dev/docs/storefronts/themes/best-practices/performance/limit-product-queries-with-pagination) | 有受限生成器 | `domain:query-limit`、`domain:query-paginate` | collection.products/collections 使用有限循环；其它数组按平台语义考虑 paginate。 原有页码、数量、forloop、固定轮播及数据查询。 |
+| [limit-product-queries-with-pagination](https://shopify.dev/docs/storefronts/themes/best-practices/performance/limit-product-queries-with-pagination) | 有受限生成器 | `domain:query-limit`、`domain:query-limit-render`、`domain:query-paginate` | collection.products/collections 使用有限循环；其它数组按平台语义考虑 paginate。 原有页码、数量、forloop、固定轮播及数据查询。 |
 | [limit-pagination-depth](https://shopify.dev/docs/storefronts/themes/best-practices/performance/limit-pagination-depth) | 需编写替换补丁 | — | 减少深页查询并提供筛选或明确分页；保持完整访问路径。 平台分页边界、键盘、Load more、URL 和内容范围。 |
 | [defer-modal-content-loading](https://shopify.dev/docs/storefronts/themes/best-practices/performance/defer-modal-content-loading) | 需编写替换补丁 | — | 首开再请求隐藏弹窗昂贵 Liquid；按正确 API 上下文渲染。 首次打开、关闭再开、错误重试、recommendations 专用上下文。 |
 | [defer-combined-listing-products](https://shopify.dev/docs/storefronts/themes/best-practices/performance/defer-combined-listing-products) | 需编写替换补丁 | — | 用选项的子产品 URL 按需加载 combined listings，保留普通选项路径。 资格、nil、所选变体、商品跳转和购买行为。 |
@@ -70,7 +70,7 @@
 | 官方专题 | 当前能力 | 执行入口 | 改写/验证重点 |
 | --- | --- | --- | --- |
 | [stylesheet-subsetting](https://shopify.dev/docs/storefronts/themes/best-practices/performance/stylesheet-subsetting) | 需编写替换补丁 | — | 根据实际 section/block/snippet 渲染树组织原生 stylesheet，保留动态使用。 平台原生子集与手工 critical CSS 分别验证，不能混同。 |
-| [reduce-stylesheet-count](https://shopify.dev/docs/storefronts/themes/best-practices/performance/reduce-stylesheet-count) | 需编写替换补丁 | — | 在依赖和级联明确时合并相关样式或消除重复加载。 跨模板、首个实例、动态 section、优先级、样式表和 DOM 消费者。 |
+| [reduce-stylesheet-count](https://shopify.dev/docs/storefronts/themes/best-practices/performance/reduce-stylesheet-count) | 有受限生成器 | `domain:stylesheet-once` | 一个非嵌套循环的调用方与前导样式 snippet 成对修改；首个实际实例输出、共享默认调用、级联和独立收益验证。 |
 | [load-critical-css-synchronously](https://shopify.dev/docs/storefronts/themes/best-practices/performance/load-critical-css-synchronously) | 有受限生成器 | `site:liquid-critical-css-sync`、`demand:critical-css`、`split:css` | 首屏样式保持同步；只延迟证实非关键部分。 无 JS、FOUC、CLS、冷缓存和跨状态计算样式。 |
 | [use-transform-for-animations](https://shopify.dev/docs/storefronts/themes/best-practices/performance/use-transform-for-animations) | 有受限生成器 | `site:css-transition-properties` | 对审阅过的动画收窄变化属性，复杂布局动画需要保持语义重构。 hover/focus/open/close、reduced motion、布局及呈现耗时。 |
 

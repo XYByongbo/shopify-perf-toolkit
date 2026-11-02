@@ -3,7 +3,6 @@ import argparse,json,os
 from pathlib import Path
 from collections import Counter
 from xml.sax.saxutils import escape
-from reportlab.pdfgen import canvas
 from reportlab.platypus import SimpleDocTemplate,Paragraph,Spacer,Table,TableStyle,PageBreak,KeepTogether
 from reportlab.lib import colors
 from reportlab.lib.styles import ParagraphStyle

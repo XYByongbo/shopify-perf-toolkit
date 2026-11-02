@@ -1,9 +1,17 @@
-# 命令参考（v0.8.0）
+# 命令参考（v0.14.0）
 
 在工具根目录执行 `node scripts/perfkit.mjs --help` 查看全部参数。所有 --out 均要求新文件/新目录，不覆盖旧证据。--project 是主题源码根目录，--target 是其内相对路径。doctor 检查可用性，不代表浏览器启动或网络已验证。
 
 | 命令 | 主要参数 | 结果 |
 | --- | --- | --- |
+| doctor | --out 可选 | 当前版本与本机能力；不替代实际启动和回归 |
+| diagnose-performance | --project、--profiles；--run/--checks/--ownership/--performance-baseline 可选，--out | 统一候选排序、资源/字体调查、归属与结构上下文 |
+| profile-domain | --config，--out 新目录 | 测量前后部署身份绑定的 runtime/Liquid 证据 |
+| optimize | --config，--out 新目录 | prepare/apply/verify；verify 的 resourceProfiles 接入采样前及正式验收 |
+| verify-optimization | --config，--out | 原分数、收益、身份、功能、视觉及资源等价验收 |
+| plan-resource-repair / verify-resource-repair | --project/--profile/--config，或 --config；--out | 受限坏图修复与独立内容恢复验收，不计性能收益 |
+| improve-cycle | --config，--out 新目录 | 审阅、同步、采集和正式验收的可恢复执行 |
+| audit-quality | --project；--checks 可选，--out | 代码、SEO、结构依赖与归属的静态候选分析 |
 | sync-shopify-docs | --config 可选，--out 新目录 | 有界获取官方文档元数据；失败/截断保留 incomplete |
 | shopify-methods | --sources、--topic、--out 可选 | 导出方法卡、真实生成器参数与来源审阅状态 |
 | plan-official | --project、--config、--diagnosis、--out；--profiles、--sources 可选 | 当前证据绑定的官方方法补丁；见 shopify-knowledge.md |
@@ -13,13 +21,13 @@
 | evaluate-iteration | --config，--out 可选 | 候选历史收益、负向、噪声门槛及早停 |
 | scan | --project，--pages 可选 URL 数组 JSON，--out | site-scan：库存、依赖、候选、未解析关系 |
 | check-performance | --project，--config 可选 timeoutMs JSON，--out | 独立官方性能检查，冻结 Liquid/JSON/JS/CSS 快照；与两规则 precheck 并存 |
-| audit-performance | --project，--profiles 可选 profile 路径/对象数组，--out | Shopify P0/P1 的 27 组候选、按能力区分的覆盖状态与未完成项 |
+| audit-performance | --project，--profiles、--baseline、--checks、--ownership 可选，--out | Shopify P0/P1 的 27 组候选、按能力区分的覆盖状态与未完成项 |
 | import-check | --project，--input，--metadata/--baseline 可选，--out | 规范报告、校正注记、同口径增量门禁 |
 | audit-resources | --project，--probe true/false 可选，--out | 外链、脚本顺序与符号依赖候选；默认离线 |
 | inspect | --project，--target，--capture 可选，--out | 文件级诊断 |
 | map | --project，--capture，--target 可选，--out | 源码关联及不确定项 |
 | measure | --config，--out 新目录 | run.json、各组原始 LHR 和失败记录 |
-| audit-site | --project，--run 测量目录，--checks/--resources 可选补充报告，--out | 实测指标、资源、优先候选及证据 |
+| audit-site | --project，--run 测量目录，--checks/--resources/--ownership/--performance-baseline 可选，--out | 实测指标、资源、优先候选及证据 |
 | code-strategies | --out 可选 | 可执行策略、参数、证据与回归要求 |
 | analyze-code | --project，--target，--out 可选 | 单文件结构候选、拒绝原因、未填写的 recipe；不改源码 |
 | plan-site | --project，--recipe，--out | 多文件差异、指纹和完整快照 |
@@ -76,3 +84,5 @@ batch 的 status=complete 仅表示执行完成。reviewRequired=true、停止/�
 - `experiment-liquid --config <pair.json> --out <new-directory>`：交替采集真实 Shopify 服务端 profile，输出可重算证据。
 
 配置、审阅契约、会话集成及实测门禁见 [四类优化闭环](domain-optimization.md)。
+
+0.14.0 的 batch 顶层支持 ownership 与 performanceBaseline；diagnose-performance 支持 --checks、--ownership、--performance-baseline。optimize verify / improve collect formal 用 resourceProfiles 传入前后部署绑定采样，直接 verify-optimization 仍从 regression.resourceProfiles 读取。完整契约与迁移要求见 [功能升级](toolkit-evolution.md)。

@@ -21,7 +21,7 @@ async function fixture(t,text,file='sections/main.liquid',extraFiles={}){
   const snapshot=await sourceSnapshot(root),time=n=>new Date(Date.UTC(2026,9,23,0,0,n)).toISOString();
   const proof={kind:'deployment-proof',status:'verified',scope:'theme-text-source',method:'shopify-cli-source-pull-and-browser-theme-id',project:root,sourceHash:snapshot.hash,remoteSourceHash:snapshot.hash,sourceManifest:snapshot.files,store:'fixture.myshopify.com',themeId:'1',pages:[{id:'target',url,status:'verified',store:'fixture.myshopify.com',themeId:'1'}]};
   const bind=p=>({...p,project:root,createdAt:time(2),finishedAt:time(3),domainProof:{version:1,url,startedAt:time(2),finishedAt:time(3),before:{...proof,startedAt:time(0),finishedAt:time(1)},after:{...proof,startedAt:time(4),finishedAt:time(5)}}});
-  const runtime=bind({kind:'runtime-profile',status:'complete',sourceStable:true,snapshot,themeId:'1',finalUrl:url,config:{url,device:'mobile',state:'initial',actions:[]},domainTargets:[],resources:[],initial:{}});
+  const runtime=bind({kind:'runtime-profile',status:'complete',sourceStable:true,snapshot,themeId:'1',finalUrl:url,config:{url,device:'mobile',state:'initial',actions:[]},domainTargets:[],resources:[],initial:{delivery:{securityPolicy:{complete:true,headers:[],meta:[]}}}});
   const liquid=line=>{const rawProfile={shared:{frames:[{name:file+':'+line}]},profiles:[{name:'Liquid',type:'sampled',unit:'milliseconds',startValue:0,endValue:30,samples:[[0]],weights:[30]}]};return bind({kind:'liquid-profile',status:'complete',sourceSnapshot:snapshot,rawProfile,evidence:{origin:'shopify-cli',rawProfileHash:sha256(JSON.stringify(rawProfile)),collector:{kind:'shopify-cli',version:'4.9.4'},store:'fixture.myshopify.com',themeId:'1',urlPath:new URL(url).pathname+new URL(url).search}});};
   const diagnose=lp=>({kind:'bottleneck-diagnosis',sourceHash:snapshot.hash,candidates:domainCandidates({files:[{file,text}],snapshot,profiles:[runtime],liquidProfile:lp})});
   return {root,snapshot,runtime,liquid,diagnose,file,text};
@@ -51,7 +51,7 @@ test('formal Liquid no-gain restores both files, diagnoses actual formal reports
       await writeFile(path.join(output,'patch-evidence.json'),JSON.stringify({before:baseline.root,after:after.root,goal:config.goal}));
       return {output,status:'promising',verification:{outcome:'promising'},counts:{attempted:6,failed:0}};
     },
-    verifyOptimization:async input=>({outcome:'not-accepted',scoreTargets:{outcome:'targets-not-met',checks:[]},gain:await evaluateGain({before:input.before,after:input.after,goal:input.goal}),checks:[{id:'declared-goal-gain-no-metric-regression',pass:false}]}),
+    verifyOptimization:async input=>({outcome:'not-accepted',scoreTargets:{outcome:'targets-not-met',checks:[]},gain:await evaluateGain({before:input.before,after:input.after,goal:input.goal}),checks:[{id:'candidate-identity',pass:true},{id:'plan-matches-measured-source',pass:true},{id:'declared-goal-gain-no-metric-regression',pass:false}]}),
   }});
   await step({action:'start'});assert.equal(state.error,undefined);
   const recovery=JSON.parse(await readFile(state.recovery)),c=recovery.candidates.find(c=>c.kind==='section-fetch');assert.ok(c);

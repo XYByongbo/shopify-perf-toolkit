@@ -316,3 +316,48 @@ test('official App route retains script bytes and mandatory business evidence',a
   await assert.rejects(createOfficialPlan({project:f.root,diagnosis:d,config:{...config,review:{...config.review,businessAssertions:[]}}}));
   await assert.rejects(createOfficialPlan({project:f.root,diagnosis:d,config:{...config,executor:'site:liquid-defer-script'}}));
 });
+
+for(const repair of [false,'verify','collect','missing-navigation'])test(repair?`formal Liquid ${repair} pins samples despite another read failure and prevents replacement`:'formal Liquid no-gain is a verified rejection before navigation and the session returns to diagnosis',async t=>{
+  const {proof:navProof,regression,read}=await import('./helpers/improvement-fixture.mjs');
+  const {collectOptimizationEvidence}=await import('../lib/optimization-collection.mjs');
+  const {patchGate}=await import('../lib/optimization-verification.mjs');
+  const {formalLiquidRejected}=await import('../lib/formal-recovery.mjs');
+  const text="{% for p in collection.products %}\n{% assign title = shop.name | upcase %}{{ title }}:{{ p.title }}\n{% endfor %}";
+  const f=await setup(t,text),before=await siteRun(t,{devices:['mobile'],scores:{mobile:[60]}});await navProof(before,f.snapshot,f.root);
+  const out=await mkdtemp('/private/tmp/perfkit-formal-liquid-');t.after(()=>rm(out,{recursive:true,force:true}));let state,index=0;
+  const step=async(input,dependencies={})=>state=await runImprovement({config:{schemaVersion:1,...(state?{previous:path.join(state.output,'session.json')}:{project:f.root,run:before.root,profiles:[f.profile],liquidProfile:liquidProfile(f.snapshot,30),budget:{maxAttempts:30,maxCandidateRounds:3}}),...input},output:path.join(out,String(index++)),dependencies});
+  await step({action:'start'});const c=(await read(state.recovery)).candidates.find(c=>c.kind==='liquid-hotspot');assert.ok(c);
+  await step({action:'prepare',candidateId:c.candidateId,method:'liquid-cache-loop-filter',rationale:'Measured server hotspot',domain:{schemaVersion:1,candidateId:c.candidateId,method:'liquid-cache-loop-filter',review:{summary:'Synthetic loop contract',profileHotspotConfirmed:true,loopScopeReviewed:true}}});assert.equal(state.error,undefined);
+  const plan=await read(state.active.plan);await step({action:'apply',reviewedPlanHash:state.active.planHash});const snapshot=await sourceSnapshot(f.root);
+  const after=await siteRun(t,{devices:['mobile'],offset:30,scores:{mobile:[90]},augment:r=>{r.audits['largest-contentful-paint'].numericValue=1400;}});await navProof(after,snapshot,f.root);
+  const scenario=hash=>{const r=regression(hash);Object.assign(r,{createdAt:'2026-10-16T00:00:00Z',finishedAt:'2026-10-16T00:00:01Z'});Object.assign(r.runs[0],{finalUrl:url,store:'fixture.myshopify.com',documentStable:true});return r;};
+  const liquid={kind:'liquid-experiment',status:'complete',before:[],after:[],schedule:[],counts:{attempted:10,failed:0}};
+  for(let i=0;i<5;i++) {const sides=i%2?['after','before']:['before','after'];for(const [j,side]of sides.entries()){
+    liquid[side].push(liquidProfile(side==='before'?f.snapshot:snapshot,30,i*20+j*10,'1'));liquid.schedule.push({round:i+1,side});
+  }}
+  const patch={plan,diagnosis:await read(state.active.diagnosis),candidateId:c.candidateId,before:before.root,after:after.root,regressionBefore:scenario(f.snapshot.hash),regressionAfter:scenario(snapshot.hash)};
+  const gate=await patchGate(plan,patch,undefined,liquid);assert.equal(gate.liquid.outcome,'no-measurable-gain',JSON.stringify(gate));assert.equal(gate.outcome,'hypothesis-not-confirmed',JSON.stringify(gate));
+  assert.equal(formalLiquidRejected(gate,{sourceHash:f.snapshot.hash,store:'fixture.myshopify.com'},snapshot.hash),true);
+  assert.equal(formalLiquidRejected(gate,{sourceHash:f.snapshot.hash,store:'other.myshopify.com'},snapshot.hash),false);
+  const side={schemaVersion:1,engine:'lighthouse',devices:['mobile'],pages:[{id:'home',url}],deployment:{project:f.root,store:'fixture.myshopify.com',themeId:'1'}};
+  // Exploration transition is isolated; formal verification below recomputes the complete Liquid/plan/identity gates.
+  await step({action:'experiment',experiment:{schemaVersion:1,before:side,after:side}},{runPatchExperiment:async({output})=>{await mkdir(output,{recursive:true});await writeFile(path.join(output,'patch-evidence.json'),JSON.stringify(patch));return {output,status:'promising',counts:{attempted:6,failed:0}};}});
+  assert.equal(state.error,undefined);let navigation=0;
+  if(repair) {
+    const data={liquidEvidence:liquid,review:path.join(out,'missing.json')};
+    await step(repair!=='collect'?{action:'verify',verification:{after:repair==='missing-navigation'?path.join(out,'missing-navigation'):after.root,...data}}:{action:'collect',formal:{measurement:{...side,purpose:'acceptance',runs:5},scenarios:{},...data}},
+      {collectOptimizationEvidence:()=>assert.fail('Missing review must not start collection')});
+    assert.equal(state.error.code,'ENOENT');assert.ok(state.active.liquidEvidenceHash);
+    const pinned=state.active.liquidEvidenceHash,replacement=structuredClone(liquid);
+    replacement.after=replacement.after.map((_,i)=>liquidProfile(snapshot,10,i*20+(i%2?0:10),'1'));
+    await step({action:'verify',verification:{after:after.root,liquidEvidence:replacement}});
+    assert.match(state.error.message,/first valid formal Liquid samples/);assert.equal(state.active.liquidEvidenceHash,pinned);
+    await step({action:'verify',verification:{after:after.root}}); // Reuses the pinned raw Liquid profiles.
+    assert.equal(state.error,undefined);assert.equal(state.history.at(-1).outcome,'formal-rejected');assert.equal(state.active,null);
+    assert.equal(state.counts.attempted,6);return;
+  }
+  await step({action:'collect',formal:{measurement:{...side,purpose:'acceptance',runs:5},scenarios:{},liquidEvidence:liquid}},{collectOptimizationEvidence:args=>collectOptimizationEvidence({...args,dependencies:{measureSite:()=>{navigation++;assert.fail('Negative formal Liquid evidence must stop navigation');}}})});
+  assert.equal(state.error,undefined,JSON.stringify(state.error));assert.equal(state.active,null);assert.equal(navigation,0);
+  assert.equal(state.history.at(-1).outcome,'formal-rejected');assert.deepEqual(state.history.at(-1).rejectionReasons,['liquid-no-gain-or-regression']);
+  assert.equal(await readFile(path.join(f.root,'sections/main.liquid'),'utf8'),text);assert.ok(state.recovery);
+});

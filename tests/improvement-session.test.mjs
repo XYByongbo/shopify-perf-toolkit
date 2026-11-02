@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { runImprovement, readImprovementSession } from '../lib/improvement-session.mjs';
 import { diagnoseRecovery } from '../lib/recovery.mjs';
@@ -11,76 +11,9 @@ import { preservationStyles } from '../lib/preservation.mjs';
 import { siteRun, saveManifest, regressionForRun, changeReport } from './helpers/site-run.mjs';
 import { renderReport } from '../lib/report.mjs';
 import { execFileSync } from 'node:child_process';
+import {hashSession} from '../lib/improvement-state.mjs';
 
-const url = 'https://shop.example.test/?preview_theme_id=1';
-const read = async file => JSON.parse(await readFile(file,'utf8'));
-const experimentConfig = project => ({schemaVersion:1,
-  before:{schemaVersion:1,engine:'lighthouse',devices:['mobile'],pages:[{id:'home',url}],deployment:{project:project+'-baseline',store:'fixture.myshopify.com',themeId:'1'}},
-  after:{schemaVersion:1,engine:'lighthouse',devices:['mobile'],pages:[{id:'home',url}],deployment:{project,store:'fixture.myshopify.com',themeId:'2'}}});
-async function proof(fixture,snapshot,project) {
-  const declaration={project,store:'fixture.myshopify.com',themeId:'1'};
-  const p={kind:'deployment-proof',status:'verified',scope:'theme-text-source',method:'shopify-cli-source-pull-and-browser-theme-id',...declaration,
-    sourceHash:snapshot.hash,remoteSourceHash:snapshot.hash,sourceManifest:snapshot.files,
-    pages:fixture.manifest.config.pages.map(page=>({...page,status:'verified',store:declaration.store,themeId:'1'}))};
-  Object.assign(fixture.manifest,{startedAt:'2026-10-15T23:57:00Z',finishedAt:'2026-10-18T00:02:00Z',deployment:{
-    before:{...p,startedAt:'2026-10-15T23:58:00Z',finishedAt:'2026-10-15T23:59:00Z'},
-    after:{...p,startedAt:'2026-10-18T00:00:00Z',finishedAt:'2026-10-18T00:01:00Z'}}});
-  fixture.manifest.config.deployment=declaration;await saveManifest(fixture);
-}
-function regression(hash) {
-  return {kind:'scenarios',sourceHash:hash,sourceStable:true,outcome:'passed',environment:{browserVersion:'synthetic'},
-    runs:[{name:'action',url,viewport:{name:'mobile',width:390,height:844,dpr:1},themeId:'1',outcome:'passed',constrained:false,blockedRequests:[],pageErrors:[],steps:[
-      {index:0,action:'click',selector:'button',times:1,outcome:'passed',elapsedMs:20},
-      {index:1,action:'assert-text',selector:'output',text:'1',outcome:'passed',elapsedMs:10},
-      {index:2,action:'checkpoint',key:'open',selector:'main',outcome:'passed',observation:{version:1,
-        content:[{tag:'MAIN',text:['Fixture']}],layout:[{rect:[0,0,100,30],styles:Object.fromEntries(preservationStyles.map(k=>[k,'fixture']))}]}}
-    ]}]};
-}
-async function runtime(project) {
-  const snapshot=await sourceSnapshot(project),source={status:'verified-bytes',...snapshot.files.find(f=>f.file==='assets/main.js'),line:1};
-  return {kind:'runtime-profile',status:'complete',sourceStable:true,snapshot,config:{url,device:'mobile',state:'initial',actions:[]},
-    cpu:[{selfMs:400,inclusiveMs:400,functionName:'heavy',source,url:'https://cdn.example.test/main.js'}],resources:[],renderResources:[],coverage:{js:[],css:[]},lcp:{renderDelayMs:200}};
-}
-async function setup(t, budget={maxCandidateRounds:4}, exploration=false) {
-  const root=await mkdtemp('/private/tmp/perfkit-improve-');t.after(()=>rm(root,{recursive:true,force:true}));
-  const project=path.join(root,'theme');await mkdir(path.join(project,'assets'),{recursive:true});
-  await writeFile(path.join(project,'assets/main.js'),'function heavy(){ return 1; }');
-  const baseline=await siteRun(t,{devices:['mobile'],reports:exploration?3:5,scores:{mobile:[50]},augment:r=>{
-    r.audits['total-blocking-time'].numericValue=700;
-    r.audits['total-blocking-time'].score=0.1;
-    r.categories.performance.auditRefs=[{id:'total-blocking-time',weight:30},{id:'largest-contentful-paint',weight:25},{id:'cumulative-layout-shift',weight:25},{id:'first-contentful-paint',weight:10},{id:'speed-index',weight:10}];
-  }});
-  if(exploration){baseline.manifest.config.purpose='exploration';baseline.manifest.config.runs=3;}
-  await proof(baseline,await sourceSnapshot(project),project);
-  let state,index=0;
-  const step=async (input,deps={})=>{
-    state=await runImprovement({config:{schemaVersion:1,...(state?{previous:path.join(state.output,'session.json')}:{project,run:baseline.root,profiles:[await runtime(project)],budget}),...input},
-      output:path.join(root,`step-${index++}`),dependencies:deps});return state;
-  };
-  const prepare=async (text,method='replace-work')=>{
-    const recovery=await read(state.recovery),c=recovery.candidates[0];
-    return step({action:'prepare',candidateId:c.candidateId,method,rationale:'Measured CPU frame; remove repeated work and preserve output.',recipe:{schemaVersion:1,changes:[{
-      kind:'reviewed-replacement',target:'assets/main.js',replacementText:text,reason:'Synthetic fixture implementation',
-      evidence:{summary:'Synthetic source-bound hypothesis, no real-store claim',candidateId:c.candidateId,diagnosisSourceHash:state.baselineHash}
-    }]}});
-  };
-  const experiment=async ({score=50,tbt=700,external=false}={})=>{
-    const baselineSnapshot=await read(state.active.diagnosis),before=state.baselineRun;
-    return step({action:'experiment',experiment:experimentConfig(project)}, {runPatchExperiment:async ({config,output})=>{
-      await mkdir(output,{recursive:true});
-      const plan=await read(config.plan),diagnosis=await read(config.diagnosis),snapshot=await sourceSnapshot(project);
-      const after=await siteRun(t,{devices:['mobile'],offset:100+index*20,scores:{mobile:[score]},augment:r=>{r.audits['total-blocking-time'].numericValue=tbt;}});
-      await proof(after,snapshot,project);
-      const input={plan,diagnosis,candidateId:config.candidateId,before,after:after.root,goal:config.goal,
-        regressionBefore:regression(baselineSnapshot.sourceHash),regressionAfter:regression(snapshot.hash)};
-      const verification=await verifyPatchExperiment(input);
-      if(external)for(const key of ['diagnosis','regressionBefore','regressionAfter']){const file=path.join(root,`${key}.json`);await writeFile(file,JSON.stringify(input[key]));input[key]=file;}
-      await writeFile(path.join(output,'patch-evidence.json'),JSON.stringify(input));
-      return {output,status:verification.outcome,verification,counts:{attempted:6,failed:0}};
-    }});
-  };
-  return {root,project,baseline,step,prepare,experiment,get state(){return state;}};
-}
+import {url,read,experimentConfig,proof,regression,runtime,setup} from './helpers/improvement-fixture.mjs';
 
 test('recovery ranks measured loss and excludes stale/wrong-page profiles without declaring success',async t=>{
   const f=await setup(t),s=await f.step({action:'start'}),r=await read(s.recovery);
@@ -269,7 +202,7 @@ test('broken score evaluator never promotes candidate as an intermediate gain',a
 
 test('actual candidate UI failure rolls back while keeping the formal rejection',async t=>{
   const f=await setup(t),verification=await formalCandidate(t,f);
-  verification.regression.scenarios.runs[0].steps[0].outcome='failed';
+  Object.assign(verification.regression.scenarios.runs[0].steps[0],{outcome:'failed',error:{code:'ASSERTION_FAILED',expected:'Fixture',actual:'Broken'}});
   const s=await f.step({action:'verify',verification});assert.equal(s.active,null);
   assert.equal(s.history.at(-1).outcome,'formal-rejected');
   assert.equal(await readFile(path.join(f.project,'assets/main.js'),'utf8'),'function heavy(){ return 1; }');
@@ -373,4 +306,100 @@ test('different operator-authored official mechanisms remain available after no 
   await f.step({action:'apply',reviewedPlanHash:f.state.active.planHash});await f.experiment();assert.equal(f.state.history.at(-1).outcome,'no-measurable-gain');
   const s=await prepare('request-critical-data-before-dom-ready','function heavy(){ return 1; } // independent data timing fixture');
   assert.equal(s.error,undefined);assert.equal(s.active.method,'request-critical-data-before-dom-ready/reviewed-replacement');
+});
+
+test('invalid formal resource evidence with flat scores is retained for repair, not recorded as a failed mechanism',async t=>{
+  const f=await setup(t),verification=await formalCandidate(t,f),after=await siteRun(t,{devices:['mobile'],offset:600,scores:{mobile:[50]},augment:r=>{r.audits['total-blocking-time'].numericValue=700;}});
+  await proof(after,await sourceSnapshot(f.project),f.project);
+  const s=await f.step({action:'verify',verification:{...verification,after:after.root,regression:regressionForRun(after),budget:{maxRequests:20}}});
+  assert.ok(s.active);assert.equal(s.active.formalAfter,await realpath(after.root));assert.equal(s.history.at(-1).outcome,'promising');
+  assert.equal((await read(s.formalRecovery)).action,'repair-evidence');assert.equal((await read(s.verification)).outcome,'invalid-evidence');
+  const retry=await f.step({action:'verify',verification});assert.match(retry.error.message,/first valid formal candidate/);
+});
+
+test('wrong-store behavior failure does not blacklist a valid patch',async t=>{
+  const f=await setup(t),verification=await formalCandidate(t,f),run=verification.regression.scenarios.runs[0];
+  Object.assign(run.steps[0],{outcome:'failed',error:{code:'ASSERTION_FAILED',expected:'Fixture',actual:'Broken'}});run.store='other.myshopify.com';
+  const s=await f.step({action:'verify',verification});assert.ok(s.active);assert.equal(s.history.at(-1).outcome,'promising');
+  assert.equal((await read(s.formalRecovery)).action,'repair-evidence');
+});
+
+for(const field of ['review','regression','liquidEvidence'])test(`unreadable ${field} cannot leave the first formal batch replaceable`,async t=>{
+  const f=await setup(t),verification=await formalCandidate(t,f),counts={...f.state.counts};
+  let s=await f.step({action:'verify',verification:{...verification,[field]:path.join(f.root,'missing.json')}});
+  assert.equal(s.error.code,'ENOENT');assert.equal(s.active.formalAfter,await realpath(verification.after));
+  const replacement=await siteRun(t,{devices:['mobile'],offset:600,scores:{mobile:[90]}});
+  await proof(replacement,await sourceSnapshot(f.project),f.project);
+  s=await f.step({action:'verify',verification:{...verification,after:replacement.root}});
+  assert.match(s.error.message,/first valid formal candidate/);assert.deepEqual(s.counts,counts);
+  s=await f.step({action:'verify',verification});
+  assert.equal(s.error,undefined);assert.equal(s.status,'improved-below-target');assert.deepEqual(s.counts,counts);
+});
+
+test('formal batch bytes remain fixed after a failed review read',async t=>{
+  const f=await setup(t),verification=await formalCandidate(t,f);
+  await f.step({action:'verify',verification:{...verification,review:path.join(f.root,'missing.json')}});
+  const manifest=await read(path.join(verification.after,'run.json'));
+  const reportFile=path.join(verification.after,manifest.groups[0].reports[0]),report=await read(reportFile);
+  report.categories.performance.score=1;await writeFile(reportFile,JSON.stringify(report));
+  const s=await f.step({action:'verify',verification});
+  assert.match(s.error.message,/Previously recorded measurement evidence changed/);assert.equal(s.retained.length,0);
+});
+
+test('new mechanism rejects old candidate evidence without poisoning its formal batch or inheriting reviews',async t=>{
+  const f=await setup(t),old=await formalCandidate(t,f);
+  await f.step({action:'verify',verification:{after:old.after}});
+  await f.step({action:'rollback'});await f.prepare('function heavy(){ return 3; }','new-mechanism');
+  assert.equal(f.state.active.formalAfter,undefined);assert.equal(f.state.active.interactionEvidence,undefined);assert.equal(f.state.active.liquidEvidence,undefined);
+  await f.step({action:'apply',reviewedPlanHash:f.state.active.planHash});await f.experiment({score:90,tbt:100});
+  let s=await f.step({action:'verify',verification:old});
+  assert.equal(s.status,'formal-validation-required');assert.equal(s.active.formalAfter,undefined);assert.equal(s.retained.length,0);
+  const after=await siteRun(t,{devices:['mobile'],offset:600,scores:{mobile:[90]}});await proof(after,await sourceSnapshot(f.project),f.project);
+  s=await f.step({action:'verify',verification:{after:after.root,regression:old.regression,review:old.review}});
+  assert.equal(s.active.formalAfter,await realpath(after.root));assert.equal(s.retained.length,0);
+  const checks=(await read(s.verification)).checks;
+  assert.equal(checks.find(c=>c.id==='content-and-visual-review').pass,false);assert.equal(checks.find(c=>c.id==='functional-regression').pass,false);
+  s=await f.step({action:'verify',verification:{after:after.root,regression:regressionForRun(after),review:{...old.review,sourceHash:s.active.sourceHash}}});
+  assert.equal(s.status,'optimization-accepted',JSON.stringify(s.error));assert.equal(s.counts.rounds,2);assert.equal(s.counts.attempted,12);
+});
+
+test('first verify resource budget survives missing files, omission and attempts to loosen it',async t=>{
+  const f=await setup(t),verification=await formalCandidate(t,f),budget={maxRequests:20};
+  let s=await f.step({action:'verify',verification:{...verification,budget,review:path.join(f.root,'missing.json')}});
+  assert.deepEqual(s.verificationBudget,budget);assert.equal(s.error.code,'ENOENT');
+  s=await f.step({action:'verify',verification:{...verification,budget:{maxRequests:200}}});
+  assert.match(s.error.message,/budget is fixed/);
+  s=await f.step({action:'verify',verification});
+  assert.equal(s.status,'formal-validation-required');assert.equal(s.retained.length,0);
+  assert.equal((await read(s.verification)).outcome,'invalid-evidence'); // Missing resource rows are not free resources.
+  assert.deepEqual((await readImprovementSession(path.join(s.output,'session.json'))).verificationBudget,budget);
+});
+test('a missing navigation directory cannot discard the resource budget supplied with verification',async t=>{
+  const f=await setup(t),verification=await formalCandidate(t,f),budget={maxRequests:20},counts={...f.state.counts};
+  let s=await f.step({action:'verify',verification:{...verification,after:path.join(f.root,'missing-navigation'),budget}});
+  assert.equal(s.error.code,'ENOENT');assert.deepEqual(s.verificationBudget,budget);assert.deepEqual(s.counts,counts);
+  s=await f.step({action:'verify',verification:{...verification,budget:{maxRequests:200}}});assert.match(s.error.message,/budget is fixed/);
+  s=await f.step({action:'verify',verification});assert.equal(s.retained.length,0);assert.equal((await read(s.verification)).outcome,'invalid-evidence');
+  assert.deepEqual(s.verificationBudget,budget);assert.deepEqual(s.counts,counts);
+});
+
+test('verification payload cannot override approval, goals or persistent execution counters',async t=>{
+  const f=await setup(t),verification=await formalCandidate(t,f),counts={...f.state.counts},budget={...f.state.budget};
+  for(const extra of [{reviewedPlanHash:'approved'},{counts:{attempted:0,failed:0,rounds:0}},{goal:{kind:'score'}},{budget:{maxAttempts:9999}}]) {
+    const s=await f.step({action:'verify',verification:{...verification,...extra}});
+    assert.ok(s.error);assert.equal(s.retained.length,0);assert.deepEqual(s.counts,counts);assert.deepEqual(s.budget,budget);
+  }
+  const s=await f.step({action:'verify',verification});assert.equal(s.status,'improved-below-target');
+});
+
+test('session descendants cannot drop inherited evidence locks or resource budgets even with a recalculated own hash',async t=>{
+  const f=await setup(t),verification=await formalCandidate(t,f);
+  await f.step({action:'verify',verification:{after:verification.after,budget:{maxRequests:20}}});
+  const child=await f.step({action:'verify',verification:{after:verification.after}}),file=path.join(child.output,'session.json');
+  for(const mutate of [s=>{s.evidenceRuns={};},s=>{delete s.verificationBudget;},s=>{delete s.active.formalAfter;},s=>{s.active.patchEvidenceHash='rewritten';},s=>{s.counts.attempted=0;}]) {
+    const changed=structuredClone(child);mutate(changed);changed.sessionHash=hashSession(changed);
+    await writeFile(file,JSON.stringify(changed));
+    await assert.rejects(readImprovementSession(file),/Broken session history or reset budget/);
+  }
+  await writeFile(file,JSON.stringify(child));assert.equal((await readImprovementSession(file)).sessionHash,child.sessionHash);
 });

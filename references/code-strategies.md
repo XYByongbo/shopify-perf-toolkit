@@ -23,7 +23,7 @@ node scripts/perfkit.mjs rollback --project /absolute/theme --plan /absolute/run
 
 ## 支持范围
 
-当前通用策略共 19 项。P0 的 `liquid-image-tag-loading`、`liquid-picture-pair`、`liquid-hoist-head-resource`、`liquid-cache-metafield`、`css-lcp-reveal` 见 [P0 策略](shopify-performance-rules.md#五项新增补丁策略)。P1 新增 `liquid-dedupe-resource-hint`、`liquid-critical-css-sync`、`js-passive-listener`、`css-transition-properties`，详见 [P1 检查与优化](shopify-performance-rules.md#p1-检查与优化)。运行事实不能由源码推断，这些规则的待审任务放在 `analyze-code.reviewTasks`，与结构可转换的 `candidates` 分开；待填 recipe 不等于已通过结构或运行验证。
+当前通用策略共 21 项。P0 的 `liquid-image-tag-loading`、`liquid-picture-pair`、`liquid-hoist-head-resource`、`liquid-cache-metafield`、`css-lcp-reveal` 见 [P0 策略](shopify-performance-rules.md#五项新增补丁策略)。P1 新增 `liquid-dedupe-resource-hint`、`liquid-critical-css-sync`、`js-passive-listener`、`css-transition-properties`，详见 [P1 检查与优化](shopify-performance-rules.md#p1-检查与优化)。运行事实不能由源码推断，这些规则的待审任务放在 `analyze-code.reviewTasks`，与结构可转换的 `candidates` 分开；待填 recipe 不等于已通过结构或运行验证。
 
 | kind | 实际修改 | 参数与必要审阅 |
 | --- | --- | --- |
@@ -92,3 +92,5 @@ node scripts/perfkit.mjs rollback --project /absolute/theme --plan /absolute/run
 Liquid 使用 Shopify 官方 parser 定位。循环缓存拒绝局部循环变量输入、动态 lookup、写入依赖、共享作用域及 break/continue；空集合不新增赋值，保留现有变量。字体 fallback 定义须在相应 font-family 栈里实际引用（同文件组合改动用 reviewed-replacement），不能只增加无用 CSS。
 
 任意单体脚本、动态 Liquid、特殊 CSS 级联不自动重写。CSS 拆分和组件 activate/destroy 加载器见 [执行引擎](performance-engine.md)，这些计划同样需要多页面/断点/状态及首个交互证据。
+
+0.14.0 新增 `liquid-font-display` 与 `liquid-rehost-resource`，参数、证据与正式验收要求见 [功能升级](toolkit-evolution.md)。资源替换不等于内容恢复或已取得性能收益。

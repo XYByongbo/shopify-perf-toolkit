@@ -64,7 +64,7 @@ batch 使用 `officialChecks: true` 或 `officialChecks: {"timeoutMs":120000}` �
 
 ## 五项新增补丁策略
 
-`code-strategies` 现在列出 19 项通用代码策略。以下五项 P0 策略通过原 `plan-site → apply → rollback` 生成与重算，绑定当前 `sourceHash`。所有审阅证据必须由实际检查得出，工具不自动填 true。`analyze-code.reviewTasks` 提供源码偏移和待填 recipe；缺少页面证据或参数的模板不能直接应用。
+`code-strategies` 现在列出 21 项通用代码策略。以下五项 P0 策略通过原 `plan-site → apply → rollback` 生成与重算，绑定当前 `sourceHash`。所有审阅证据必须由实际检查得出，工具不自动填 true。`analyze-code.reviewTasks` 提供源码偏移和待填 recipe；缺少页面证据或参数的模板不能直接应用。
 
 | kind | 参数 | 必需审阅 / 拒绝边界 |
 | --- | --- | --- |
@@ -136,3 +136,5 @@ P1 runtime 使用 `initial.delivery.version:1`：最多 500 个 link、100 个�
 四项策略的生成结果另在完整隔离主题中使用 Shopify CLI 4.9.4 / Theme Check 3.26.1 的默认完整配置复核：没有新增 error/warning，保留原有 AssetPreload 和 RemoteAsset 各一条 warning，未通过抑制规则清零。项目 60/5 结构预检完整、无告警。生成后 layout/JS/CSS 非空物理行分别为 14/3/6，无新增 Liquid 嵌套、无新 helper，重复 hint 减为一项；这只是支持模式的主题代码预算与语法验证，不是实际商家主题或性能分数验收。
 
 依据：[官方性能总览](https://shopify.dev/docs/storefronts/themes/best-practices/performance)、[Theme Check](https://shopify.dev/docs/storefronts/themes/best-practices/performance/theme-check-tool)、[picture](https://shopify.dev/docs/storefronts/themes/best-practices/performance/use-picture-for-art-directed-heroes)、[head 顺序与实站验证](https://shopify.dev/docs/storefronts/themes/best-practices/performance/load-resources-before-content-for-header)、[metafield](https://shopify.dev/docs/storefronts/themes/best-practices/performance/move-metafield-access-outside-loops)、[variants](https://shopify.dev/docs/storefronts/themes/best-practices/performance/avoid-variant-overfetching)、[LCP 动画](https://shopify.dev/docs/storefronts/themes/best-practices/performance/dont-hide-lcp-image-behind-animations)。对照日期：2026-10-20。
+
+0.14.0 新增 `liquid-font-display` 与 `liquid-rehost-resource`，参数、证据与正式验收要求见 [功能升级](toolkit-evolution.md)。资源替换不等于内容恢复或已取得性能收益。

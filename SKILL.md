@@ -5,11 +5,15 @@ description: Diagnose and optimize Shopify Liquid themes at site, image, or comp
 
 # Shopify 整站性能优化
 
+当前发行版本：0.14.0（2026-11-02）。发行 ZIP 使用显式 --out 保存到主题/工具仓库之外；解压后运行 npm ci --ignore-scripts。
+
 以本文件目录为工具根，执行 scripts/perfkit.mjs，主题由绝对 --project 指定。Node 22.19+、Python 3.9+；代码策略与真实 Lighthouse 先在工具目录 npm ci --ignore-scripts。不要把工具依赖安装到主题。
 
 默认交付目标是**修改影响性能的主题代码并实测分数变化**。用户要求优化时，检查和报告是定位手段，不是最终交付；先复用已有有效证据，定位 JS/CSS/Liquid 的具体执行或加载路径，完成可逆补丁，再测受影响页面。用户仅要求检查/复验时保持只读。没有安全、可验证的候选时给出具体代码、受限原因和已排除方案，不能用另一轮同源码全站测量代替修改。
 
 代码优化默认不下载、复制、转码或生成远程图片/视频素材。图片加载优先级、响应式属性和媒体生命周期也属于代码优化，先用源码、已有 LHR/DOM/网络记录定位。只有明确的素材处理任务或现有证据无法解决的特定素材问题才取单个原件；不批量镜像主题素材。Lighthouse 的正常图片请求和必要截图不同于素材下载；不能拦图片、暖缓存或删内容来制造高分。
+
+新增执行入口与边界见 [主题性能执行流程](references/theme-performance-workflow.md)。先确认内容资源正确，再按源码和实际成本生成候选；失效图片修复不计性能收益，重复样式、Liquid 转发及动态资产必须走独立验证。
 
 ## 默认执行纪律
 
@@ -57,6 +61,8 @@ Shopify 官方性能规则使用 [官方性能检查与 P0/P1 规则](references
 
 图片 LCP、图片/应用布局偏移、Liquid 热点或第三方 loader 任务读取 [四类实测闭环](references/domain-optimization.md)。使用 profile-domain 的前后部署校验建立源节点关联，plan-domain 生成实际候选；improve prepare 的 domain 配置和 method=next 可选择未测试实现。Liquid 另需 experiment-liquid 原始服务端配对证据，App 另需脚本成功加载和业务交互断言。缺少这些证据保留调查状态，不用填写 reviewed 标志绕过门禁。
 
+需要连续执行已审阅的不同机制时使用 [恢复执行器](references/recovery-cycle.md) 的 `improve-cycle`；它复用会话诊断、生成器、预算与验收，不自动填写审阅证据。显式 sync 适配器仅由调用方提供并限定到未发布预览，返回成功仍须独立核验源码；collect 固定首次正式样本，缺证据用 verify 补齐，不重复测分。
+
 低分、无收益或假设未确认时使用 [可恢复优化会话](references/improvement-workflow.md)，不能只重复规则检查或换一批测分。`improve start` 读取已核验基线与当前 profile，按页面/设备的实测丢分提出调查方向；`prepare` 接入现有生成器或经过审阅的替换，`apply` 实际应用，显式同步后 `experiment` 真实测量。无效证据先修复；有效但无收益的补丁自动回滚并重新诊断，选择不同机制或不同假设，保留完整历史和预算。读取 [官方来源与实现映射](references/shopify-recovery-sources.md)，根据问题定点复核当前官方文档。
 
 有收益但低于评分门槛，不能直接失败结案或声称通过。会话 `verify` 仅在除原分数门槛外的正式验收全部通过、累计收益成立时，标为 `improved-below-target` 并保留为中间基线；采集新源码的运行证据后 `refresh` 继续。最终仍需原门槛、无退步、身份、功能及内容视觉审阅。没有可执行候选时按 recovery 的调查任务补足证据，复杂实现由操作者准备，不编造源码映射、效果或审阅标志。CLI 不替代模型推理，不自动发布或移除业务功能。
@@ -98,3 +104,11 @@ JS/CSS/Liquid 先用 code-strategies 查看实际支持范围，再对瓶颈文�
 有回归则修复或 rollback，文件漂移时保留冲突。交付变更、计划/receipt、实测报告、功能画面证据、未测项和补丁保留状态。不能把合成样本、字节下降、单次高分或工具测试通过写成真实主题达标，更不能承诺所有主题 100% 达标。
 
 工作表位于 assets/templates，配置示例位于 assets/examples。任务报告、验证记录、主题快照和回滚资料通过输出路径保存到工具目录之外的独立任务目录，工具目录只保留工具代码、测试、文档、模板与依赖。原单文件工作流见 [修改契约](references/changes.md)。
+
+## 报告经验驱动的工具升级
+
+使用 [功能升级流程](references/toolkit-evolution.md) 将外链、字体、生成代码和结构问题接入实际优化。`audit-performance` 的 intelligence 提供资源逐次采样、字体待审配方、归属和设置依赖；独立观察扫描不受主题禁用规则影响。比较历史报告时提供 --baseline；导入检查器配置用 --checks，显式归属用 --ownership。配置变化与源码变化分别解释，不把豁免、settings 减少或链接数量下降当成收益。生成器托管文件的归属数组可作为 recipe.ownership 传递到计划，必须匹配原始源码指纹。
+
+字体使用 liquid-font-display 保留字体身份，复核实际字形、换行、CLS 和冷暖加载。liquid-rehost-resource 仅生成显式等价资源 URL 替换；原始/候选 profile 的 hashResourceUrls 应包含对应图片/字体地址。正式验收 regression.resourceProfiles 提供完整前后部署绑定 profile 数组，每个页面/设备均需实际 GET 响应 SHA-256 和 MIME 一致。缺失证据不能通过。picture/srcset、动态资产、CORS 与复杂相对依赖仍按文档边界复核，不自动批量搬迁。
+
+复审接入：batch 可用 ownership（每项必须包含当前 sourceHash）和 performanceBaseline；diagnose-performance / audit-site 对应 --ownership / --performance-baseline。补丁准备重算归属上下文，共享文件仅被生成器引用时不视为生成器托管。optimize verify / improve collect formal 用 resourceProfiles 提供前后完整采样，采集前检查实际唯一节点、完成 GET、MIME、操作和精确源码差异，再将证据保存到 regression。直接 verify-optimization 继续从 regression.resourceProfiles 读取。资源替换现要求字面唯一 id；禁止通过无关请求或其他相同 URL 的节点提供等价/内容证据。

@@ -133,7 +133,8 @@ test('Apply rejects a rehashed generated plan with extra changes, and drift prev
 test('CLI exposes catalog, discovers strategies, generates, applies and rolls back without replacement text',async t=>{
   const project=await fixture(t),cli=path.resolve('scripts/perfkit.mjs');
   const run=(...args)=>{const r=spawnSync(process.execPath,[cli,...args],{encoding:'utf8'});assert.equal(r.status,0,r.stderr);return JSON.parse(r.stdout);};
-  const catalog=run('code-strategies','--format','full');assert.equal(catalog.strategies.length,19);
+  const catalog=run('code-strategies','--format','full');assert.equal(catalog.strategies.length,21);
+  assert.ok(catalog.strategies.some(s=>s.kind==='liquid-font-display'));assert.ok(catalog.strategies.some(s=>s.kind==='liquid-rehost-resource'));
   const discovery=run('analyze-code','--project',project,'--target','assets/main.js','--format','full');assert.equal(discovery.candidates.length,1);
   const recipe=path.join(project,'recipe.json'),plan=path.join(project,'plan.json');
   await fs.writeFile(recipe,JSON.stringify({schemaVersion:1,changes:[recipeItem(js,'assets/main.js','js-raf-listener')]}));

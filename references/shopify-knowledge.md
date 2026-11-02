@@ -2,7 +2,7 @@
 
 截至 2026-10-23，已实际获取官方性能目录的 70 篇专题，以及相关 Liquid API、Theme Check、CLI、App 与 Section Rendering 文档，共 161 个页面。范围是[主题性能目录](https://shopify.dev/docs/storefronts/themes/best-practices/performance)的递归子页、Theme Check 规则子页，以及明确列出的相关 API 和应用性能参考。不是 Shopify 全站镜像，也不声称覆盖所有隐藏、未链接或其他产品的性能页面。
 
-**文档覆盖与生成器覆盖分开计算。** 70 篇均有工具可读方法卡；其中 27 篇接入 35 个执行入口（同一底层变换可能有 site/domain 两种证据适配器，不能理解为 35 种完全不同算法）。其余是需要操作者编写实现的改写、测量流程或平台/外部项目范围，不能因为有文档就标记自动实现。查询分页、隐藏 DOM 与首屏整页 fetch 的 Section API 替换已有受限生成器；CSS 原生 subsetting、字体自托管、任意弹窗服务器延迟加载等仍需具体实现。
+**文档覆盖与生成器覆盖分开计算。** 70 篇均有工具可读方法卡；其中 29 篇接入 38 个执行入口（同一底层变换可能有 site/domain 两种证据适配器，不能理解为 35 种完全不同算法）。其余是需要操作者编写实现的改写、测量流程或平台/外部项目范围，不能因为有文档就标记自动实现。查询分页、隐藏 DOM 与首屏整页 fetch 的 Section API 替换已有受限生成器；CSS 原生 subsetting、字体自托管、任意弹窗服务器延迟加载等仍需具体实现。
 
 新增查询、隐藏 DOM 与 Section API 的配置和强制实测合同见 [三类优化闭环](extended-optimization.md)。
 

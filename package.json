@@ -1,6 +1,6 @@
 {
   "name": "shopify-perf-toolkit",
-  "version": "0.12.0",
+  "version": "0.14.0",
   "private": true,
   "type": "module",
   "description": "Whole-theme Shopify performance diagnosis, reviewed patches, rollback, real Lighthouse/PSI measurement and score acceptance",
@@ -31,7 +31,7 @@
     "test:site": "node scripts/validate_site_pipeline.mjs",
     "release": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/build_release.py",
     "test:execution": "node --test tests/execution.test.mjs tests/batch-integration.test.mjs tests/measure.test.mjs tests/site-verify.test.mjs tests/run-evidence.test.mjs tests/cli.test.mjs",
-    "test:browser": "PERF_KIT_BROWSER_TESTS=1 node --test --test-concurrency=1 tests/runtime-browser.test.mjs tests/demand-browser.test.mjs tests/performance-browser.test.mjs tests/p1-performance-browser.test.mjs tests/domain-browser.test.mjs tests/extended-browser.test.mjs tests/section-liquid-browser.test.mjs",
+    "test:browser": "PERF_KIT_BROWSER_TESTS=1 node --test --test-concurrency=1 tests/runtime-browser.test.mjs tests/demand-browser.test.mjs tests/performance-browser.test.mjs tests/p1-performance-browser.test.mjs tests/domain-browser.test.mjs tests/extended-browser.test.mjs tests/section-liquid-browser.test.mjs tests/theme-steps-browser.test.mjs tests/recovery-adaptive-browser.test.mjs tests/toolkit-evolution-browser.test.mjs",
     "test:shopify-p1": "node --test tests/p1-performance.test.mjs",
     "test:demand": "node --test tests/demand-engine.test.mjs",
     "test:demand-live": "node scripts/validate_demand_pipeline.mjs",
@@ -48,7 +48,12 @@
     "test:extended-live": "node scripts/validate_extended_pipeline.mjs",
     "test:section-liquid": "node --test tests/section-liquid.test.mjs",
     "test:section-liquid-browser": "PERF_KIT_BROWSER_TESTS=1 node --test --test-concurrency=1 tests/section-liquid-browser.test.mjs",
-    "test:section-liquid-live": "node scripts/validate_section_liquid.mjs"
+    "test:section-liquid-live": "node scripts/validate_section_liquid.mjs",
+    "test:theme-workflow": "node --test tests/theme-steps.test.mjs tests/liquid-assets.test.mjs tests/resource-repair.test.mjs tests/recovery-cost.test.mjs tests/improvement-session.test.mjs",
+    "test:theme-workflow-browser": "PERF_KIT_BROWSER_TESTS=1 node --test --test-concurrency=1 tests/theme-steps-browser.test.mjs",
+    "test:theme-workflow-live": "node scripts/validate_theme_workflow.mjs",
+    "test:recovery-cycle": "node --test tests/recovery-evidence.test.mjs tests/recovery-adaptive.test.mjs tests/formal-recovery.test.mjs tests/domain-engine.test.mjs tests/architecture-boundaries.test.mjs tests/performance-upgrade.test.mjs tests/resource-budget.test.mjs tests/formal-collection-evidence.test.mjs tests/recovery-cycle.test.mjs tests/improvement-session.test.mjs",
+    "test:recovery-cycle-live": "node scripts/validate_recovery_cycle.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",

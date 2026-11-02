@@ -21,7 +21,8 @@ test('all discovered performance articles have reviewed cards and real executor 
   const discovered=sources.documents.find(d=>d.url===performanceRoot).links.filter(x=>x.startsWith(performanceRoot+'/'));
   assert.deepEqual(new Set(discovered),new Set(catalog.methods.map(m=>m.source.url)));
   for(const m of catalog.methods)for(const e of m.executors){assert.ok(e.boundary);assert.ok(e.parameters);assert.ok(e.evidenceRequired.includes('sourceHash'));}
-  for(const id of ['self-host-web-fonts','stylesheet-subsetting','reduce-stylesheet-count'])assert.equal(catalog.methods.find(m=>m.id===id).executors.length,0);
+  for(const id of ['self-host-web-fonts','stylesheet-subsetting'])assert.equal(catalog.methods.find(m=>m.id===id).executors.length,0);
+  assert.ok(catalog.methods.find(m=>m.id==='reduce-stylesheet-count').executors.some(e=>e.id==='domain:stylesheet-once'));
   assert.equal(catalog.methods.find(m=>m.id==='finding-worst-offenders').status,'measurement-workflow');
   assert.equal(catalog.methods.find(m=>m.id==='avoid-request-proxies').status,'platform-workflow');
   const ssr=catalog.methods.find(m=>m.id==='render-essential-content-server-side');
@@ -35,6 +36,15 @@ test('changed, missing and newly discovered official pages remain review-require
   s.documents.push({url:performanceRoot+'/new-method',contentHash:'new'});
   const c=officialMethodCatalog({sources:s});assert.equal(c.status,'review-required');assert.equal(c.coverage.sourceReviewRequired,2);
   assert.deepEqual(c.coverage.uncovered,[performanceRoot+'/new-method']);
+});
+
+test('foundational render/paginate reference drift blocks affected generators even when the performance article is unchanged',async()=>{
+  const sources=await readShopifySources();sources.documents.find(d=>d.url==='https://shopify.dev/docs/api/liquid/tags/render').contentHash='changed';
+  const catalog=officialMethodCatalog({sources});
+  for(const id of ['avoid-nested-renders','reduce-stylesheet-count','limit-product-queries-with-pagination']){
+    const method=catalog.methods.find(m=>m.id===id);assert.equal(method.status,'source-review-required');assert.ok(method.referenceDependencies.some(d=>d.status==='changed-needs-review'));
+  }
+  assert.equal(catalog.methods.find(m=>m.id==='never-lazy-load-lcp-image').source.status,'reviewed');
 });
 
 test('bounded refresh discovers topics, deduplicates links and saves metadata without full text',async t=>{

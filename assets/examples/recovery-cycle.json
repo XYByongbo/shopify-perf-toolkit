@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "previous": "/absolute/diagnosed-session/session.json",
+  "options": [
+    {
+      "id": "critical-css-for-measured-resource",
+      "prepare": {
+        "candidateId": "REPLACE_WITH_CURRENT_DIAGNOSIS_CANDIDATE_ID",
+        "method": "critical-css",
+        "rationale": "Replace the measured blocking stylesheet path while retaining all declared states and the complete stylesheet fallback.",
+        "demand": "/absolute/reviewed-critical-css-config.json"
+      },
+      "reviewedPlan": "/absolute/reviewed-critical-css-plan.json",
+      "experiment": "/absolute/independent-preview-experiment.json",
+      "formal": "/absolute/formal-measurement-and-regression.json"
+    }
+  ]
+}

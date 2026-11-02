@@ -107,7 +107,9 @@ for(const method of ['section-liquid-initial','section-liquid-inline'])test(`rea
   ]) {
     server.setPolicy(policy);
     const blocked=await runScenarios({config:{schemaVersion:1,project:projects[2],expectedThemeId:'2',url:url('2'),settleMs:100,timeoutMs:700,serverRenderedSelectors:['#hero'],viewports:[{name:'mobile',width:390,height:844}],scenarios:[{name:'blocked-inline',steps}]},output:path.join(root,'csp-'+Math.random().toString(16).slice(2))});
-    assert.equal(blocked.outcome,'failed');assert.equal(checkExtendedBehavior(plan,blocked,{candidate:true}),false);
+    // Missing CSP-blocked behavior must never pass. A bounded artifact capture may
+    // additionally constrain the negative run; the actual CSP/controller proof is mandatory below.
+    assert.ok(['failed','blocked'].includes(blocked.outcome));assert.equal(checkExtendedBehavior(plan,blocked,{candidate:true}),false);
     assert.ok(blocked.runs[0].cspViolations.some(v=>v.disposition==='enforce'&&v.blockedURI==='inline'));
     assert.equal(blocked.runs[0].initialControllers.length,0);
   }

@@ -223,10 +223,18 @@
     "topic": "liquid",
     "action": "只内联热点中可证明等价的简单嵌套调用，保留复杂组件边界。",
     "validate": "render 隔离、参数、include 副作用、schema 与重复实例。",
-    "executors": [],
+    "executors": [
+      "domain:liquid-collapse-forwarder"
+    ],
     "reviewedSourceHash": "c6a83cbfc0466c79bf2dce0d6f02c3f071c01a6f2bec6a9efe23f7658039b54d",
     "evidenceDomain": "liquid-server",
-    "implementation": "operator-authored-replacement; no automatic generator for this method"
+    "implementation": "operator-authored-replacement; no automatic generator for this method",
+    "referenceDependencies": [
+      {
+        "url": "https://shopify.dev/docs/api/liquid/tags/render",
+        "reviewedSourceHash": "5efa4a437fd0e867cef6760668cd30f6d6c92560f344235762a9f1a0d6c8f981"
+      }
+    ]
   },
   {
     "id": "avoid-variant-overfetching",
@@ -245,11 +253,22 @@
     "validate": "原有页码、数量、forloop、固定轮播及数据查询。",
     "executors": [
       "domain:query-limit",
-      "domain:query-paginate"
+      "domain:query-paginate",
+      "domain:query-limit-render"
     ],
     "reviewedSourceHash": "b0cd2191761373d0dff264a8c9b6fd9460a70759ddb441eeaa79ba99ae329e90",
     "evidenceDomain": "liquid-server",
-    "supportedSubset": "Preserve a capped products query or convert explicit (current_page - 1) * page-size manual offset pagination; no pagination of fixed carousels."
+    "supportedSubset": "Preserve a capped products query or convert explicit (current_page - 1) * page-size manual offset pagination; no pagination of fixed carousels.",
+    "referenceDependencies": [
+      {
+        "url": "https://shopify.dev/docs/api/liquid/tags/paginate",
+        "reviewedSourceHash": "58b2affea73a335d43139640aaba07f78eb2c2eb69e222ead100ff4ec2cd8264"
+      },
+      {
+        "url": "https://shopify.dev/docs/api/liquid/tags/render",
+        "reviewedSourceHash": "5efa4a437fd0e867cef6760668cd30f6d6c92560f344235762a9f1a0d6c8f981"
+      }
+    ]
   },
   {
     "id": "limit-pagination-depth",
@@ -374,10 +393,18 @@
     "topic": "css",
     "action": "在依赖和级联明确时合并相关样式或消除重复加载。",
     "validate": "跨模板、首个实例、动态 section、优先级、样式表和 DOM 消费者。",
-    "executors": [],
+    "executors": [
+      "domain:stylesheet-once"
+    ],
     "reviewedSourceHash": "8f9791569af2b9713367e7d3fdfc9f5383b02994c7d6914b0d23a320f3391446",
     "evidenceDomain": "browser",
-    "implementation": "operator-authored-replacement; no automatic generator for this method"
+    "implementation": "operator-authored-replacement; no automatic generator for this method",
+    "referenceDependencies": [
+      {
+        "url": "https://shopify.dev/docs/api/liquid/tags/render",
+        "reviewedSourceHash": "5efa4a437fd0e867cef6760668cd30f6d6c92560f344235762a9f1a0d6c8f981"
+      }
+    ]
   },
   {
     "id": "load-critical-css-synchronously",

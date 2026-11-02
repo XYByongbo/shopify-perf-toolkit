@@ -6,6 +6,8 @@
 
 官方方法执行与来源版本固定见 [官方知识库](shopify-knowledge.md)。
 
+可执行的多轮入口、预览适配器与正式采集见 [恢复执行器](recovery-cycle.md)。`improve-cycle` 会生成并核对已审阅方案，实测失败后自动转到未测试机制；沿用原会话与全部门禁。
+
 ## 会话步骤
 
 每一步使用新的输出目录，除 start 外传入上一步的 `session.json`。输出必须位于主题目录之外。所有配置使用 `schemaVersion:1`。
@@ -23,6 +25,8 @@ node scripts/perfkit.mjs improve --config /absolute/experiment-step.json --out /
 | refresh | previous、可选 run 和新采集的 profiles 等诊断输入；重新分析当前基线，保留全部历史和预算 | ready-for-plan / investigation-required |
 | prepare | candidateId、method、rationale；recipe、demand、split、plan、domain、official 六选一；生成或验证实际补丁和 diff | review-required |
 | apply | previous、reviewedPlanHash；校验整份计划和当前源码后实际写入 | awaiting-preview-sync |
+| sync | previous、preview；显式适配器同步或直接核验预览源码 | awaiting-preview-sync，成功后 previewSyncRequired=false |
+| collect | previous、formal；预算内采集正式矩阵及回归并执行原 verify；不允许重复采集 | 原正式验收结果或待修复证据 |
 | experiment | previous、experiment 配置或配置文件路径；运行两组已准备预览的交替测量、checkpoint 与目标收益验证 | formal-validation-required，或回滚后重新诊断 |
 | verify | previous、verification 配置或路径；重算正式验收及相对最初基线的累计收益 | optimization-accepted / improved-below-target / 待补证据 |
 | rollback | previous；回滚当前 active 补丁，失败时保留冲突回执 | 重新诊断 / rollback-conflict |
@@ -51,7 +55,7 @@ prepared-experiment.json 沿用 [patch-experiment.json](../assets/examples/patch
 {"schemaVersion":1,"action":"verify","previous":"/absolute/step-03/session.json","verification":"/absolute/formal-verification.json"}
 ```
 
-verification 的 plan、expectedSourceHash、goal、patchEvidence 由会话固定，before 默认为当前基线；显式提供其他 before 时先执行同源码正式基线校验，其余沿用 verify-optimization 契约。本命令重算已有正式证据，不代替外部采集。缺失内容视觉审阅仍不能通过。
+verification 仅接受 after、before、regression、review、interactionEvidence、liquidEvidence、budget。plan、expectedSourceHash、goal、patchEvidence 由会话固定，不接受调用方覆盖；before 默认为当前基线，显式提供其他 before 时先执行同源码正式基线校验。regression/review 可提供绝对 JSON 文件路径。首次提供的资源 budget 即固定并跨方案继承；省略不取消，执行预算与计数不能通过 verification 重设。本命令重算已有正式证据，不代替外部采集。缺失内容视觉审阅仍不能通过；缺失审阅文件也不能解除已有效导航、交互或 Liquid 样本的固定。
 
 ## 无收益之后做什么
 

@@ -1,9 +1,9 @@
 """Analytical report: reference structure, evidence-led Chinese narrative, separate index."""
-import os,json
+import os
 from pathlib import Path
 from collections import Counter
 from xml.sax.saxutils import escape
-from reportlab.platypus import SimpleDocTemplate,Paragraph,Spacer,Table,TableStyle,PageBreak,KeepTogether
+from reportlab.platypus import SimpleDocTemplate,Paragraph,Spacer,Table,TableStyle,PageBreak
 from reportlab.lib import colors
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.pdfbase import pdfmetrics
@@ -133,6 +133,11 @@ def render_analytical(data,output,font=None):
     groups={}
     for f in findings:groups.setdefault((f['origin'],f['ruleId']),[]).append(f)
     table([['来源/规则','数','代表位置/问题编号']]+[[ORIGIN.get(o,o)+' / '+r,len(g),f"{g[0]['file']}:{g[0]['line']}\n{g[0]['id']}"]for (o,r),g in sorted(groups.items())],[215,35,225])
+    intelligence=q.get('intelligence',{})
+    if intelligence:
+        text('归属、结构与豁免观察',sub)
+        table([['文件','归属状态','生成器线索']]+[[r['file'],r['status'],' / '.join(r['generators'])] for r in intelligence.get('ownership',[]) if r.get('generators')],[240,110,125])
+        text('结构分析保留动态引用和间接引用，未授权自动删除设置。规则豁免不代表问题修复。完整设置依赖与豁免证据见 report.json。')
     text('误报校正原则',sub)
     for s in ['structured_data 是原生过滤器；不能按示例把它归为 App 自定义过滤器。','content_for blocks 需要支持它的解析器；不能禁用无关规则代替修复误报。','图片缺尺寸需核实 CSS 是否已预留空间；不能直接宣称 CLS 已恶化。','script 加 defer/async 需要依赖和首个交互验证；不能全部统一延迟。','过时过滤器与深层嵌套不是自动 P0；现代分页阈值以实际检查器配置为准。']:text(s)
     text('规范来源',sub)

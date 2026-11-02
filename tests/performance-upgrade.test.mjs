@@ -201,12 +201,13 @@ test('verify workflow shares attempt budget, measures exploration then formal ca
     f.manifest.config.deployment=deployment;await saveManifest(f);
   };
   await bind(baseline,snapshotBefore);
-  const calls=[]; let regression;
+  const calls=[]; let regression,verifications=0;
   const measurement={schemaVersion:1,engine:'lighthouse',pages:baseline.manifest.config.pages,devices:['mobile'],runs:5,deployment:{project,store:'fixture.myshopify.com',themeId:'123'}};
   const config={schemaVersion:1,action:'verify',project,plan:planFile,reviewedPlanHash:plan.planHash,before:baseline.root,measurement,
     scenarios:{schemaVersion:1,url:measurement.pages[0].url,viewports:[{name:'mobile',width:390,height:844}],scenarios:[{name:'content',steps:[{action:'assert-text',selector:'main',text:'Fixture'}]}]},
     review:{sourceHash:snapshotAfter.hash,contentPreserved:true,visualsPreserved:true,summary:'Synthetic reviewer evidence.'}};
   const result=await runOptimization({config,output:path.join(root,'verify'),dependencies:{
+    verifyOptimization:async input=>{verifications++;return verifyOptimization(input);},
     measureSite:async({config:c,output})=>{
       calls.push(c);const f=await siteRun(t,{devices:['mobile'],reports:c.runs,offset:c.purpose==='exploration'?10:20,scores:{mobile:[85]}});
       f.manifest.config={...c};await bind(f,snapshotAfter);regression=regressionForRun(f);await cp(f.root,output,{recursive:true});return{status:'complete',counts:{attempted:c.runs,failed:0}};
@@ -214,7 +215,7 @@ test('verify workflow shares attempt budget, measures exploration then formal ca
     verifyDeployment:async()=>regression.remote
   }});
   assert.equal(result.status,'optimization-accepted',JSON.stringify(result.error));assert.deepEqual(calls.map(c=>c.purpose),['exploration','acceptance']);
-  assert.equal(calls[1].budget.maxAttempts,calls[0].budget.maxAttempts-3);assert.equal(result.budget.counts.attempted,8);
+  assert.equal(calls[1].budget.maxAttempts,calls[0].budget.maxAttempts-3);assert.equal(result.budget.counts.attempted,8);assert.equal(verifications,1);
   for (const scenarios of [{...config.scenarios,project:'/wrong/project'}, {...config.scenarios,expectedThemeId:'999'}]) {
     const denied=await runOptimization({config:{...config,scenarios},output:path.join(root,`mismatch-${scenarios.expectedThemeId??'project'}`),dependencies:{
       measureSite:async()=>assert.fail('Mismatched regression must stop before measurement') }});

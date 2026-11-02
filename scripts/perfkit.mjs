@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -13,6 +13,7 @@ const specs = {
   'shopify-methods':['sources','topic','out'],
   'plan-official':['project','config','diagnosis','profiles','sources','out'],
   improve: ['config','out'],
+  'improve-cycle': ['config','out'],
   doctor: [],
   'import-field': ['input','out'],
   'audit-stylesheets': ['project','out'],
@@ -21,7 +22,7 @@ const specs = {
   'verify-interactions': ['config','out'],
   'ci-check': ['config','out'],
   'source-graph': ['project', 'out'],
-  'diagnose-performance': ['project', 'profiles', 'run', 'liquid', 'field', 'owners', 'goal', 'limit', 'out'],
+  'diagnose-performance': ['project', 'profiles', 'run', 'liquid', 'field', 'owners', 'goal', 'limit', 'checks', 'ownership', 'performance-baseline', 'out'],
   'plan-demand': ['project', 'config', 'diagnosis', 'profiles', 'out'],
   'plan-domain': ['project', 'config', 'diagnosis', 'profiles', 'out'],
   'profile-domain': ['config', 'out'],
@@ -43,9 +44,11 @@ const specs = {
   scan: ['project', 'pages', 'out'],
   precheck: ['project', 'config', 'out'],
   'check-performance': ['project', 'config', 'out'],
-  'audit-performance': ['project', 'profiles', 'out'],
+  'audit-performance': ['project', 'profiles', 'baseline', 'checks', 'ownership', 'out'],
   'import-check': ['project', 'input', 'metadata', 'baseline', 'out'],
   'audit-resources': ['project', 'probe', 'out'],
+  'plan-resource-repair':['project','config','profile','out'],
+  'verify-resource-repair':['config','out'],
   'audit-quality': ['project', 'checks', 'out'],
   map: ['project', 'target', 'capture', 'out'],
   scenarios: ['config', 'out'],
@@ -53,7 +56,7 @@ const specs = {
   batch: ['config','out'],
   summarize: ['run','out'],
   'evaluate-iteration': ['config','out'],
-  'audit-site': ['project', 'run', 'checks', 'official', 'resources', 'runtime', 'precheck', 'out'],
+  'audit-site': ['project', 'run', 'checks', 'official', 'resources', 'runtime', 'precheck', 'ownership', 'performance-baseline', 'out'],
   'plan-site': ['project', 'recipe', 'out'],
   'verify-site': ['before', 'after', 'thresholds', 'out'],
   inspect: ['project', 'target', 'capture', 'out'],
@@ -72,6 +75,7 @@ const help = `Shopify Perf Toolkit ${version} (Node 22+, offline core)
   shopify-methods [--sources <refreshed-sources.json>] [--topic <images|liquid|css|fonts|javascript|apps|delivery|mobile|measurement|platform|external>] [--out <methods.json>]
   plan-official --project <theme> --config <official-method.json> --diagnosis <diagnosis.json> [--profiles <profile-paths.json>] [--sources <sources.json>] --out <plan.json>
   improve --config <start-or-resume-step.json> --out <NEW-directory>
+  improve-cycle --config <reviewed-recovery-options.json> --out <NEW-directory>
   doctor
   import-field --input <normalized-export.json|summary.csv|crux.json> --out <field.json>
   audit-stylesheets --project <theme> --out <stylesheet-audit.json>
@@ -80,7 +84,7 @@ const help = `Shopify Perf Toolkit ${version} (Node 22+, offline core)
   verify-interactions --config <interaction-comparison.json> --out <interaction-gain.json>
   ci-check --config <explicit-baseline-and-candidate.json> --out <ci.json>
   source-graph --project <theme> --out <graph.json>
-  diagnose-performance --project <theme> --profiles <profile-paths.json> [--run <run>] [--liquid <profile.json>] [--field <field.json>] [--owners <owners.json>] [--goal <goal.json>] [--limit <1..20>] --out <diagnosis.json>
+  diagnose-performance --project <theme> --profiles <profile-paths.json> [--run <run>] [--liquid <profile.json>] [--field <field.json>] [--owners <owners.json>] [--goal <goal.json>] [--checks <check-import.json>] [--ownership <ownership.json>] [--performance-baseline <performance.json>] [--limit <1..20>] --out <diagnosis.json>
   plan-demand --project <theme> --config <demand.json> --diagnosis <diagnosis.json> [--profiles <profile-paths.json>] --out <plan.json>
   plan-domain --project <theme> --config <domain-plan.json> --diagnosis <diagnosis.json> [--profiles <profile-paths.json>] --out <plan.json>
   profile-domain --config <domain-profile.json> --out <new-directory>
@@ -105,12 +109,14 @@ const help = `Shopify Perf Toolkit ${version} (Node 22+, offline core)
   evaluate-iteration --config <history.json> [--out <decision.json>]
   precheck --project <theme> [--config <precheck-options.json>] --out <precheck.json>
   check-performance --project <theme> [--config <official-options.json>] --out <official-checks.json>
-  audit-performance --project <theme> [--profiles <runtime-profile-array.json>] --out <performance.json>
+  audit-performance --project <theme> [--profiles <runtime-profile-array.json>] [--baseline <performance.json>] [--checks <check-import.json>] [--ownership <ownership.json>] --out <performance.json>
   import-check --project <theme> --input <theme-check.json> [--metadata <scan-contract.json>] [--baseline <prior-import.json>] --out <check-import.json>
   audit-quality --project <theme> [--checks <check-import.json>] --out <quality.json>
   audit-resources --project <theme> [--probe true|false] --out <resource-audit.json>
+  plan-resource-repair --project <theme> --config <approved-image-repair.json> --profile <deployment-bound-profile.json> --out <plan.json>
+  verify-resource-repair --config <plan-before-after-profiles.json> --out <repair-verification.json>
   measure --config <measurement.json> --out <NEW-run-directory>
-  audit-site --project <theme> --run <measurement-directory> [--checks <check-import.json>] [--resources <resource-audit.json>] --out <site-audit.json>
+  audit-site --project <theme> --run <measurement-directory> [--checks <check-import.json>] [--resources <resource-audit.json>] [--ownership <ownership.json>] [--performance-baseline <performance.json>] --out <site-audit.json>
   plan-site --project <theme> --recipe <reviewed-recipe.json> --out <site-plan.json>
   verify-site --before <baseline-run> --after <candidate-run> [--thresholds <thresholds.json>] --out <site-verification.json>
   map --project <theme> --capture <capture.json> [--target <file>] --out <mapping.json>
@@ -212,6 +218,11 @@ export async function main(argv=process.argv.slice(2)) {
   const {command,args:a}=parse(argv);
   outputFormat=a.format??'summary';
   if(command==='help') { console.log(help); return 0; }
+  if(command==='improve-cycle') {
+    const {runRecoveryCycle}=await import('../lib/recovery-cycle.mjs');
+    const result=await runRecoveryCycle({config:await readJSON(required(a,'config')),output:required(a,'out')});
+    await emit(result);return result.error?2:result.status==='optimization-accepted'?0:3;
+  }
   if(command==='improve') {
     const {runImprovement}=await import('../lib/improvement-session.mjs');
     const result=await runImprovement({config:await readJSON(required(a,'config')),output:required(a,'out')});
@@ -257,7 +268,7 @@ export async function main(argv=process.argv.slice(2)) {
       result = publicSourceIndex(await indexThemeSources(required(a,'project')));
     } else if (command === 'diagnose-performance') {
       result = await (await import('../lib/decision-engine.mjs')).diagnoseUnified({ project: required(a,'project'), profiles: await profiles(), run: a.run, liquidProfile: a.liquid ? await readJSON(a.liquid) : undefined,
-        field:a.field?await readJSON(a.field):null,owners:a.owners?await readJSON(a.owners):[],goal:a.goal?await readJSON(a.goal):undefined,...(a.limit!==undefined?{limit:Number(a.limit)}:{}) });
+        checks:a.checks?await readJSON(a.checks):null,ownership:a.ownership?await readJSON(a.ownership):[],performanceBaseline:a['performance-baseline']?await readJSON(a['performance-baseline']):null,field:a.field?await readJSON(a.field):null,owners:a.owners?await readJSON(a.owners):[],goal:a.goal?await readJSON(a.goal):undefined,...(a.limit!==undefined?{limit:Number(a.limit)}:{}) });
     } else if (command === 'plan-demand') {
       result = await (await import('../lib/demand-plan.mjs')).createDemandPlan({ project: required(a,'project'), config: await readJSON(required(a,'config')), diagnosis: await readJSON(required(a,'diagnosis')), profiles: await profiles() });
     } else if (command === 'plan-domain') {
@@ -267,7 +278,7 @@ export async function main(argv=process.argv.slice(2)) {
       await emit(result); return result.status === 'promising' ? 0 : 3;
     } else {
       const config = await readJSON(required(a,'config'));
-      for (const key of command === 'verify-patch' ? ['plan','diagnosis','regressionBefore','regressionAfter'] : ['before','after']) if (config[key]) config[key] = await materialize(config[key]);
+      for (const key of command === 'verify-patch' ? ['plan','diagnosis','regressionBefore','regressionAfter'] : ['before','after','plan']) if (config[key]) config[key] = await materialize(config[key]);
       result = command === 'verify-patch' ? await (await import('../lib/patch-experiment.mjs')).verifyPatchExperiment(config)
         : (await import('../lib/preservation.mjs')).verifyPreservation(config);
     }
@@ -373,7 +384,7 @@ export async function main(argv=process.argv.slice(2)) {
     const {auditPerformance}=await import('../lib/performance-audit.mjs');
     const profiles=a.profiles?await readJSON(a.profiles):[];
     if(!Array.isArray(profiles)||profiles.length>24)throw new Error('profiles must contain at most 24 saved profile paths/objects.');
-    const result=await auditPerformance({project:required(a,'project'),profiles:await Promise.all(profiles.map(p=>typeof p==='string'?readJSON(p):p))});
+    const result=await auditPerformance({project:required(a,'project'),baseline:a.baseline?await readJSON(a.baseline):null,checks:a.checks?await readJSON(a.checks):null,ownership:a.ownership?await readJSON(a.ownership):[],profiles:await Promise.all(profiles.map(p=>typeof p==='string'?readJSON(p):p))});
     await emit(result,a.out);return result.reviewRequired?3:0;
   }
   if(command==='precheck') {
@@ -397,6 +408,13 @@ export async function main(argv=process.argv.slice(2)) {
     const {auditResources}=await import('../lib/resource-audit.mjs');
     const result=await auditResources({project:required(a,'project'),probe:a.probe==='true'});
     await emit(result,a.out);return result.complete?0:3;
+  }
+  if(['plan-resource-repair','verify-resource-repair'].includes(command)) {
+    await newOutput(a.out);const {createResourceRepair,verifyResourceRepair}=await import('../lib/resource-repair.mjs');
+    let result;
+    if(command==='plan-resource-repair')result=await createResourceRepair({project:required(a,'project'),config:await readJSON(required(a,'config')),profile:await readJSON(required(a,'profile'))});
+    else {const config=await readJSON(required(a,'config'));for(const k of ['plan','before','after'])if(typeof config[k]==='string')config[k]=await readJSON(config[k]);result=await verifyResourceRepair(config);}
+    await emit(result,a.out);return result.outcome==='invalid-evidence'?3:0;
   }
   if(command==='map') {
     const {mapCapture}=await import('../lib/mapping.mjs');
@@ -435,7 +453,7 @@ export async function main(argv=process.argv.slice(2)) {
   }
   if(command==='audit-site') {
     const {auditSite}=await import('../lib/site-audit.mjs');
-    const result=await auditSite({project:required(a,'project'),run:required(a,'run'),checks:a.checks?await readJSON(a.checks):null,officialChecks:a.official?await readJSON(a.official):null,resourceAnalysis:a.resources?await readJSON(a.resources):null,precheck:a.precheck?await readJSON(a.precheck):null,runtimeProfile:a.runtime?await readJSON(a.runtime):null});
+    const result=await auditSite({project:required(a,'project'),run:required(a,'run'),checks:a.checks?await readJSON(a.checks):null,officialChecks:a.official?await readJSON(a.official):null,resourceAnalysis:a.resources?await readJSON(a.resources):null,precheck:a.precheck?await readJSON(a.precheck):null,runtimeProfile:a.runtime?await readJSON(a.runtime):null,ownership:a.ownership?await readJSON(a.ownership):[],performanceBaseline:a['performance-baseline']?await readJSON(a['performance-baseline']):null});
     await emit(result,a.out);return result.complete===false?3:0;
   }
   if(command==='plan-site') {
