@@ -1,29 +1,37 @@
 # Shopify 整站性能优化工具包
 
+> 用真实证据定位瓶颈，用可逆补丁推进优化，用独立测量确认收益。
 
-当前版本 **0.14.0**（2026-11-02）。面向 Shopify Liquid 主题源码目录（主题 ZIP 先解压），将源码依赖、运行耗时、可逆补丁和独立验收连接起来。
+![Wobby 在主题性能工作台检查真实证据、可逆补丁和独立验收](assets/wolfbox-illustrations/readme-toolkit-overview-v1.png)
 
-本版完成六项能力及全流程复审：统一诊断排序、资源成本与健康状态、字体待审配方、独立观察基线、生成代码归属、设置依赖。新增 `liquid-font-display` 与 `liquid-rehost-resource` 两项受限策略；资源替换从正式采集到验收均要求实际节点、完成 GET、响应字节及部署身份等价。用法与兼容要求见 [功能升级](references/toolkit-evolution.md)，完整变更见 [更新记录](CHANGELOG.md)。
+面向 Shopify Liquid 主题开发者的本地性能工具包。把主题源码、Chrome 运行采样、Lighthouse / PSI 测量与审阅记录串起来，帮助你回答：**哪里慢、该改什么、改完是否有效。** 可从 Codex 技能或 `perfkit` CLI 使用，输入为主题源码目录；主题 ZIP 需先解压。
 
-从 0.13.0 升级时重新建立观察基线；归属记录需携带当前 sourceHash，资源替换需字面唯一 id 和新的运行采集证据。评分、业务和视觉验收仍独立保留。工具代码测试不代表商家主题线上提分。
+**当前版本：0.14.0 · 2026-11-02** · [更新记录](CHANGELOG.md) · [完整命令](references/commands.md) · [安装与运行](#安装与运行)
 
-新增 [主题性能执行流程](references/theme-performance-workflow.md)：资源恢复单独验收、snippet 样式成对去重、纯 Liquid 转发消除、带 render 的查询裁剪和受限动态 JS Liquid 映射；无收益按机制与因果上下文排除，保留原测量门槛。
+## 六项能力，贯穿诊断到验收
 
-新增官方性能方法库：已读取 161 个相关官方页面，整理 70 篇性能专题；29 篇接入 38 个有边界的执行入口。`sync-shopify-docs` 刷新来源，`shopify-methods` 导出机器合同，`plan-official` 或 `improve prepare official` 生成真实补丁并保留原实测闭环。自动生成、人工实现、测量与平台职责分开报告。使用方式见 [官方知识库与可执行补丁](references/shopify-knowledge.md)。
+| 能力 | 帮你解决的问题 |
+| --- | --- |
+| 统一排序 | 结合目标、证据和执行范围安排候选优先级，区分可执行补丁与待调查任务，不混比不同口径的耗时。 |
+| 资源成本 | 按采样追踪请求、传输、CPU、源码引用和发起链，找到值得继续调查的脚本、样式与媒体。 |
+| 资源健康 | 检查图片解码与 picture 实际选源；未触发、超时或采样不完整时保留未知状态。 |
+| 字体闭环 | 从字体加载和文本几何证据生成待审配方，支持保留字体身份的 `font-display` 补丁。 |
+| 豁免与归属 | 分开记录规则禁用与实际修复，核对生成器、App 和主题源码归属，建立可比的观察基线。 |
+| 结构依赖 | 分析 section / block 设置、别名、动态访问与调用关系，为重构提供依据。 |
 
-分页查询、隐藏 DOM 和 Section Rendering API 现有十个执行入口（含两个旧版隐藏 DOM 对照入口）。新增 `section-liquid-initial` 将首屏 Ajax 改为复用已有 snippet 的 Liquid 输出；`section-liquid-inline` 针对小型独立控制器进一步消除外部请求，后续更新保留 Section API。要求无 JS 内容、真实请求与内容变化验证。入口见 [三类优化闭环](references/extended-optimization.md)，首轮失败后调整方案并正式通过的记录见 [Liquid 首屏实测](references/section-liquid-validation.md)。
+本版提供 **21 项通用代码策略**，包括新增的 `liquid-font-display` 和 `liquid-rehost-resource`。候选进入既有的差异审阅、应用、回滚与验证流程；结构告警和资源耗时需要进一步验证，才能判断是否有性能收益。实现与兼容要求见 [0.14.0 功能升级](references/toolkit-evolution.md)。
 
-新增 `improve` 优化会话：低分时按实测指标丢分和源码证据定位；生成并应用补丁后运行真实实验，无收益或回归则回滚、记录已排除方案并重新诊断。有收益但仍低于门槛时，仅在其他正式门禁全部通过后保留中间基线，继续下一轮；最终另与最初基线比较累计收益。会话保留历史、预算和显式预览同步边界，不承诺任意主题必然提分。见 [可执行改进流程](references/improvement-workflow.md) 与 [实际查阅的 Shopify 官方资料](references/shopify-recovery-sources.md)。
+## 怎样开始
 
-Liquid 首屏与内联控制器的后续审查已修复共享依赖、CSP、编辑器卸载/请求竞态，以及正式无收益报告未进入重诊断的问题。修复版通过原门槛复验，详见 [复审记录](references/section-liquid-review.md)。
+1. **先诊断。** 安装依赖并运行 `doctor`；用 [batch 批处理](#默认用一次批处理) 串联测量与诊断，已有有效证据可以复用。
+2. **再修改。** 选择瓶颈，生成并审阅补丁计划，本地应用后显式同步到候选预览。
+3. **用实测决定下一步。** 小样本实验有收益后进入正式验收；无收益或发生回归则回滚、保留失败历史，再选择其他方案。[improve 会话](references/improvement-workflow.md) 可持续记录状态与预算。
 
-图片 LCP、图片/应用容器 CLS、Liquid 热点和主题可控 App loader 现接入 `profile-domain`、`plan-domain` 与 `experiment-liquid`：部署绑定定位、实际生成补丁、独立收益验证，支持会话内无收益回滚并选择另一种方法。适用范围、配置及验证边界见 [四类性能优化闭环](references/domain-optimization.md)；跨候选重试、App 脚本/业务证据和 Liquid 采样的修复与反例测试见 [全面审查记录](references/domain-review.md)。
+正式验收同时检查收益、指标退步、部署身份、功能及内容视觉证据。默认每页每设备前后各至少 5 次独立导航测量；候选端移动最低 **75 / 中位 80**，桌面最低 **85 / 中位 90**，门槛可配置。工具测试与隔离夹具验证不能代替商家主题实测，也不保证任意主题提分。
 
-本版包含 P0/P1 扩展：`check-performance` 执行 11 项官方检查；`audit-performance` 覆盖 11 组 P0 和 16 组 P1 候选，补齐资源提示、CSS/字体交付、交互与隐藏组件诊断。通用策略共 21 项，包括新增的重复资源提示清理、关键 CSS 恢复同步、受限 passive 监听器和过渡属性收窄。沿用源码证据、审阅、应用及回滚机制。覆盖范围与命令见 [Shopify 官方性能检查与 P0/P1 规则](references/shopify-performance-rules.md)。
+`batch` 编排测量与诊断；`optimize` 分阶段编排补丁与验收。主题预览同步由调用方显式执行。更多操作见 [代码优化工作流](references/site-workflow.md)，各层职责与完整流程见下文。
 
-默认优化路径：复用有效基线 → 定位影响分数的主题代码 → 应用可逆补丁 → 受影响页面小样本测分与回归 → 有收益后正式验收。`batch` 是测量/诊断编排器，不会自动修改源码。代码任务不额外下载图片或视频素材，也不每轮重跑无关的全站截图和业务套件；Lighthouse 正常加载图片，不能通过阻断资源换分数。详见 [代码优化工作流](references/site-workflow.md)。
-
-默认每个页面、每种设备前后各至少 5 次独立测量，候选端要求：**移动端每次最低分 ≥75、中位数 ≥80；桌面端每次最低分 ≥85、中位数 ≥90**，门槛可配置。工具离线测试与隔离主题验证只证明相应工具流程，不能保证任意店铺都达到目标。
+从 0.13.0 升级时需重建观察基线；归属记录必须绑定当前 `sourceHash`，资源替换需唯一字面 id 和新的运行证据。详见 [升级与验收边界](references/toolkit-evolution.md)。
 
 ## 当前架构与各层职责
 
@@ -134,7 +142,7 @@ flowchart TB
 | `plan-image` / `plan-component` | 单图和单组件工作流 |
 | `lighthouse` / `score-target` | 汇总、验收已有原始 Lighthouse 报告 |
 
-静态结果是候选；资源同名不等于已确定源码位置。按指标加权丢分和版本匹配的评分曲线安排优先级，Lighthouse 机会估值不相加。十项 [可执行代码策略](references/code-strategies.md) 和两类拆分计划生成真实补丁；每项仍需结合主题逻辑和页面证据审阅，不支持的模式明确拒绝。95 分降到 80 分会被退步门槛拒绝；单纯“分数达标”不能冒充“已提分”。
+静态结果是候选；资源同名不等于已确定源码位置。按指标加权丢分和版本匹配的评分曲线安排优先级，Lighthouse 机会估值不相加。21 项 [可执行代码策略](references/code-strategies.md) 和两类拆分计划生成真实补丁；每项仍需结合主题逻辑和页面证据审阅，不支持的模式明确拒绝。95 分降到 80 分会被退步门槛拒绝；单纯“分数达标”不能冒充“已提分”。
 
 ## 安装与运行
 
@@ -205,6 +213,10 @@ node scripts/perfkit.mjs rollback --project /absolute/theme --plan /absolute/run
 
 ## 使用资料
 
+- [主题性能八步流程](references/theme-performance-workflow.md)、[P0/P1 规则](references/shopify-performance-rules.md)、[单补丁实验与验收](references/performance-engine.md)
+- [官方知识库与可执行补丁](references/shopify-knowledge.md)、[实际查阅的恢复资料](references/shopify-recovery-sources.md)
+- [三类优化闭环](references/extended-optimization.md)、[Liquid 首屏实测](references/section-liquid-validation.md)、[复审记录](references/section-liquid-review.md)
+- [图片、CLS、Liquid 与 App 优化](references/domain-optimization.md)、[全面审查记录](references/domain-review.md)
 - [报告接入、误报校正与资源依赖](references/code-quality.md)
 - [完整命令](references/commands.md)、[整站工作流](references/site-workflow.md)、[测量约定](references/measurement.md)
 - [多文件补丁](references/site-patches.md)、[单文件补丁](references/changes.md)
