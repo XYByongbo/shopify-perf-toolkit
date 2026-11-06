@@ -1,6 +1,6 @@
 {
   "name": "shopify-perf-toolkit",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "private": true,
   "type": "module",
   "description": "Whole-theme Shopify performance diagnosis, reviewed patches, rollback, real Lighthouse/PSI measurement and score acceptance",
@@ -57,7 +57,7 @@
     "test:theme-workflow-live": "node scripts/validate_theme_workflow.mjs",
     "test:recovery-cycle": "node --test tests/recovery-evidence.test.mjs tests/recovery-adaptive.test.mjs tests/formal-recovery.test.mjs tests/domain-engine.test.mjs tests/architecture-boundaries.test.mjs tests/performance-upgrade.test.mjs tests/resource-budget.test.mjs tests/formal-collection-evidence.test.mjs tests/recovery-cycle.test.mjs tests/improvement-session.test.mjs",
     "test:recovery-cycle-live": "node scripts/validate_recovery_cycle.mjs",
-    "test:seo": "node --test tests/seo-toolkit.test.mjs tests/toolkit-split.test.mjs",
+    "test:seo": "node --test tests/seo-toolkit.test.mjs tests/seo-repair.test.mjs tests/toolkit-split.test.mjs",
     "release:toolkits": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/build_toolkits.py"
   },
   "dependencies": {

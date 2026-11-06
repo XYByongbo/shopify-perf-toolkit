@@ -1,11 +1,11 @@
 ---
 name: shopify-perf-toolkit
-description: Diagnose and optimize Shopify Liquid themes at site, image, or component scope. Use for performance bottlenecks, LCP media, JavaScript lifecycle, CSS and font delivery, App costs, source mapping, reviewable multi-file patches, rollback, real Lighthouse or PageSpeed Insights measurement, score acceptance, code quality and analytical PDF reports. Standalone offline SEO checks use shopify-seo-toolkit. Not theme redesign or automatic publishing.
+description: Diagnose and optimize Shopify Liquid themes at site, image, or component scope. Use for performance bottlenecks, LCP media, JavaScript lifecycle, CSS and font delivery, App costs, source mapping, reviewable multi-file patches, rollback, real Lighthouse or PageSpeed Insights measurement, score acceptance, code quality and analytical PDF reports. Standalone source SEO repairs use shopify-seo-toolkit. Not theme redesign or automatic publishing.
 ---
 
 # Shopify 主题性能优化
 
-版本 **0.16.0（2026-11-06）**。从本技能目录执行 `node scripts/perfkit.mjs`，用绝对 `--project` 指向真实主题。Node 22.19+、Python 3.9+；工具依赖在本目录 `npm ci --ignore-scripts`，不安装到主题。主题 ZIP 先解压；没有真实主题/URL时完成隔离验证并明确店铺未测。
+版本 **0.17.0（2026-11-06）**。从本技能目录执行 `node scripts/perfkit.mjs`，用绝对 `--project` 指向真实主题。Node 22.19+、Python 3.9+；工具依赖在本目录 `npm ci --ignore-scripts`，不安装到主题。主题 ZIP 先解压；没有真实主题/URL时完成隔离验证并明确店铺未测。
 
 用户要求优化时，目标是完成可逆的主题代码修改并验证实际收益；审计和报告用于定位。只要求检查或建议时保持只读。没有安全可验证候选时给出具体受限原因与已排除方案，不以重复测分代替修改。
 
@@ -32,6 +32,8 @@ description: Diagnose and optimize Shopify Liquid themes at site, image, or comp
 | 官方方法、资源/字体升级、归属及历史兼容 | [官方方法库](references/shopify-knowledge.md)、[功能升级](references/toolkit-evolution.md)、[专项执行细则](references/task-workflows.md)；按主题检索对应小节 |
 
 全部参数见 [命令参考](references/commands.md)。`batch` 编排测量与诊断，不会自动优化源码；`status=complete` 也不等于优化验收。HTML/源码检查、规范告警和真实收益分别报告，不能用检查通过代替性能结论。
+
+内置方法不能覆盖当前瓶颈时，按 [自定义实现流程](references/source-repair-workflow.md) 执行 request-implementation，阅读请求中的源码并编写候选，plan-custom 审阅后以 improve prepare 的 implementation 接回原会话。不能因为没有内置策略就只输出建议；缺少实测证据或预算时说明具体阻塞。候选检查清单不是通过证据，仍须实际预览和实验。
 
 ## 共同执行边界
 

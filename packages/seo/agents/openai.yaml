@@ -1,6 +1,6 @@
 interface:
-  display_name: "Shopify SEO 审查"
-  short_description: "独立检查主题源码与保存 HTML 的 SEO 声明，保留未知与覆盖边界"
-  default_prompt: "使用 $shopify-seo-toolkit 检查主题源码或保存 HTML 的 SEO 问题，输出来源明确的只读报告和未验证项。"
+  display_name: "Shopify SEO 源码优化"
+  short_description: "检查并修改主题 SEO 源码，保存差异与回滚记录，复核真实代码变化"
+  default_prompt: "使用 $shopify-seo-toolkit 定位主题代码中的 SEO 问题，生成并审阅候选，执行可逆修复和源码复核；根据现有业务数据继续处理剩余问题，明确未验证的动态与线上范围。"
 policy:
   allow_implicit_invocation: true

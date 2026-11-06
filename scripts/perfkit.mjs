@@ -9,6 +9,8 @@ import { spawnSync } from 'node:child_process';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const { version } = JSON.parse(await fs.readFile(path.join(here, '../package.json'), 'utf8'));
 const specs = {
+  'request-implementation':['previous','candidate','files','out'],
+  'plan-custom':['request','candidate','out'],
   'sync-shopify-docs':['config','out'],
   'shopify-methods':['sources','topic','out'],
   'plan-official':['project','config','diagnosis','profiles','sources','out'],
@@ -72,6 +74,8 @@ const specs = {
   'score-target': ['before', 'after', 'minimum', 'target', 'out'],
 };
 const help = `Shopify Perf Toolkit ${version} (Node 22+, offline core)
+  request-implementation --previous <session.json> --candidate <candidateId> [--files <paths.json>] --out <request.json>
+  plan-custom --request <request.json> --candidate <implementation.json> --out <plan.json>
   sync-shopify-docs [--config <bounded-sync.json>] --out <NEW-directory>
   shopify-methods [--sources <refreshed-sources.json>] [--topic <images|liquid|css|fonts|javascript|apps|delivery|mobile|measurement|platform|external>] [--out <methods.json>]
   plan-official --project <theme> --config <official-method.json> --diagnosis <diagnosis.json> [--profiles <profile-paths.json>] [--sources <sources.json>] --out <plan.json>
@@ -334,6 +338,14 @@ export async function main(argv=process.argv.slice(2)) {
     const result=officialMethodCatalog({sources:a.sources?await readJSON(a.sources):undefined});
     if(a.topic){if(!result.methods.some(m=>m.topic===a.topic))throw new Error('Unknown official method topic.');result.methods=result.methods.filter(m=>m.topic===a.topic);result.filter={topic:a.topic};}
     await emit(result,a.out);return result.status==='current'?0:3;
+  }
+  if(command==='request-implementation') {
+    const {requestImplementation}=await import('../lib/custom-implementation.mjs');
+    await emit(await requestImplementation({previous:required(a,'previous'),candidateId:required(a,'candidate'),files:a.files?await readJSON(a.files):[]}),required(a,'out'));return 0;
+  }
+  if(command==='plan-custom') {
+    const {createCustomPlan}=await import('../lib/custom-implementation.mjs');
+    await emit(await createCustomPlan({request:required(a,'request'),candidate:required(a,'candidate')}),required(a,'out'));return 0;
   }
   if(command==='plan-official') {
     const {createOfficialPlan}=await import('../lib/official-plan.mjs');

@@ -1,19 +1,18 @@
 # Shopify SEO 工具包
 
-当前版本 **0.16.0**。独立检查 Shopify 主题源码和保存 HTML 的元数据、JSON-LD、链接与图片替代文本，生成 JSON、HTML 和可选 PDF 报告。
+当前版本 **0.17.0**。以 Shopify 主题代码为输入，检查并修复元数据、JSON-LD、链接与图片替代文本问题，提供计划、写入、回滚和源码复核。
 
-这是源码发行包，需要 Node.js 22.19+；HTML 检查使用 Python 3.9+ 标准库。没有 npm 运行依赖，不需要安装 Lighthouse、Chrome 或另一个性能工具包。
+这是源码发行包，需要 Node.js 22.19+；HTML 检查使用 Python 3.9+ 标准库。修复使用锁定版本的 Shopify Liquid 解析器，不需要安装 Lighthouse、Chrome 或另一个性能工具包。
 
 ## 安装与运行
 
-解压 `shopify-seo-toolkit-v0.16.0.zip` 后，在解压目录执行：
+解压 `shopify-seo-toolkit-v0.17.0.zip` 后，在解压目录执行：
 
 ```sh
 npm ci --ignore-scripts
 node scripts/seokit.mjs doctor
 node scripts/seokit.mjs audit-source --project /absolute/theme --out /absolute/task/source-seo.json
-node scripts/seokit.mjs audit-html --input /absolute/task/page.html --out /absolute/task/html-seo.json
-node scripts/seokit.mjs report --input /absolute/task/html-seo.json --out /absolute/task/seo.html
+node scripts/seokit.mjs fix --project /absolute/theme --out /absolute/task/new-fix
 npm test
 ```
 
@@ -23,9 +22,9 @@ npm test
 
 ## 结果含义
 
-`audit-complete` 表示这次离线规则执行完整且无发现；`review-required` 表示有条目待审，`partial` 表示覆盖不完整。批次另有 `failed` / `stopped`。所有结果保留 `acceptance=not-evaluated`，不声称线上 SEO、排名或性能验收通过。
+`audit-complete` 表示这次离线规则执行完整且无发现；`review-required` 表示有条目待审，`partial` 表示覆盖不完整。批次另有 `failed` / `stopped`。只读审查结果保留 `acceptance=not-evaluated`，不声称线上 SEO、排名或性能验收通过。
 
-首版只读，不抓取网站、不渲染 Liquid、不自动改主题。HTML 行号不等于 Liquid 行号；原始字节指纹不证明当前店铺或部署。完整页面与 Section 片段采用不同检查范围。
+`fix` 会真实修改主题文件，保存计划与回滚快照，失败会尝试还原；`source-fix-verified` 仅代表选定源码规则已修复。`partially-repaired` 列出剩余问题，Codex 可按已有业务数据提供 `--config` 候选继续修复。详见 [完整修复流程](../../references/source-repair-workflow.md)。保存 HTML 检查仍可选，不参与源码修复验收。HTML 行号不等于 Liquid 行号；原始字节指纹不证明当前店铺或部署。完整页面与 Section 片段采用不同检查范围。
 
 可选 PDF：在选用的 Python 环境安装 reportlab 后，执行 `node scripts/seokit.mjs report-pdf --input /absolute/task/html-seo.json --out /absolute/task/seo.pdf`。`SEOKIT_PYTHON` 可选择解释器，也兼容 `PERF_KIT_PYTHON`。PDF 不是基本安装或审查的必需依赖。
 

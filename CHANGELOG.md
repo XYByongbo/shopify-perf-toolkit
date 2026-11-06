@@ -1,5 +1,18 @@
 # 更新记录
 
+## 0.17.0 — 2026-11-06
+
+- 全面复审：只读依赖改为按原始字节验证，真实主题的 settings_data.json、图片和字体不再被误当作修改目标；保持源码写入权限限制。
+- SEO 补丁按所选规则核对 AST，保留业务正文、资源地址、Liquid 控制流及原生脚本/样式；拒绝以动态 JSON-LD 隐藏静态解析失败。补齐空语言、大小写元数据、无 href canonical 的自动修复。
+- SEO 复核结束再次确认真实源码；存储失败仍执行还原，部分写入冲突明确报告，CLI 在写入前检查回执目录。
+- 自定义性能计划经旧 plan 路径仍锁定方法身份并重验语法；失败历史记录实际专项机制，不能用 custom 名称绕过。增加 content_for_layout 保护及最大关联文件请求往返验证。
+- 新增自定义补丁正式通过/缺证据拒绝/正式回归回滚测试，并提供真实 Chrome + Lighthouse 的 `validate_improvement_pipeline.mjs --custom` 隔离链路验证。
+
+- SEO 新增 plan/fix/apply/verify/rollback：自动元数据修复、业务源码候选、前后规则复核、完整指纹与失败回滚；只验收源码变化，不推断线上排名。
+- 提取共享源码写入器，沿用性能补丁与回滚行为；SEO 仅增加 Shopify Liquid 解析器依赖，不引入测量引擎。
+- 性能新增 request-implementation / plan-custom 和 prepare implementation，自定义代码绑定当前诊断、源码与会话，继续实测、无收益回滚及原正式验收。
+- 补充真实文件写入/还原、漂移、篡改、误修、独立 CLI 与安装回归测试，更新两套技能工作流。
+
 ## 0.16.0 — 2026-11-06
 
 - 拆分复审：排除源码 SVG、template、noscript 中的页面元数据及惰性图片误报；旧综合审查复用同一修正规则。

@@ -281,6 +281,7 @@ test('known preflight failure with zero navigation can be repaired without manuf
 test('exhausted options do not generate parameter retries, and equivalent domain methods are excluded',async t=>{
   const f=await fixture(t);f.config.options=[f.options[0]];
   const r=await f.run(f.config);assert.equal(r.status,'no-supported-alternative');assert.equal(f.observed.experiments,1);
+  assert.equal(r.nextAction.command,'request-implementation');assert.equal(r.nextAction.previous,r.session);assert.ok(r.nextAction.candidates.length);
   const candidate={candidateId:'c',file:'sections/catalog.liquid',line:1,kind:'liquid-query',metric:'ttfb',methods:['query-limit','query-limit-render']};
   const state={baselineHash:'hash',history:[{baselineHash:'hash',hypothesisKey:hypothesisKey(candidate),method:'query-limit',outcome:'no-measurable-gain'}]};
   assert.equal(selectRecoveryOption(state,{candidates:[candidate]},[{id:'parameter-retry',prepare:{candidateId:'c',method:'query-limit-render'}}]),null);
@@ -350,6 +351,7 @@ test('disappearing bottleneck in fresh evidence does not reuse the previous diag
   const f=await fixture(t),r=await f.run(f.config,{...f.deps,profileDomain:async({config})=>({...await freshRuntime(config),cpu:[]})});
   const s=await readImprovementSession(r.session);
   assert.equal(r.status,'no-supported-alternative');assert.equal(s.counts.rounds,1);assert.equal(f.observed.experiments,1);
+  assert.equal(r.nextAction.command,'reprofile');assert.deepEqual(r.nextAction.candidates,[]);
   assert.deepEqual(s.inputs.profiles[0].cpu,[]);assert.equal((await read(s.recovery)).candidates.length,0);
 });
 

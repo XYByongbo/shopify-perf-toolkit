@@ -27,12 +27,12 @@ test('legacy HTML profile retains performance checks; SEO results cannot become 
   const filename=path.join(root,'seo.json');await fs.writeFile(filename,JSON.stringify(seo));
   assert.equal((await verifySite({before:filename,after:filename})).outcome,'invalid-evidence');
 });
-test('SEO and shared modules have only built-in dependencies and never import performance',async()=>{
+test('SEO permits its pinned Liquid parser; shared core remains builtin-only with no reverse dependencies',async()=>{
   const root=new URL('../',import.meta.url),visited=new Set();
   function walk(n,visit){if(!n||typeof n!=='object')return;visit(n);for(const v of Object.values(n)){if(Array.isArray(v))v.forEach(x=>walk(x,visit));else if(v&&typeof v==='object')walk(v,visit);}}
   async function visit(file){if(visited.has(file))return;visited.add(file);const code=await fs.readFile(new URL(file,root),'utf8'),deps=[];
     walk(parse(code,{ecmaVersion:'latest',sourceType:'module'}),n=>{if(['ImportDeclaration','ImportExpression','ExportNamedDeclaration','ExportAllDeclaration'].includes(n.type)&&n.source){assert.equal(typeof n.source.value,'string','All SEO module imports are statically traceable');deps.push(n.source.value);}});
-    for(const dep of deps){if(dep.startsWith('node:'))continue;assert.ok(dep.startsWith('.'),'No external runtime dependency: '+dep);const resolved=path.posix.normalize(path.posix.join(path.posix.dirname(file),dep));assert.match(resolved,/^(lib\/(core|seo)\/|scripts\/seokit\.mjs$)/);if(file.startsWith('lib/core/'))assert.match(resolved,/^lib\/core\//,'Shared core must not import either product');await visit(resolved);}
+    for(const dep of deps){if(dep.startsWith('node:'))continue;if(file.startsWith('lib/seo/')&&dep==='@shopify/liquid-html-parser')continue;assert.ok(dep.startsWith('.'),'No external runtime dependency: '+dep);const resolved=path.posix.normalize(path.posix.join(path.posix.dirname(file),dep));assert.match(resolved,/^(lib\/(core|seo)\/|scripts\/seokit\.mjs$)/);if(file.startsWith('lib/core/'))assert.match(resolved,/^lib\/core\//,'Shared core must not import either product');await visit(resolved);}
   }
   for(const file of await fs.readdir(new URL('lib/core/',root)))if(file.endsWith('.mjs'))await visit('lib/core/'+file);
   await visit('scripts/seokit.mjs');assert.ok(visited.has('lib/core/source-scan.mjs'));

@@ -13,8 +13,10 @@ import { measureSite } from '../lib/measure.mjs';
 import { runPatchExperiment } from '../lib/patch-experiment.mjs';
 import { runImprovement } from '../lib/improvement-session.mjs';
 import { renderReport } from '../lib/report.mjs';
+import {requestImplementation} from '../lib/custom-implementation.mjs';
+import {createDemandPlan} from '../lib/demand-plan.mjs';
 
-const {values:options}=parseArgs({options:{resume:{type:'string'},goal:{type:'string'}}});
+const {values:options}=parseArgs({options:{resume:{type:'string'},goal:{type:'string'},custom:{type:'boolean',default:false}}});
 if(options.resume && !path.isAbsolute(options.resume) || options.goal && !['score','fcp','speedIndex'].includes(options.goal)) throw new Error('Usage: [--resume /absolute/step-N/session.json] [--goal score|fcp|speedIndex]');
 const resumed=options.resume?JSON.parse(await readFile(options.resume,'utf8')):null;
 if (resumed && options.goal && options.goal!==resumed.goal.metric) throw new Error('Resume cannot change the declared goal.');
@@ -71,20 +73,35 @@ try {
   const measured=await measureSite({config:measurement('1'),output:run,dependencies:{verifyDeployment:deployment}});assert.equal(measured.status,'complete');
   await step({action:'start',project:candidate,run,profiles,goal,budget:{maxCandidateRounds:3,maxAttempts:20,maxFailures:3,maxWallTimeMs:600000}});
   let recovery=await read(state.recovery),hotspot=recovery.candidates.find(c=>c.file==='assets/main.css'&&c.kind==='render-resource');assert.ok(hotspot);
+  if(options.custom){
+    const request=await requestImplementation({previous:path.join(state.output,'session.json'),candidateId:hotspot.candidateId});
+    const candidate={schemaVersion:1,requestHash:request.requestHash,method:'custom/css-comment-control',rationale:'Negative control: unchanged blocking behavior.',checks:['Unchanged heading, button response and styles'],changes:[{target:'assets/main.css',replacementText:css+'\n/* custom negative control */'}]};
+    await step({action:'prepare',candidateId:hotspot.candidateId,method:candidate.method,rationale:candidate.rationale,implementation:{request,candidate}});
+  }else {
   await step({action:'prepare',candidateId:hotspot.candidateId,method:'css-comment-only',rationale:'Negative control: a comment cannot remove the delayed blocking stylesheet.',recipe:{schemaVersion:1,changes:[{
     kind:'reviewed-replacement',target:'assets/main.css',replacementText:css+'\n/* negative control */',reason:'Isolated negative control',
     evidence:{summary:'Artificial fixture with unchanged visible CSS',candidateId:hotspot.candidateId,diagnosisSourceHash:state.baselineHash}}]}});
+  }
   await step({action:'apply',reviewedPlanHash:state.active.planHash});await step({action:'experiment',experiment});
   assert.equal(state.active,null,'Unproductive control must be rolled back');
   assert.equal(await readFile(path.join(candidate,'assets/main.css'),'utf8'),css);
   }
   const recovery=await read(state.recovery),hotspot=recovery.candidates.find(c=>c.file==='assets/main.css'&&c.kind==='render-resource');
+  if(options.custom){
+    const request=await requestImplementation({previous:path.join(state.output,'session.json'),candidateId:hotspot.candidateId,files:['layout/theme.liquid']});
+    const generated=await createDemandPlan({project:candidate,diagnosis:recovery.diagnosis,profiles:state.inputs.profiles,config:{
+      schemaVersion:1,mode:'critical-css',source:'assets/main.css',newAsset:'assets/critical.css',loaderTarget:'layout/theme.liquid',tagStart:0,inlineLoadHandlerAllowed:true,candidateId:hotspot.candidateId}});
+    const implementation={schemaVersion:1,requestHash:request.requestHash,method:'custom/critical-css',rationale:'Reviewed custom replacement preserves full CSS fallback while removing its initial blocking cost.',checks:['Equivalent body checkpoint and working button'],
+      changes:generated.changes.map(c=>({target:c.target,kind:c.recipeKind==='create-asset'?'create-asset':'reviewed-replacement',replacementText:c.after,evidence:c.evidence}))};
+    await step({action:'prepare',candidateId:hotspot.candidateId,method:implementation.method,rationale:implementation.rationale,implementation:{request,candidate:implementation}});
+  }else {
   await step({action:'prepare',candidateId:hotspot.candidateId,method:'critical-css',rationale:'Change the loading mechanism: deliver observed critical styles first and retain the full stylesheet fallback.',demand:{
     schemaVersion:1,mode:'critical-css',source:'assets/main.css',newAsset:'assets/critical.css',loaderTarget:'layout/theme.liquid',tagStart:0,inlineLoadHandlerAllowed:true,candidateId:hotspot.candidateId}});
+  }
   await step({action:'apply',reviewedPlanHash:state.active.planHash});await step({action:'experiment',experiment});
   assert.equal(state.status,'formal-validation-required',JSON.stringify(state.history.at(-1).verification));
   await writeFile(path.join(root,'session.html'),renderReport(state));
-  const result={kind:'improvement-pipeline-validation',status:'passed',scope:'isolated-artificial-fixture-only',root,goal,history:state.history.map(h=>({method:h.method,outcome:h.outcome,gain:h.verification?.gain})),
+  const result={kind:'improvement-pipeline-validation',status:'passed',scope:'isolated-artificial-fixture-only',customImplementation:options.custom,root,goal,history:state.history.map(h=>({method:h.method,outcome:h.outcome,gain:h.verification?.gain})),
     formalAcceptance:'not-evaluated',next:'A real theme still needs full matrix, explicit synchronization, regression and independent content/visual review.'};
   await writeFile(path.join(root,'result.json'),JSON.stringify(result,null,2));
   console.log(JSON.stringify({status:result.status,output:root,history:result.history.map(h=>({method:h.method,outcome:h.outcome}))}));

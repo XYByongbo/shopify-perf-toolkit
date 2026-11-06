@@ -66,13 +66,13 @@ class ToolkitSplitTests(unittest.TestCase):
                 build_toolkits(root, output)
             self.assertEqual(before, [p.read_bytes() for p in archives])
 
-    def test_seo_package_installs_and_runs_without_performance_or_node_modules(self):
+    def test_seo_package_installs_and_runs_without_performance(self):
         root = Path(__file__).resolve().parent.parent
         with tempfile.TemporaryDirectory() as temporary:
             stage = Path(temporary).resolve() / 'seo'
             stage.mkdir()
             package = stage_seo(root, stage)
-            self.assertFalse(package.get('dependencies'))
+            self.assertEqual(package.get('dependencies'), {'@shopify/liquid-html-parser': '2.10.2'})
             self.assertFalse((stage / 'lib/measure.mjs').exists())
             self.assertFalse((stage / 'scripts/perfkit.mjs').exists())
             for file in (root / 'lib/core').glob('*.mjs'):
@@ -87,6 +87,7 @@ class ToolkitSplitTests(unittest.TestCase):
             subprocess.run(['npm', 'ci', '--offline', '--ignore-scripts', '--no-audit', '--no-fund'], cwd=installed, capture_output=True, check=True)
             completed = subprocess.run(['node', 'scripts/seokit.mjs', 'doctor'], cwd=installed, capture_output=True, text=True, check=True)
             self.assertFalse(json.loads(completed.stdout)['lighthouseRequired'])
+            self.assertTrue(json.loads(completed.stdout)['repairAvailable'])
             result = subprocess.run(['npm', 'test'], cwd=installed, capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn('# fail 0', result.stdout)

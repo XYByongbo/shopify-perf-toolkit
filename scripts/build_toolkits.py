@@ -34,7 +34,7 @@ def stage_seo(root, stage):
             shutil.copy2(file, destination)
             if str(relative) in {'README.md', 'SKILL.md'}:
                 text = destination.read_text(encoding='utf-8')
-                text = text.replace('(../../references/', '(references/').replace('(../../assets/', '(assets/').replace('(../../THIRD_PARTY_NOTICES.md)', '(THIRD_PARTY_NOTICES.md)')
+                text = text.replace('(../../references/', '(references/').replace('(../../assets/', '(assets/').replace('(../../THIRD_PARTY_NOTICES.md)', '(THIRD_PARTY_NOTICES.md)').replace('(../../theme-code-generation/', '(theme-code-generation/')
                 destination.write_text(text, encoding='utf-8')
     package = json.loads((Path(stage) / 'package.json').read_text())
     root_package = json.loads((root / 'package.json').read_text())

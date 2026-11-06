@@ -10,16 +10,20 @@ import {runProcess} from '../lib/core/bounded-process.mjs';
 
 const {version}=JSON.parse(await fs.readFile(new URL('../package.json',import.meta.url),'utf8'));
 const specs={doctor:[], 'audit-source':['project','out'],'audit-html':['input','fragment','out'],
+  plan:['project','config','out'],fix:['project','config','out'],apply:['project','plan','out'],verify:['project','plan','out'],rollback:['project','plan','out'],
   batch:['config','out'],report:['input','out'],'report-pdf':['input','out']};
 const help=`Shopify SEO Toolkit ${version}
   doctor
+  plan --project <theme> [--config <source-replacements.json>] --out <plan.json>
+  fix --project <theme> [--config <source-replacements.json>] --out <new-directory>
+  apply|verify|rollback --project <theme> --plan <plan.json> --out <new-json>
   audit-source --project <absolute-theme> --out <new-json>
   audit-html --input <absolute-saved.html> [--fragment true|false] --out <new-json>
   batch --config <absolute-json> --out <new-directory>
   report --input <seo-audit.json> --out <new-html>
   report-pdf --input <seo-audit.json> --out <new-pdf>
-Offline, read-only SEO checks. No measurement, patching or online SEO acceptance.
-Exit 0: scoped audit completed without findings; 3: review/partial/stopped; 2: input/execution failure.
+Source SEO audit and repair. Saved HTML remains an optional read-only diagnostic. No online SEO acceptance.
+Exit 0: requested operation completed (audit has no findings); 3: review/partial/stopped; 2: input/execution failure.
 PDF requires optional Python reportlab; HTML audit uses Python stdlib only.
 `;
 function parse(argv) {
@@ -36,9 +40,23 @@ export async function main(argv=process.argv.slice(2)) {
   if(command==='help'){console.log(help);return 0;}
   if(command==='doctor'){
     let python=false;try {const p=await runProcess(process.env.SEOKIT_PYTHON||process.env.PERF_KIT_PYTHON||'python3',['--version'],{timeoutMs:3000,maxBytes:1024});const match=(p.stdout+p.stderr).match(/^Python (\d+)\.(\d+)\./);python=p.code===0&&!!match&&(Number(match[1])>3||Number(match[1])===3&&Number(match[2])>=9);}catch{}
+    let repairAvailable=false;try{await import('../lib/seo/repair.mjs');repairAvailable=true;}catch{}
     console.log(JSON.stringify({kind:'seo-capabilities',version,sourceAudit:true,htmlAudit:python,
       pythonAvailable:python,networkRequired:false,lighthouseRequired:false,browserRequired:false,
-      onlineSEO:'not-implemented',patching:'not-implemented',pdf:'optional-reportlab'}));return 0;
+      onlineSEO:'not-implemented',repairAvailable,patching:repairAvailable?'source-plan-apply-verify-rollback':'install-dependencies',pdf:'optional-reportlab'}));return 0;
+  }
+  if(['plan','fix','apply','verify','rollback'].includes(command)) {
+    absolute(a.project,'project');const out=await guardOutput(a.out,a.project);
+    const repair=await import('../lib/seo/repair.mjs');
+    if(command==='fix') {const result=await repair.repairSEO({project:a.project,config:a.config?await readJSON(a.config):undefined,output:out});console.log(JSON.stringify({...result,output:out}));return ['failed','failed-rolled-back','rollback-conflict'].includes(result.status)?2:['partially-repaired','implementation-required'].includes(result.status)?3:0;}
+    // Fail on unusable receipt directories before changing the theme.
+    await fs.mkdir(path.dirname(out),{recursive:true});
+    let result;
+    try {
+      result=command==='plan'?await repair.createSEOPlan({project:a.project,config:a.config?await readJSON(a.config):undefined}):await repair[{apply:'applySEOPlan',verify:'verifySEOPlan',rollback:'rollbackSEOPlan'}[command]](await readJSON(a.plan),a.project);
+    }catch(error){if(error.receipt)await saveFile(out,error.receipt);throw error;}
+    await saveFile(out,result);console.log(JSON.stringify({kind:result.kind,status:result.status,output:out}));
+    return command==='verify'&&!result.passed||result.status==='implementation-required'?3:0;
   }
   if(command==='batch') {
     const result=await runSEOBatch({config:await readJSON(a.config),output:a.out});

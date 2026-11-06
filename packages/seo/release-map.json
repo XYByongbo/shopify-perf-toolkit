@@ -14,5 +14,8 @@
   "assets/examples/seo-batch.json": "assets/examples/seo-batch.json",
   "tests/seo-toolkit.test.mjs": "tests/seo-toolkit.test.mjs",
   "THIRD_PARTY_NOTICES.md": "THIRD_PARTY_NOTICES.md",
-  "licenses": "licenses"
+  "licenses": "licenses",
+  "tests/seo-repair.test.mjs": "tests/seo-repair.test.mjs",
+  "theme-code-generation": "theme-code-generation",
+  "references/source-repair-workflow.md": "references/source-repair-workflow.md"
 }

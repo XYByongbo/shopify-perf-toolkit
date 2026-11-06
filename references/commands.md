@@ -95,3 +95,7 @@ batch 的 status=complete 仅表示执行完成。reviewRequired=true、停止/�
 ## 独立 SEO 命令
 
 源码仓库运行 `node scripts/seokit.mjs --help`。SEO 发行包安装为 seokit，包含 doctor、audit-source、audit-html、batch、report、report-pdf。配置及结果契约见 [独立 SEO 工具](seo-toolkit.md)。上面的 perfkit 旧命令继续兼容。
+
+## 源码 SEO 修复和自定义性能实现（0.17.0）
+
+`seokit plan/fix/apply/verify/rollback`、`perfkit request-implementation/plan-custom` 及 `improve prepare implementation` 的参数、配置与完整执行流程见 [源码修复流程](source-repair-workflow.md)。旧命令和原验收门槛保持。
