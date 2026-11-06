@@ -25,7 +25,9 @@ PSI 仅支持公开可访问的地址，不接受本地/私网目标，不继承
 
 `fcp.json` 使用同版本 Lighthouse 和原始设置离线重放 Lantern；模拟 FCP 必须与 LHR 相差不超过 0.001ms，原始 FCP 必须与 LHR 的整数值一致（允许 1ms 舍入差）。它记录乐观/悲观图、观察时间、模拟时间、网络依赖和同任务内的脚本/首次 Layout。这个容差是重放一致性检查，**不是性能验收阈值**。缺文件、错版本或重放不一致标为 `unavailable`，不能编造原因；PSI 不提供这套本地原始导航资产。
 
-FCP 退步而原始 observed FCP 未退步时，恢复流程读取每一个样本的绑定图，辨别任务合并引起的依赖变化。模型敏感性改变原因判断，不改变已拒收结论，不开放原补丁重试，不用 observed 指标替换模拟评分。具体实例见 [Section FCP 诊断](section-fcp-review.md)。可对已有原始文件执行以下只读重放（只写新的分析文件，不启动浏览器）：
+Lighthouse simulate 与 observed FCP 使用不同时间轴，不能直接相减归因。脚本执行与首次 Layout 落在同一 RunTask 时，Lantern 可能保留整段脚本依赖；defer 本身不能排除这条路径。
+
+FCP 退步而原始 observed FCP 未退步时，恢复流程读取每一个样本的绑定图，辨别任务合并引起的依赖变化。模型敏感性改变原因判断，不改变已拒收结论，不开放原补丁重试，不用 observed 指标替换模拟评分。可对已有原始文件执行以下只读重放（只写新的分析文件，不启动浏览器）：
 
 ```sh
 node scripts/inspect_lantern_fcp.mjs /absolute/report.json /absolute/trace.json /absolute/devtoolslog.json /absolute/new-fcp-analysis.json
@@ -43,6 +45,8 @@ verify-site 要求相同引擎、页面 id/设备矩阵、每组完整报告、�
 
 官方资料：[Lighthouse](https://github.com/GoogleChrome/lighthouse)、[PSI v5](https://developers.google.com/speed/docs/insights/v5/get-started)、[评分波动与曲线](https://developer.chrome.com/docs/lighthouse/performance/performance-scoring)。
 
-## v0.5.0 执行预算与探索
+## 执行预算与探索
 
 默认正式 runs=5 不变。显式 purpose=exploration 才允许1–4次（默认3），verify-site拒绝探索数据。budget限制时间/总尝试/失败，停止后保留全部已执行报告和失败，未执行项明确计为缺测。measure默认安静并落盘summary.json；批处理、历史早停、外部模型计量的严格边界见 [execution.md](execution.md)。
+
+离线回归入口：`node --test tests/fcp-diagnostics.test.mjs`。`tests/fixtures/lantern-fcp/` 保留已绑定原始数据的高/低模式回归夹具，用于验证重放和证据拒绝路径，不代表当前商家性能。

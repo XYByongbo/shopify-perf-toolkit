@@ -101,6 +101,4 @@ node scripts/perfkit.mjs plan-official --project /absolute/theme --config /absol
 
 ## 验证边界
 
-本次知识库接线验证覆盖来源抓取/截断/失败、卡片漂移、CLI 导出与生成、site/domain/demand/split 实际补丁、错误节点拒绝、App 与 Liquid 证据保留、无收益切换及字体消费者。真实 Chrome 用于隔离夹具的图片、CLS、App 与字体执行；人工 LHR/Liquid 数据仅测试验收合同。完整结果见 [本次验证记录](shopify-knowledge-validation.md)。
-
-商家真实主题地址尚未提供，本次不报告店铺前后评分，也不承诺任何主题必然提分。交付的是能够生成、应用、回滚并实测验收的工具，以及明确的自动化覆盖范围。
+方法卡描述官方建议与本包实际支持的子集；卡片存在不代表任意主题都能自动改写。使用 `npm run test:official-methods` 检查来源漂移、补丁生成、错误证据与恢复契约；实际店铺仍需当前源码、部署绑定运行证据、独立收益和完整正式验收。隔离浏览器与合成数据仅验证工具机制，不能用作商家评分或 Shopify Liquid 服务端收益。

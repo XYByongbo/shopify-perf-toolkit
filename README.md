@@ -6,7 +6,15 @@
 
 面向 Shopify Liquid 主题开发者的本地性能工具包。把主题源码、Chrome 运行采样、Lighthouse / PSI 测量与审阅记录串起来，帮助你回答：**哪里慢、该改什么、改完是否有效。** 可从 Codex 技能或 `perfkit` CLI 使用，输入为主题源码目录；主题 ZIP 需先解压。
 
-**当前版本：0.14.0 · 2026-11-02** · [更新记录](CHANGELOG.md) · [完整命令](references/commands.md) · [安装与运行](#安装与运行)
+**当前版本：0.16.0 · 2026-11-06** · [更新记录](CHANGELOG.md) · [完整命令](references/commands.md) · [安装与运行](#安装与运行)
+
+本版拆分为两个可独立安装的工具包：**perfkit 负责性能与评分，seokit 负责只读 SEO 审查**。二者共用源码扫描、解析和指纹能力，发行包各自自包含。性能命令及验收保持兼容；SEO 首版可单独审查源码、保存 HTML 和生成报告，无需 Lighthouse 或 Chrome。
+
+- [SEO 工具包安装与使用](packages/seo/README.md)
+- [两套工具的边界、配置和迁移](references/seo-toolkit.md)
+- 同时构建：`npm run release:toolkits -- --out-dir /absolute/Codex-Outputs/new-release-directory`
+
+本版新增渲染后 HTML 审查（`audit-html` / batch `renderedHtml`）、表单与焦点快照、购物交互场景，并将技能入口按任务精简。原正式实测、部署身份、回滚与验收门槛保留。用法见 [HTML 与快照](references/rendered-html.md)、[交互场景](references/interaction-scenarios.md)；新增复用来源见 [许可说明](THIRD_PARTY_NOTICES.md)。
 
 ## 六项能力，贯穿诊断到验收
 
@@ -19,7 +27,7 @@
 | 豁免与归属 | 分开记录规则禁用与实际修复，核对生成器、App 和主题源码归属，建立可比的观察基线。 |
 | 结构依赖 | 分析 section / block 设置、别名、动态访问与调用关系，为重构提供依据。 |
 
-本版提供 **21 项通用代码策略**，包括新增的 `liquid-font-display` 和 `liquid-rehost-resource`。候选进入既有的差异审阅、应用、回滚与验证流程；结构告警和资源耗时需要进一步验证，才能判断是否有性能收益。实现与兼容要求见 [0.14.0 功能升级](references/toolkit-evolution.md)。
+本版提供 **21 项通用代码策略**，包括 `liquid-font-display` 和 `liquid-rehost-resource`。候选进入既有的差异审阅、应用、回滚与验证流程；结构告警和资源耗时需要进一步验证，才能判断是否有性能收益。实现与兼容要求见 [资源、字体与归属规则](references/toolkit-evolution.md)。
 
 ## 怎样开始
 
@@ -72,7 +80,7 @@ flowchart TB
 
 完整验收会重新校验计划及其前后文件；功能回归必须绑定候选源码、店铺/主题、页面/设备和实际完成的全部声明步骤，回归结束后再核验远端源码。缺少内容/视觉审阅时保留 `not-accepted`，可审阅已有产物后用 `verify-optimization` 复核，无需重跑 Lighthouse。旧回归记录缺少身份、稳定性或结束时间时需重新采集，不能补填通过字段；原导航评分规则不变。
 
-新增 `npm run test:architecture`，用隔离主题将预检、batch、待审计划、apply、显式同步、单补丁实验、正式验证和审阅交接连通；审阅后继续验证 CI 与回滚。运行环境、两段命令及实测覆盖见 [架构端到端验证](references/architecture-e2e.md)。
+`npm run test:architecture`，用隔离主题将预检、batch、待审计划、apply、显式同步、单补丁实验、正式验证和审阅交接连通；审阅后继续验证 CI 与回滚。运行环境、两段命令及测试边界见 [架构端到端验证](references/architecture-e2e.md)。
 
 | 层与职责 | 自动执行 | 需要人工审阅或外部操作 |
 | --- | --- | --- |
@@ -215,8 +223,8 @@ node scripts/perfkit.mjs rollback --project /absolute/theme --plan /absolute/run
 
 - [主题性能八步流程](references/theme-performance-workflow.md)、[P0/P1 规则](references/shopify-performance-rules.md)、[单补丁实验与验收](references/performance-engine.md)
 - [官方知识库与可执行补丁](references/shopify-knowledge.md)、[实际查阅的恢复资料](references/shopify-recovery-sources.md)
-- [三类优化闭环](references/extended-optimization.md)、[Liquid 首屏实测](references/section-liquid-validation.md)、[复审记录](references/section-liquid-review.md)
-- [图片、CLS、Liquid 与 App 优化](references/domain-optimization.md)、[全面审查记录](references/domain-review.md)
+- [查询、隐藏 DOM、Section Rendering 与 Liquid 首屏](references/extended-optimization.md)
+- [图片、CLS、Liquid 与 App 优化](references/domain-optimization.md)
 - [报告接入、误报校正与资源依赖](references/code-quality.md)
 - [完整命令](references/commands.md)、[整站工作流](references/site-workflow.md)、[测量约定](references/measurement.md)
 - [多文件补丁](references/site-patches.md)、[单文件补丁](references/changes.md)
@@ -229,20 +237,20 @@ node scripts/perfkit.mjs rollback --project /absolute/theme --plan /absolute/run
 
 ```sh
 npm run test:p0p1
-npm run test:execution # 本次新增流程的必要离线测试
+npm run test:execution # 执行、批处理、测量及验收回归
 npm run test:demand
 npm run test:browser
 npm test
 npm run test:lighthouse
 npm run test:site
-npm run release -- --out /absolute/Codex-Outputs/shopify-perf-toolkit-v0.14.0.zip
+npm run release -- --out /absolute/Codex-Outputs/shopify-perf-toolkit-v0.16.0.zip
 ```
 
 test:lighthouse 是 Python 汇总、评分与打包测试，合成报告不算店铺测速。test:site 使用隔离本地测试主题，运行首页/商品页 × 移动/桌面 × 前后各 5 次，共 40 次真实 Lighthouse，并验证补丁、交互、内容和回滚；需要 Chrome、Playwright，运行需数分钟。无 Playwright 时普通测试明确跳过浏览器集成。
 
 项目仅保留最新工具源码、测试、使用文档、配置模板和运行依赖。报告、测量结果、主题快照与回滚资料通过输出路径保存到工具目录之外的独立任务目录；工具目录不保留这些任务数据或生成的发行包。
 
-需要发行 ZIP 时必须按上述命令显式指定仓库外的新 ZIP 路径；白名单包含源码、测试、说明、配置示例及 lockfile，排除 node_modules、报告、回滚资料和其他 ZIP，解压后运行 npm ci。本机 Codex 技能入口 `/Users/admin/.codex/skills/shopify-perf-toolkit` 通过符号链接指向本项目，安装入口与项目 CLI 共用当前 package.json 版本的源码和依赖，仅保留这一份安装。
+需要发行 ZIP 时必须按上述命令显式指定仓库外的新 ZIP 路径；白名单包含源码、测试、说明、配置示例及 lockfile，排除 node_modules、报告、回滚资料和其他 ZIP，解压后运行 npm ci --ignore-scripts。全局 Skill 入口可指向同一个工具目录，使 Skill 与 CLI 共用源码和依赖。
 
 ### 代码、SEO 与分析型 PDF
 

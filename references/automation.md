@@ -93,3 +93,7 @@ node "<skill-dir>/scripts/perfkit.mjs" report --input "<new-run>/component-scena
 整站任务先 scan，选择高价值候选；用 capture/map 关联实际页面实例；修改前后分别运行同一场景配置，并使用 capture/verify 比较内容与布局。只有用户需要页面级性能收益结论时才另行准备正式 Lighthouse 报告。不要把所有扫描候选自动批量修复。
 
 实现依据：[Shopify JSON 模板](https://shopify.dev/docs/storefronts/themes/architecture/templates/json-templates)、[主题编辑器事件](https://shopify.dev/docs/storefronts/themes/best-practices/editor/integrate-sections-and-blocks)、[Playwright 浏览器上下文](https://playwright.dev/docs/api/class-browsercontext)。
+
+### 表单、焦点与购物交互
+
+`checkpoint` 使用 version 2，额外采集表单运行状态、实际禁用、多选项、根内焦点及滚动；不同视口/页面滚动不能比较。对比旧 version 1 仅保留历史覆盖，前后均重新采集才能使用新增能力。详见 [快照与 HTML](rendered-html.md)、[受影响购物交互场景](interaction-scenarios.md)。这里的场景执行器仍拦截业务写请求，复杂输入/乱序/IME 需用项目测试或授权预览另测。

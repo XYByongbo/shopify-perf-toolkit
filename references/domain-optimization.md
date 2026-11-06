@@ -84,10 +84,10 @@ node scripts/perfkit.mjs experiment-liquid --config /absolute/liquid-pair.json -
 
 ## 验证范围
 
-首次实现的实际结果（包括无收益和退步）见 [验证记录](domain-validation.md)；后续漏洞修复及反例验证见 [闭环审查记录](domain-review.md)。旧数据没有脚本哈希、原始 Liquid 哈希/CLI 版本或部署前后回归证明时需要重采，不回填通过字段。
+旧数据没有脚本哈希、原始 Liquid 哈希/CLI 版本或部署前后回归证明时需要重采，不回填通过字段。
 
 - `npm run test:domains`：源码绑定、尺寸/比例、Liquid 语义与采样反例、App 保持和布局生成。
 - `npm run test:domains-browser`：真实 Chrome 的图片偏移、加载优先级与 App 首次操作。
 - `npm run test:domains-live`：隔离人工夹具，真实 Chrome/Lighthouse 前后交替采样，负结果照实保留，回滚并尝试另一种图片加载方法。仅远端 source pull 用本地副本模拟。
 
-这些测试不能代替商家真实主题验收。真实主题需指定项目、独立基线/候选未发布预览、权限和业务契约；本轮真实主题地址等待用户提供。工具不会承诺任意主题必然提分，不把流程完成报告为优化成功。
+这些测试不能代替商家真实主题验收。真实主题需指定项目、独立基线/候选未发布预览、权限和业务契约。工具不会承诺任意主题必然提分，不把流程完成报告为优化成功。

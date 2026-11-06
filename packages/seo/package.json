@@ -1,0 +1,11 @@
+{
+  "name": "shopify-seo-toolkit",
+  "version": "0.16.0",
+  "private": true,
+  "type": "module",
+  "description": "Read-only Shopify SEO source and saved HTML audits, independent of performance scoring",
+  "engines": {"node": ">=22.19"},
+  "bin": {"seokit": "scripts/seokit.mjs"},
+  "files": ["README.md", "SKILL.md", "CHANGELOG.md", "package-lock.json", "agents", "lib", "scripts", "references", "assets", "tests", "THIRD_PARTY_NOTICES.md", "licenses"],
+  "scripts": {"test": "node --test tests/seo-toolkit.test.mjs"}
+}

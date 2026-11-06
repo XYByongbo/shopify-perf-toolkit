@@ -1,4 +1,4 @@
-# 命令参考（v0.14.0）
+# 命令参考（v0.16.0）
 
 在工具根目录执行 `node scripts/perfkit.mjs --help` 查看全部参数。所有 --out 均要求新文件/新目录，不覆盖旧证据。--project 是主题源码根目录，--target 是其内相对路径。doctor 检查可用性，不代表浏览器启动或网络已验证。
 
@@ -11,6 +11,7 @@
 | verify-optimization | --config，--out | 原分数、收益、身份、功能、视觉及资源等价验收 |
 | plan-resource-repair / verify-resource-repair | --project/--profile/--config，或 --config；--out | 受限坏图修复与独立内容恢复验收，不计性能收益 |
 | improve-cycle | --config，--out 新目录 | 审阅、同步、采集和正式验收的可恢复执行 |
+| audit-html | --input 绝对 HTML 路径；--fragment true/false、--lcp-id 可选，--out | 保存的渲染 HTML 检查；错误/警告退出 3，不证明源码身份或性能验收 |
 | audit-quality | --project；--checks 可选，--out | 代码、SEO、结构依赖与归属的静态候选分析 |
 | sync-shopify-docs | --config 可选，--out 新目录 | 有界获取官方文档元数据；失败/截断保留 incomplete |
 | shopify-methods | --sources、--topic、--out 可选 | 导出方法卡、真实生成器参数与来源审阅状态 |
@@ -70,7 +71,7 @@ batch 的 status=complete 仅表示执行完成。reviewRequired=true、停止/�
 
 新增 `import-field`、`audit-stylesheets`、`attribute-apps`、`measure-interactions`、`verify-interactions`、`ci-check`；`diagnose-performance` 增加 --field/--owners/--goal，`verify-gain` 增加 --goal。optimize、experiment、verify-patch、verify-optimization 可声明 goal，交互目标另需 interactionEvidence。格式、完整架构、采样标准、CI 模板和边界见 [P0/P1 实施说明](evidence-driven-architecture.md)。省略 goal 时保留原评分模式。
 
-0.11.1：scenarios 支持 `{"action":"press","selector":"#control","key":"Enter"}`；交互正式验收必须覆盖 goal.target 的同类操作及紧随的 UI 断言。旧交互采样缺少动作目标/时间等新增证据时重新采集，原评分 LHR 可继续使用。见 [二次审计](p0-p1-audit.md)。
+0.11.1：scenarios 支持 `{"action":"press","selector":"#control","key":"Enter"}`；交互正式验收必须覆盖 goal.target 的同类操作及紧随的 UI 断言。旧交互采样缺少动作目标/时间等新增证据时重新采集，原评分 LHR 可继续使用。交互契约见 [目标与交互采样](evidence-driven-architecture.md#交互采样)。
 
 
 ## Liquid 前期预检
@@ -86,3 +87,11 @@ batch 的 status=complete 仅表示执行完成。reviewRequired=true、停止/�
 配置、审阅契约、会话集成及实测门禁见 [四类优化闭环](domain-optimization.md)。
 
 0.14.0 的 batch 顶层支持 ownership 与 performanceBaseline；diagnose-performance 支持 --checks、--ownership、--performance-baseline。optimize verify / improve collect formal 用 resourceProfiles 传入前后部署绑定采样，直接 verify-optimization 仍从 regression.resourceProfiles 读取。完整契约与迁移要求见 [功能升级](toolkit-evolution.md)。
+
+0.15.0：`batch.renderedHtml` 为 1–12 项 `{input, fragment?, lcpId?}`，逐项保存 JSON/HTML 并保留 reviewRequired；只消费显式保存的 HTML，不导航或代替评分。`scenarios.checkpoint` 默认输出 version 2；新增表单、焦点和滚动状态，旧 version 1 仅保留历史覆盖，新旧不可混比。见 [HTML 与快照](rendered-html.md)、[购物交互](interaction-scenarios.md)。
+
+0.15.1：多份 HTML 独立保存 `rendered-html-N.transport.json`，完整汇总保存 `rendered-html.json`。`audit-site --html-audits <该数组文件>` 将其作为 `unverified-source` 补充证据带入最终报告，保留具体问题，不混入源码归因或评分。批处理与直接调用均校验 HTML 审查契约；失败/超时保留已完成项及未完成范围。
+
+## 独立 SEO 命令
+
+源码仓库运行 `node scripts/seokit.mjs --help`。SEO 发行包安装为 seokit，包含 doctor、audit-source、audit-html、batch、report、report-pdf。配置及结果契约见 [独立 SEO 工具](seo-toolkit.md)。上面的 perfkit 旧命令继续兼容。

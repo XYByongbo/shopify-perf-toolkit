@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "project": "/absolute/theme",
+  "renderedHtml": [
+    {"input": "/absolute/task/page.html", "fragment": false},
+    {"input": "/absolute/task/section.html", "fragment": true}
+  ],
+  "timeoutMs": 120000
+}

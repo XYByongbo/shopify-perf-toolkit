@@ -12,7 +12,7 @@ import { createDemandPlan, freeReferences } from '../lib/demand-plan.mjs';
 import { applySitePlan, rollbackSitePlan, createSitePlan } from '../lib/site-changes.mjs';
 import { compareCheckpoints, verifyPreservation, preservationStyles } from '../lib/preservation.mjs';
 import { verifyPatchExperiment, experimentHistoryGate, patchFingerprint, runPatchExperiment } from '../lib/patch-experiment.mjs';
-import { siteRun, saveManifest, changeReport } from './helpers/site-run.mjs';
+import { siteRun, saveManifest, changeReport, regressionForRun } from './helpers/site-run.mjs';
 import { runBatch } from '../lib/batch.mjs';
 import { verifyOptimization } from '../lib/optimize.mjs';
 import { execFile } from 'node:child_process';
@@ -342,4 +342,38 @@ test('FCP and Speed Index goals produce executable CSS plans and require their o
     await rollbackSitePlan(plan,project);
     assert.equal((await diagnoseUnified({project,profiles,goal:{kind:'loading',metric:'cls'}})).candidates.length,0);
   }
+});
+
+test('version 2 state reaches formal acceptance through patch evidence while apply/rollback retain drift protection',async t=>{
+  const f=await setupPlan(t),base=await sourceSnapshot(f.project);
+  await applySitePlan(f.plan,f.project);const candidate=await sourceSnapshot(f.project);
+  const before=await siteRun(t,{devices:['mobile'],scores:{mobile:[80]},augment:r=>{r.audits['total-blocking-time'].numericValue=300;}});
+  const after=await siteRun(t,{devices:['mobile'],offset:20,scores:{mobile:[90]}});
+  await proof(before,base,f.project);await proof(after,candidate,f.project);
+  const point=()=>({version:2,focusIndex:-1,environment:{viewport:[390,844,1],scroll:[0,0]},
+    content:[{tag:'BUTTON',attrs:[['type','button']],text:['Buy'],value:null,checked:null,properties:{
+      indeterminate:null,disabled:false,readOnly:null,required:null,multiple:null,selected:null,open:null,hidden:false,inert:false,
+      effectivelyDisabled:false,min:null,max:null,step:null,pattern:null,selectedOptions:null,scroll:[0,0]}}],
+    layout:[{rect:[0,0,100,30],styles:Object.fromEntries(preservationStyles.map(k=>[k,'fixture']))}]});
+  const rb=regression(base.hash),ra=regression(candidate.hash);
+  rb.runs[0].steps.find(s=>s.action==='checkpoint').observation=point();
+  ra.runs[0].steps.find(s=>s.action==='checkpoint').observation=point();
+  const patch={plan:f.plan,diagnosis:f.diagnosis,candidateId:f.config.candidateId,before:before.root,after:after.root,regressionBefore:rb,regressionAfter:ra};
+  const formal={before:before.root,after:after.root,plan:f.plan,expectedSourceHash:candidate.hash,patchEvidence:patch,
+    regression:regressionForRun(after),review:{sourceHash:candidate.hash,contentPreserved:true,visualsPreserved:true,summary:'Synthetic contract review only; no merchant measurement claim.'}};
+  assert.equal((await verifyOptimization(formal)).outcome,'optimization-accepted');
+  const state=ra.runs[0].steps.find(s=>s.action==='checkpoint').observation.content[0].properties;
+  state.effectivelyDisabled=true;
+  const changed=await verifyOptimization(formal);
+  assert.equal(changed.outcome,'not-accepted');
+  assert.equal(changed.checks.find(c=>c.id==='original-score-targets').pass,true);
+  assert.equal(changed.checks.find(c=>c.id==='single-patch-experiment').pass,false);
+  state.effectivelyDisabled=null;assert.notEqual((await verifyOptimization(formal)).outcome,'optimization-accepted');
+  state.effectivelyDisabled=false;
+  assert.notEqual((await verifyOptimization({...formal,expectedSourceHash:'0'.repeat(64)})).outcome,'optimization-accepted');
+  await rollbackSitePlan(f.plan,f.project);assert.equal((await sourceSnapshot(f.project)).hash,base.hash);
+  await applySitePlan(f.plan,f.project);
+  const target=path.join(f.project,f.plan.changes[0].target);await writeFile(target,'external edit');
+  await assert.rejects(rollbackSitePlan(f.plan,f.project),{code:'SOURCE_DRIFT'});
+  assert.equal(await readFile(target,'utf8'),'external edit');
 });

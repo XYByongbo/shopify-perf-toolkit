@@ -28,6 +28,12 @@ Playwright/Chromium 是可选浏览器依赖，不打包个人浏览器或安装
 
 本地迁移预览只验证所支持的布局与安全交互；其 App、API、写表单、结账被禁止，不声称 Shopify 线上完整验收。没有真实主题的同条件报告时，将性能收益标为未验证。
 
+## 表单、HTML 与购物交互接入
+
+同一前后场景使用 [version 2 快照](rendered-html.md#快照-version-2) 保留实际表单状态、根内焦点和滚动；不能仅凭相同 HTML 属性推断功能未变。搜索/筛选/变体/加购等补丁按 [交互场景矩阵](interaction-scenarios.md) 选择正反例；现有 scenarios 不支持的 IME、复杂输入、乱序和真实写请求用项目测试或授权预览另测，不能把清单或受限执行当作业务通过。
+
+已保存 HTML 的检查走 `audit-html` / batch.renderedHtml，最终整站报告保留具体问题及未验证的源码关联；静态 HTML 正常不构成正式实测、部署身份、功能视觉或回滚证据。
+
 ## Lighthouse 导入
 
 ```sh

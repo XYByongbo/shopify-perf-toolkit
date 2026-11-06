@@ -50,13 +50,14 @@ const specs = {
   'plan-resource-repair':['project','config','profile','out'],
   'verify-resource-repair':['config','out'],
   'audit-quality': ['project', 'checks', 'out'],
+  'audit-html': ['input', 'fragment', 'lcp-id', 'out'],
   map: ['project', 'target', 'capture', 'out'],
   scenarios: ['config', 'out'],
   measure: ['config', 'out', 'progress'],
   batch: ['config','out'],
   summarize: ['run','out'],
   'evaluate-iteration': ['config','out'],
-  'audit-site': ['project', 'run', 'checks', 'official', 'resources', 'runtime', 'precheck', 'ownership', 'performance-baseline', 'out'],
+  'audit-site': ['project', 'run', 'checks', 'official', 'resources', 'runtime', 'precheck', 'ownership', 'performance-baseline', 'html-audits', 'out'],
   'plan-site': ['project', 'recipe', 'out'],
   'verify-site': ['before', 'after', 'thresholds', 'out'],
   inspect: ['project', 'target', 'capture', 'out'],
@@ -112,11 +113,12 @@ const help = `Shopify Perf Toolkit ${version} (Node 22+, offline core)
   audit-performance --project <theme> [--profiles <runtime-profile-array.json>] [--baseline <performance.json>] [--checks <check-import.json>] [--ownership <ownership.json>] --out <performance.json>
   import-check --project <theme> --input <theme-check.json> [--metadata <scan-contract.json>] [--baseline <prior-import.json>] --out <check-import.json>
   audit-quality --project <theme> [--checks <check-import.json>] --out <quality.json>
+  audit-html --input <absolute-rendered.html> [--fragment true|false] [--lcp-id <trace-identified-img-id>] --out <html-audit.json>
   audit-resources --project <theme> [--probe true|false] --out <resource-audit.json>
   plan-resource-repair --project <theme> --config <approved-image-repair.json> --profile <deployment-bound-profile.json> --out <plan.json>
   verify-resource-repair --config <plan-before-after-profiles.json> --out <repair-verification.json>
   measure --config <measurement.json> --out <NEW-run-directory>
-  audit-site --project <theme> --run <measurement-directory> [--checks <check-import.json>] [--resources <resource-audit.json>] [--ownership <ownership.json>] [--performance-baseline <performance.json>] --out <site-audit.json>
+  audit-site --project <theme> --run <measurement-directory> [--html-audits <saved-html-audits.json>] [--checks <check-import.json>] [--resources <resource-audit.json>] [--ownership <ownership.json>] [--performance-baseline <performance.json>] --out <site-audit.json>
   plan-site --project <theme> --recipe <reviewed-recipe.json> --out <site-plan.json>
   verify-site --before <baseline-run> --after <candidate-run> [--thresholds <thresholds.json>] --out <site-verification.json>
   map --project <theme> --capture <capture.json> [--target <file>] --out <mapping.json>
@@ -398,6 +400,13 @@ export async function main(argv=process.argv.slice(2)) {
     const result=await importCheck({project:required(a,'project'),input:await readJSON(required(a,'input')),metadata:a.metadata?await readJSON(a.metadata):{},baseline:a.baseline?await readJSON(a.baseline):null});
     await emit(result,a.out);return !result.complete||result.comparison.gate==='review-required'?3:0;
   }
+  if(command==='audit-html') {
+    await newOutput(required(a,'out'));
+    if(a.fragment !== undefined && !['true','false'].includes(a.fragment)) throw new Error('fragment must be true or false.');
+    const {auditRenderedHTML}=await import('../lib/rendered-html.mjs');
+    const result=await auditRenderedHTML({input:required(a,'input'),fragment:a.fragment==='true',lcpId:a['lcp-id']??null});
+    await emit(result,a.out);return result.reviewRequired?3:0;
+  }
   if(command==='audit-quality') {
     await newOutput(a.out);
     const {auditQuality}=await import('../lib/quality-audit.mjs');
@@ -453,7 +462,7 @@ export async function main(argv=process.argv.slice(2)) {
   }
   if(command==='audit-site') {
     const {auditSite}=await import('../lib/site-audit.mjs');
-    const result=await auditSite({project:required(a,'project'),run:required(a,'run'),checks:a.checks?await readJSON(a.checks):null,officialChecks:a.official?await readJSON(a.official):null,resourceAnalysis:a.resources?await readJSON(a.resources):null,precheck:a.precheck?await readJSON(a.precheck):null,runtimeProfile:a.runtime?await readJSON(a.runtime):null,ownership:a.ownership?await readJSON(a.ownership):[],performanceBaseline:a['performance-baseline']?await readJSON(a['performance-baseline']):null});
+    const result=await auditSite({project:required(a,'project'),run:required(a,'run'),checks:a.checks?await readJSON(a.checks):null,officialChecks:a.official?await readJSON(a.official):null,resourceAnalysis:a.resources?await readJSON(a.resources):null,precheck:a.precheck?await readJSON(a.precheck):null,runtimeProfile:a.runtime?await readJSON(a.runtime):null,ownership:a.ownership?await readJSON(a.ownership):[],performanceBaseline:a['performance-baseline']?await readJSON(a['performance-baseline']):null,renderedHtml:a['html-audits']?await readJSON(a['html-audits']):[]});
     await emit(result,a.out);return result.complete===false?3:0;
   }
   if(command==='plan-site') {

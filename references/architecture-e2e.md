@@ -33,33 +33,8 @@ npm run test:architecture -- --resume /absolute/task/run --review /absolute/task
 
 若 batch 已完整完成而后续测试脚本在应用前中断，可用 `npm run test:architecture -- --continue-after-batch /absolute/task/run` 继续。仅在本地基线、候选及两份部署快照仍是原基线时允许复用，重新占用原本地端口；已有应用产物或源码变化不能靠此选项重试覆盖。不是自动补挑性能样本。
 
-## 本轮发现与修复
-
-1. 旧验证脚本分别止于 score-targets-met 与 promising，未覆盖完整验收和审阅交接。增加上述贯通脚本。
-2. 默认 score/loading 的功能验收只校验顶层状态及少量字段，源码不稳定、错误主题或隐藏失败步骤仍可能通过。已增加统一完整回归校验，并由 optimize 自动绑定候选项目/主题；最初复现测试在修复前失败。
-3. 普通计划进入正式验证时未重算计划完整性，且只比对候选文件。现在同时校验完整计划与基线/候选文件，并补篡改计划、无关基线的拒绝测试。
-4. npm 与终端选择的 Shopify CLI 不同，旧 CLI 参数错误只留下泛化异常。现在 batch 保留 precheck-failure.json，可追溯实际版本、退出码与输出；通过显式 CLI 路径继续运行，不自动升级或跳过预检。
+## 数据与验证边界
 
 旧功能回归缺少新增 `sourceStable`、店铺/主题、`documentStable`、`finishedAt` 或完整远端核验时，需重新运行 scenarios 和 verify-deployment；不能补造历史记录。原导航 LHR、默认 score、正式每组至少 5 次、移动 75/80、桌面 85/90、指标收益与退步阈值不变。
 
-## 测试覆盖边界
-
-2026-10-20 的隔离端到端主线已通过：真实 Lighthouse 26 次，其中正式基线/候选各 10 次、单补丁前后各 3 次，0 失败。使用 Shopify CLI 4.9.4、Theme Check 3.29.0、Lighthouse 13.5.0 和已有 Chrome 155。
-
-| 验证项 | 实际结果 |
-| --- | --- |
-| 移动正式矩阵（前后各 5 次） | 分数中位数 93 → 100，候选最低 100，原 75/80 门槛通过 |
-| 桌面正式矩阵（前后各 5 次） | 分数中位数 98 → 100，候选最低 100，原 85/90 门槛通过；全矩阵收益由移动组满足，未放宽 3 分收益下限 |
-| 单补丁实验 | promising；精确补丁差异、身份、目标收益、内容/布局/交互保留全部通过 |
-| 审阅交接 | 自动阶段只有 content-and-visual-review 为 false，返回 not-accepted；操作者查看完整差异及双设备前后截图，正式截图哈希一致；提供独立审阅文件后 CLI 返回 optimization-accepted |
-| 拒绝路径 | 未审哈希、未同步预览被阻止；另有 8 类最终无效证据均不能通过，CLI 缺审阅退出码 3、完整通过退出码 0 |
-| CI 与回滚 | CI passed 保留独立含义；本地回滚字节恢复，测试预览保持候选直到显式恢复 |
-| Node 全量 | 416 项中 406 通过、0 失败，10 项专用浏览器用例另行运行 |
-| 专用真实 Chrome | 10/10 通过，无跳过；重复交互采集、键盘操作、首次交互、动态 Section、源码身份与 DevTools trace |
-| Python | 62/62 通过，无跳过；原评分、汇总、发行与 PDF 均覆盖 |
-
-相关源码/验收/预检定向测试 64/64 已通过，属于上述 Node 套件，不重复计数。初始两次旧 CLI 失败和测试脚本断言失败均保留：脚本将计划级 verificationRequired 误当成逐文件字段，修正后复用已完成的 10 次基线继续，未覆盖证据或重挑样本。
-
-本轮任务目录为 `/private/tmp/perfkit-architecture-live-KN5dDJ`，保留完整原始报告、review-request/operator-review、最终验收、拒绝路径及回滚回执；日志为 `/private/tmp/perfkit-architecture-*.log`。临时产物不进入工具发行包。
-
-真实端到端主线使用默认 score，loading/interaction 的完整门禁另有合成契约测试和真实浏览器采集测试。真实 Shopify 账号同步、GitHub Actions 上下游 artifact 传输、线上 CWV/INP 及真实交易写操作不属于隔离夹具的通过结论。
+默认 score 流程使用隔离主题和真实浏览器测量；loading/interaction 另有契约与浏览器测试。远端 source pull 由本地部署快照模拟，真实 Shopify 账号同步、GitHub Actions artifact 传输、线上 CWV/INP 及真实交易写操作不属于该夹具的验证范围。测试产物保存在脚本输出的项目外目录，不作为发行包内容。

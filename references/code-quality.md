@@ -86,3 +86,7 @@ node scripts/perfkit.mjs audit-site --project /absolute/theme --run /absolute/ru
 ## 自动前期预检
 
 两项 Liquid 结构规则可用 `precheck` 直接调用官方检查器；完整流程、独立配置范围与 batch 开关见 [前期预检](precheck.md)。LiquidComplexity 和 LiquidNestingDepth 均单列为维护性/架构问题，和 snippet 调用深度、文件行数分别解释。
+
+## 与渲染后 HTML 衔接
+
+用户提供最终 HTML 时按 [HTML 审查契约](rendered-html.md) 运行 `audit-html` 或加入 batch.renderedHtml；代码报告不能从 Liquid 标签推断最终元数据唯一性、活动重复 ID 或动态 JSON-LD。批处理把逐项结果带入最终 audit-site，直接调用用 --html-audits 指定已保存审查数组。HTML 问题保留 HTML 行号及原始字节指纹，标为 unverified-source，不伪造 Liquid 映射或替代原正式验收。

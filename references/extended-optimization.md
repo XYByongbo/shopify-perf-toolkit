@@ -50,7 +50,7 @@ Section API 生成器用稳定子节点选择器查找**当前**页面真实 `sh
 
 恢复机制将此方法与 scoped HTML/JSON 请求缩减区分。后两者无收益时可选 Liquid 首屏；Liquid 首屏仍无收益时，该机制也耗尽；若原始 trace 指向剩余控制脚本请求，可选 section-liquid-inline 消除该请求，否则须基于新证据换瓶颈，不通过调整等待时间或重测通过。既有门槛全部保留。
 
-`section-liquid-inline` 使用相同 initialLiquid 参数，额外要求 inlineScriptAllowed，并要求当前部署绑定 profile 采集了 CSP。仅接受展开后不超过 4KiB 的独立控制器，且只有加载函数和 document 事件代理注册；拒绝其他文件引用、非标准 defer 标签、脚本结束符或 Liquid 定界符。控制器移入目标区块，原资产改为迁移注释，不新增首交互等待；控制器通过版本签名按当前区块挂载，编辑器 unload 时移除业务监听并取消请求；load 时重新绑定，旧响应和过期排序请求不能覆盖新内容。4KiB 为加生命周期包装前的控制器预算，完整内联代码另限 8KiB，均为工具保守边界。外部控制器方法也采用相同生命周期管理，并保留原 script 标签的 nonce。
+`section-liquid-inline` 使用相同 initialLiquid 参数，额外要求 inlineScriptAllowed，并要求当前部署绑定 profile 采集了 CSP。仅接受展开后不超过 4KiB 的独立控制器，且只有加载函数和 document 事件代理注册；拒绝其他文件引用、非标准 defer 标签、脚本结束符或 Liquid 定界符。控制器移入目标区块，原资产改为迁移注释，不新增首交互等待；控制器通过版本签名按当前区块挂载，编辑器 unload 时移除业务监听并取消请求；load 时重新绑定，旧响应和过期排序请求不能覆盖新内容。4KiB 为加生命周期包装前的控制器预算，完整内联代码另限 8KiB，均为工具保守边界。外部控制器方法也采用相同生命周期管理，并保留原 script 标签的 nonce。 裸内联候选按 script-src-elem → script-src → default-src 及多策略交集判断；不复制预览 nonce、不放宽 CSP。动态引用、外部 App 全局契约仍需实际审阅。从未加载过区块控制器的页面首次在编辑器添加该区块，需要目标主题提供初始化入口。旧引导若仅保留初始化布尔值、无法释放匿名监听，升级预览须整页重载。
 
 可重复执行 `PERF_KIT_BROWSER_TESTS=1 node --test tests/section-liquid-browser.test.mjs` 和 `node scripts/validate_section_liquid.mjs`。后者生成完整主题副本、实际补丁、Theme Check、探索与双设备正式报告，最多 26 次 Lighthouse；首轮不 promising 则停止正式测量并保留负结果。第二机制使用 `--inline --previous=/absolute/previous-run`，重新定位并保存上轮正式失败与调整依据；每种机制仍固定最多 26 次，不重复测同一补丁。它使用实际 LiquidJS/Chrome，但 Shopify source-pull 与 API 由本地夹具提供，不能证明商家主题或 Shopify 服务端收益。
 
@@ -144,6 +144,8 @@ npm run test:extended
 npm run test:extended-browser
 npm run test:extended-live
 node scripts/validate_extended_recovery.mjs
+# 仅复核已有证据，不追加测分预算：
+node scripts/recheck_extended_evidence.mjs /absolute/prior-output /absolute/new-recheck-output
 ```
 
-单元测试使用合成证据验证解析、门禁与会话状态；Chrome 测试运行真实生成补丁；live 脚本运行真实 Lighthouse 探索，保留负结果并换方案。只在本地人工夹具模拟 Shopify source pull 和 Section API；不伪造 Shopify Liquid 服务端收益。新增恢复脚本固定最多 30 次 Lighthouse（五种开销对照各三次 + 基线三次 + 两轮各六次），不自动加码。复审结果见 [闭环复审](extended-review.md)，历史结果见 [上次验证记录](extended-validation.md)。商家项目地址尚未提供，店铺实际评分与服务器查询收益仍待真实预览验证。
+单元测试使用合成证据验证解析、门禁与会话状态；Chrome 测试运行真实生成补丁；live 脚本运行真实 Lighthouse 探索，保留负结果并换方案。只在本地人工夹具模拟 Shopify source pull 和 Section API；不伪造 Shopify Liquid 服务端收益。恢复脚本固定最多 30 次 Lighthouse（五种开销对照各三次 + 基线三次 + 两轮各六次），不自动加码。隔离夹具结果不构成商家主题验收；真实任务仍需目标源码、预览、独立测量和服务器查询证据。

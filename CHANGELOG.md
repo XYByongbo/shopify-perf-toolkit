@@ -1,5 +1,34 @@
 # 更新记录
 
+## 0.16.0 — 2026-11-06
+
+- 拆分复审：排除源码 SVG、template、noscript 中的页面元数据及惰性图片误报；旧综合审查复用同一修正规则。
+- SEO 报告校验覆盖状态、布局清单、观察归属及截断详情数量；等价 JSON 字段顺序不再导致拒绝。
+- 依赖测试覆盖全部共享模块并禁止反向导入产品层；双包发布前同时检查性能与 SEO 锁文件版本。
+
+- 第一轮 SEO/性能拆分：新增独立 seokit CLI、Skill、源码/保存 HTML 审查、无测量依赖的批处理及 HTML/PDF 报告。
+- 提取公共源码遍历、读取/指纹、HTML 词法、进程和报告转义；旧 audit-quality 与新 SEO 入口共用同一规则实现。
+- HTML 按规则组先筛选再截断，保留完整计数；SEO 来源与覆盖契约拒绝伪造干净汇总及线上验收结论。
+- 旧 perfkit 命令、报告、评分门槛、补丁、回滚及会话继续兼容。SEO 首版只读，不新增主题写入器。
+- 新增显式双包构建与独立安装验证，SEO 无 npm 运行依赖，两个 ZIP 均自包含；补充反例、架构边界与打包回归。
+
+## 0.15.1 — 2026-11-03
+
+- 修复 batch 多份 renderedHtml 共用 transport 文件导致第二项失败；逐项记录、已完成数量与失败/超时范围独立保留。
+- 将渲染后 HTML 审查数组贯通 batch → audit-site CLI/直接调用 → 最终 HTML 报告，展示具体问题并保留 unverified-source 关联边界；不混入源码候选或性能评分。
+- 校验保存的 HTML 审查计数、状态、输入指纹和来源声明，拒绝伪造干净汇总及部署验证结论。
+- HTML 标准库辅助进程继承批处理监督组，避免超时后脱离总预算继续运行；其他子进程默认分组行为不变。
+- 快照拒绝用 null 掩盖适用表单状态及无效布局，保留旧版本兼容和自定义元素状态；补充正式验收阻断、源码恢复及漂移冲突测试。
+- 整站工作流、代码审查和验证协议接入 HTML 与购物交互矩阵；原独立五样本、评分/退步、部署身份、功能视觉及回滚机制保留。
+
+## 0.15.0 — 2026-11-03
+
+- 在既有 checkpointDOM / verifyPreservation 中增加 version 2：运行时表单约束、indeterminate、多选项、祖先实际禁用、open/inert、焦点及滚动；混版、缺字段、环境不一致拒绝验收。version 1 历史比较保留并显式标注有限覆盖。
+- 新增标准库 HTML helper、`audit-html` CLI、batch `renderedHtml`、HTML 报告与有界摘要；输入绑定原始字节 SHA-256，重复 ID/元数据/图片/样式表/JSON-LD 问题单独报告，不充当源码身份或性能验收。
+- 增加购物交互场景和请求边界，明确 IME、乱序、写入成功但 UI 失败、重复写入等测试，以及现有工具未自动执行的范围。
+- 主 SKILL.md 按任务读取；既有专项约束迁至 references/task-workflows.md，沿用单 agent、预算、五样本、评分/退步、部署、功能视觉和 apply/rollback 保护。
+- 保留 GitLab 套件固定来源和 MIT 许可；未导入品牌设计规范或替换测量/回滚引擎。
+
 ## 0.14.0 — 2026-11-02
 
 ### 新增能力
@@ -17,7 +46,7 @@
 - 图片解码有界等待；选源变化、解码超时、空/缺版本快照和采样截断保持未知。不完整观察不能用于可比基线。
 - CPU 和引用在重复请求间只计一次，使用原始 URL 关联后再脱敏；配置引用保留 JSON 路径，不伪造行号；识别编译后的 .js 与 .js.liquid 资产关系。
 - 修复保存采样在批处理末端丢失、字体调查任务未进入工作流、豁免信息被观察差异遮盖等接入缺口。
-- 整合 0.13.0 之后的恢复闭环与正式证据完整性修复，详见下面的日期记录。
+- 恢复闭环保留正式证据固定、补证续跑、预算结算和异常恢复保护。
 
 ### 升级与边界
 
@@ -26,41 +55,6 @@
 - `optimize verify` 和 improve collect 的 formal 配置支持 resourceProfiles，直接 verify-optimization 使用 regression.resourceProfiles。
 - ZIP 是源码发行包，包含 lockfile、文档、测试和配置示例；不包含 node_modules、测量报告或其他发行包。解压后运行 npm ci --ignore-scripts。
 - 原评分、独立测量、功能及视觉门槛保留；本版发布检查不等于商家主题性能验收。
-
-### 2026-10-29 collect / verify 异常路径一致性复审
-
-- 采集器写样本后抛错仍在 finally 固定原始证据；续跑绑定原采集目录，不能利用读取失败替换整批样本。
-- 新增部分报告字节锁，一份报告缺失不解除其他文件的固定；各类有效样本及资源预算独立保存，导航读取失败不跳过其他固定步骤。
-- 采集器上报次数与落盘记录矛盾时保留预留预算并拒绝退款；加强采集目录、配置、次数及文件锁的会话继承校验。
-- 补充抛错、缺报告、改分、错误零次数回执、导航目录读取失败及修复后原样本续跑测试，原验收门槛保持不变。
-
-### 2026-10-29 补证据续跑完整性复审
-
-- 有效导航、交互和 Liquid 原始样本在附属审阅/行为文件读取前固定；读取失败不能换样本。旧源码的导航证据不再污染新候选 formalAfter。
-- 首次在 verify 指定的资源预算持久化并传给后续方案采集，省略不会取消，修改被拒绝。verify 输入白名单拒绝覆盖计划、目标、审阅批准或执行计数。
-- 会话链核验继承的证据锁与资源预算；补充缺文件、原始字节修改、旧候选证据、预算省略/放宽与跨机制续跑回归，验收门槛不变。
-
-### 2026-10-29 审阅绑定与正式证据修复续跑
-
-- 旧源码的正式内容/视觉审阅在 collect 预留导航前被拦截；新计划审阅仍比较完整补丁语义，不自动改写审阅结论。
-- improve-cycle 支持 option.verification，复用固定正式样本修复证据；正式拒绝后可继续回滚、重采集、换机制、暂停审阅并续跑至验收。
-- verify 读取独立 regression/review JSON 文件；拒绝替换固定样本或放宽预算，采集与验收门槛不变。
-- 回归覆盖实际 CSS 生成变化后两层旧审阅阻断，以及采集后中断、文件证据修复、正式拒绝后换方案的完整链路。
-
-### 2026-10-29 恢复闭环二次审查
-
-- 重采集保留完整交互状态与目标契约，拒绝未执行动作、受阻请求和截断证据；显式 DOM selectors 不再被绑定列表覆盖。
-- 覆盖率改变实际生成补丁；失去可行性的 critical CSS 记录准备失败并转向其他方案，续跑不会沿用旧审阅。
-- 区分正式有效拒绝与无效证据；交互/Liquid 正式预检无收益会回滚重诊断，不额外采集导航分数。
-- 固定首次正式导航样本及有效交互样本 hash，补证据不得换分；增加实际生成器反事实测试和 Chrome 覆盖率/行为回归。
-
-### 2026-10-29 恢复闭环与架构修复
-
-- 统一官方方法执行标识，修复审阅后的 active option 续接。
-- 拆分正式采集、验收和会话链校验，消除源码采集模块的静态循环依赖。
-- 无收益/正式拒绝后自动重采集证据，严格核验时效、源码及预览范围，保留失败历史与预算；新证据参与重新生成补丁。
-- 补充续跑、旧证据重放、采集部分失败、预算、瓶颈消失及模块依赖回归测试。
-
 
 ## 0.13.0 — 2026-10-26
 
@@ -72,91 +66,6 @@
 - 按机制与相关源码/依赖/交付上下文记住负实验；新增交互样式成本候选和相关 API 文档漂移门禁，原独立收益及分数门槛保持不变。
 - 增加真实 Chrome、输出等价、依赖漂移、无收益与固定 Lighthouse 样本验证。商家主题实测待提供源码及未发布预览，不声明店铺提分。
 
-
-## Unreleased — 三类闭环复审与证据驱动恢复
-
-- 新增单份 HTML 原节点停放 hidden-detach，免除旧方案的重复正文和外部引导请求；旧模板执行器标记 comparison-only，不再作为 improve 的重试选项。修复旧分批中断后的丢失/重复节点。
-- 恢复按失败机制排除等价变体，增加收益上限、失败指标、原始报告哈希绑定的成本与模拟/观察 FCP 对照；显式、official 与计划入口一同受检。
-- 查询每个 viewport 要求完整 body 和 page 1/2；隐藏 DOM 要求首次展开完整内容，并计入连续就绪断言延迟，内联脚本也不能漏过交互门禁。
-- 保留 30 份真实 Lighthouse 负结果与独立浏览器回归：新隐藏 DOM 无显著收益；随后 Section API 改善 LCP 但触发 FCP 退步，仍拒收。没有放宽指标或扩大测分预算。详见 references/extended-review.md。
-
-## Unreleased — 查询、隐藏 DOM 与 Section Rendering 生成器
-
-- 增加六个域执行器：已有输出上限/手工分页转换、隐藏 template 一次或分批实体化、整页 HTML fetch 转单区块 HTML/JSON。当前官方方法库覆盖 26 篇、32 个执行入口。
-- 新增准确 fetch initiator 源码映射、唯一关闭 details 运行定位、查询循环与原始 Liquid 热点绑定；不猜测 section ID 或新增固定列表分页。
-- 强制 page 1/2 checkpoint、首开/关闭/键盘重开状态变化、真实 section 正文与请求哈希；回退请求不能证明优化成功。额外回归页面单独部署校验，正式 Liquid 采样门禁保留。
-- 无收益真实回滚并切换不同实现；新增源码/负例/会话测试、Chrome 及 Lighthouse 隔离验证。完整边界与结果见 references/extended-optimization.md、references/extended-validation.md。
-
-## Unreleased — 可执行 Shopify 官方方法库
-
-- 实际读取 161 个相关官方页面，整理性能目录 70 篇专题；23 篇接入 26 个受限执行入口，明确区分自动生成、人工补丁和测量/平台范围。
-- 新增 sync-shopify-docs、shopify-methods、plan-official；来源漂移需复核，失败/截断不误报页面删除。诊断与 improve 接入方法合同、固定来源版本、实际补丁及无收益历史。
-- 收紧图片/Liquid 节点绑定并保留域验证，拒绝同文件无关修改或 App 证据降级；跨文章不能重复同一失败生成器，人工不同机制保持可尝试。
-- 修复字体回退只新增 face 而未使用的问题，新增具体字体列表接线、歧义/名称碰撞拒绝和真实 Chrome 字形验证。
-- 文档与测试见 references/shopify-knowledge.md、references/shopify-knowledge-validation.md。
-
-## Unreleased — 图片、CLS、Liquid 与 App 实测闭环
-
-- 全面审查修复：candidateId=next 支持跨候选切换，区分结构拒绝与待补审阅，方法耗尽不再显示可执行。App 增加实际脚本字节、交互前后状态和回归前后部署证明；真实功能失败在测分前阻断。
-- Liquid 增加原始数据哈希、CLI/采样格式一致性与完整区间核算，拒绝把缺失热点当零耗时；固定正式样本并冻结嵌套诊断/回归文件，采集受剩余预算约束。新增反例与真实 Chrome 验证，详见 references/domain-review.md。
-
-- 新增 profile-domain，前后核验远端主题源码与浏览器身份；运行 LCP 元素、尺寸变化与布局偏移关联到唯一解析器节点，支持显式审阅的唯一选择器映射。
-- 新增 plan-domain：图片 eager/high priority、尺寸/比例、局部应用容器空间预留、受限 Liquid 缓存、主题可控 App defer/async，均生成实际可逆补丁。
-- 新增 experiment-liquid：真实 Shopify CLI 交替采样，重算文件 self-time 与总成本；无服务端收益先停止导航采样，正式验收要求每侧五次并冻结有效证据。修正纳秒单位换算和采样权重完整性。
-- 接入 improve 的 domain 配置与 method=next；无收益回滚后选择不同实现，缺少审阅不误判方法已经无效。保持原分数、功能、内容和部署门禁。
-- App 实验与正式回归检查原资源成功加载和实际交互断言。新增 assert-image-loaded，比较图片已加载的最终布局，避免把正常预留空间误当布局回归；首次 CLS 仍独立测速。
-- 新增单元反例、Chrome 与 Lighthouse 隔离验证脚本。人工夹具的结果与商家真实主题效果分开记录，不承诺所有主题提分。
-
-## Unreleased — 低分与无收益的可恢复优化会话
-
-- 审查修复：实验绑定假设页面/设备和会话店铺/引擎；固化原始测量内容，禁止复制状态绕过后继占用；runner 异常消耗预留预算并回滚，apply 异常进入恢复状态。
-- 区分正式证据缺失与实际退化；评分器失效不能推进中间基线，交互优化不因导航分数不变而误回滚；正式拒绝计入失败预算。
-- 接通 FCP/Speed Index 阻塞资源候选到实际 CSS 计划及独立实验；修正跨页面/设备候选碰撞、重复候选成本选择和 CSS profile/页面覆盖统计，报告明确当前不可执行的假设范围。
-- 新增 improve：start/refresh/prepare/apply/experiment/verify/rollback，调用真实补丁生成、应用、实验和回滚；逐步持久化状态，保留显式同步边界。
-- 新增 recovery 诊断：按页面/设备计算样本中位数、MAD 和版本可识别的指标丢分，结合当前源码候选、线上影响与实验历史排序；输出官方资料支持的证据采集和实现路线，排除陈旧/错误页面 profile。
-- 无收益、未确认假设与回归自动回滚并重诊断；拒绝重复有效实验的相同补丁及同假设/方法，允许无效证据修复后的预算内重试。历史、预算和独占后继记录贯穿 resume。
-- score/loading 模式中，只有原评分门槛未通过、其他正式门禁全部通过的候选可标为 improved-below-target 并推进中间基线；最终同时比较最初基线的累计收益，原门槛与审阅要求不降低。
-- 增加 CLI、摘要、HTML、配置示例、官方资料清单、合成证据状态机测试和真实 Chrome/Lighthouse 隔离测试。测试不代表任意店铺评分保证，也不声称读取 Shopify 全站文档。
-
-## Unreleased — 性能诊断与验收增强
-
-- P1 runtime 覆盖从 5 组扩展到 9 组：新增 PERF_ASYNC_CSS、PERF_FONT_DELIVERY、PERF_LAYOUT_ANIMATION、PERF_JS_DOM_READY_FETCH 的运行证据检查，从 runtime profile 中检测异步样式阻塞、外部字体延迟、布局抖动和 DOM ready 后 fetch。
-- Liquid profile 增加源码图关联：热点文件通过 sourceIndex 验证存在性，并提取 render/include 路径；修正纳秒时间因子。
-- 交互 CPU 诊断增强：增加交互窗口上下文（起止时间、动作列表）和交互期间加载脚本的识别与源码归因。
-- critical CSS 生成增加共享/页面特定规则分析：基于多 profile 覆盖率将规则分类为共享、页面特定和未使用，辅助拆分决策；分析结果作为 plan metadata 参与完整性校验。
-- App 归属增加自动边界推断：从未映射资源的请求模式（host、路径前缀、请求计数、资源类型）自动推断潜在 App 边界，标注置信度，需人工复核。
-- 实验支持 URL 参数切换主题版本：通过 `previewThemeIdParam` 配置，在同一预览 URL 上使用不同 `preview_theme_id` 参数切换基线/候选，减少预览同步成本。
-- verify-optimization 增加可配置性能预算门禁：支持 `maxTotalTransferBytes`、`maxByType`、`maxRequests` 预算配置，超支时拦截验收；预算检查作为 advisory gate，不替代分数门槛。
-
-## Unreleased — Shopify P1 检查与可逆策略
-
-- 新增 16 组 P1 候选：preload/preconnect、CSS 数量/同步与原生作用域、字体交付/display/fallback、布局动画、ready 后 fetch、输入监听器、View Transition、重复 module shim、隐藏 DOM、弹窗 LCP 和 Liquid fetch limit。合计 27 组，报告区分静态、仓库依赖和实际支持的运行检查。
-- 新增四项源码绑定策略：重复字面资源提示清理、关键 print/onload CSS 恢复同步、受限 passive 输入监听器、显式 transform/opacity 过渡属性；通用策略总数 19。复用原字体、合帧、作用域和分包能力，不自动移除 App、延后同意弹窗或改写任意异步逻辑。
-- runtime profile 增加有界 delivery 快照、最终文档响应 Link 头、隐藏组件规模和 LCP 祖先 tag/role。HTTP 103 未采集，旧数据缺字段、截断及源码漂移明确标记，不作为通过。
-- scan、analyze-code、audit-performance、audit-site、diagnose-performance、batch 和 HTML 报告沿用原链路；原生 stylesheet 作用域分析复用 audit-stylesheets。数量触发线明确是工具复核预算，不冒充平台限制。
-- 新增 AST/误报边界、四策略应用/回滚/漂移拒绝、CLI/报告、字体/作用域和真实 Chrome 回归；更新技能入口、命令、规则文档和 recipe 示例。店铺性能收益仍需独立测量。
-
-## Unreleased — Shopify 官方性能规则与 P0 优化
-
-- 新增 check-performance：执行 11 项官方性能检查，冻结 Liquid/JSON/JS/CSS 快照，保存版本、配置、输出与哈希；batch officialChecks 与既有结构预检/外部导入并存。
-- 修复 AssetSize、DeprecateLazysizes/DeprecateBgsizes 分类，RAW_BYTES 大资源候选接入整站 findings，不虚构性能节省。
-- 新增 11 组 P0 候选规则、独立 audit-performance、scan/audit-site/diagnose-performance 接入和 HTML 覆盖报告；区分静态线索、运行证据缺失与需复核。
-- 新增 image_tag 加载、相邻双端 picture、head 字面资源前移、循环不变 metafield 缓存和 CSS LCP reveal 五项可逆策略；保留严格的动态语法、作用域、内容与布局边界。
-- runtime profile 记录 LCP 元素/祖先样式及动画历史；仅将动画与 render delay 的同时出现标为相关性候选。旧 profile 缺该证据时提示重采，已有有效 CPU 候选继续保留。
-- 新增官方 runner、规则、拒绝边界、Liquid 输出等价、补丁应用/回滚、CLI/batch 和真实 Chrome picture/LCP 回归。
-
-## Unreleased — 架构端到端验收
-
-- 新增隔离主题端到端脚本，贯通官方预检、batch/诊断计划、审阅哈希、本地应用、显式预览同步、单补丁探索、正式验收、独立内容视觉审阅、CI 和回滚；真实 Chrome/Lighthouse，Shopify 远端源码传输由隔离部署快照替代。
-- 修复完整验收的功能证据门禁：所有 goal 均检查源码稳定性、店铺/主题、页面/设备、完整声明步骤、受限状态、文档稳定性和回归后的完整远端核验，不再仅信任顶层 passed。
-- 正式验证重新校验完整计划指纹与前后文件；optimize 自动绑定回归项目和主题，冲突在测量前拒绝。原 score、样本数、评分及收益门槛不变。
-- 预检失败保留命令输出与退出码，文档说明 npm 与终端可能选择不同 CLI。旧回归产物缺新增身份/结束时间时重新采集；原导航 LHR 可继续使用。
-
-## Unreleased — Liquid 前期预检
-
-- 新增官方两规则 precheck：临时源码快照、120/10 可配置阈值、版本/配置/源码指纹、AST 解释和影响范围候选。
-- batch 可在测量前执行预检，JSON/HTML 与整站补充报告保留待复核状态，不改变性能评分门禁。
-- 明确 LiquidNestingDepth 分类，与 snippet 调用深度分开；不修改主题或自动整改。
 
 ## 0.11.1 — 2026-10-20
 
@@ -268,9 +177,3 @@
 ## 0.1.0 — 2026-10-13
 
 原始单图与组件性能工具包，包含诊断、采集、补丁、回滚、报告和 Lighthouse 导入。原始发行包位于 `releases/`，历史验证材料位于 `validation/2026-10-13-v0.1.0/`。
-
-## 未发布：资源预算与恢复执行
-
-- 修正资源总量与请求计数，移除跨采样累计与 third-party 重复计算；资源预算缺证据拒绝验收，支持零上限。
-- 新增 improve-cycle、sync 和 collect：不同机制生成、审阅内容绑定、显式预览同步核验、正式采集、失败后继续；预算与首次样本持久化。
-- 新增预算/恢复负向回归与固定样本本地 Chrome/Lighthouse 验证脚本；不宣称真实商家收益。

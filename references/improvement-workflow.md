@@ -93,6 +93,6 @@ verification 仅接受 after、before、regression、review、interactionEvidenc
 
 `npm run test:improvement-live` 启动人工本地主题，用真实 Chrome/Lighthouse 验证：负对照补丁 → 无收益回滚 → 重诊断 → critical CSS 补丁 → 新实验。只有 Shopify 远端源码传输由隔离副本替代；输出在系统临时目录。它不发布主题、不伪造人工视觉审阅、不把探索结果当作实店正式通过。测量可能因机器负载出现不稳定，失败记录保留，不自动重复采样直到通过。
 
-使用 `npm run test:improvement-live -- --goal fcp` 或 `--goal speedIndex` 可预先声明相应加载目标；resume 不允许切换目标。审查修复记录见 [实现审查](improvement-review.md)。
+使用 `npm run test:improvement-live -- --goal fcp` 或 `--goal speedIndex` 可预先声明相应加载目标；resume 不允许切换目标。
 
 2026-10-22 本机验证：CSS 注释负对照前后移动端中位分数 93→93，判定 no-measurable-gain 并实际回滚；调整 critical CSS 后三次独立候选均为 100，前侧三次均为 93，LCP 中位数约 2103→758 ms，判定 promising。第一次准备 critical CSS 因缺少交互状态覆盖率被拒绝，补采后通过 `--resume /absolute/step-N/session.json` 继续，复用已有基线和负对照历史。这是人为设置慢样式资源的隔离实验，不是生产主题收益或完整正式验收。

@@ -91,3 +91,7 @@ batch 增加 `"bottlenecks":{"profiles":["/absolute/task/runtime/profile.json"],
 `npm run test:demand` 验证依赖与收益协议；`npm run test:browser` 验证真实 Chrome 下的 CPU 映射、生成补丁、首次点击、多实例、卸载重连、动态 section、CSS 与 DOM 检查点。测试服务器只在临时本地目录，测试数据不代表店铺分数。
 
 `npm run test:demand-live` 使用刻意设置阻塞 CSS 的隔离主题，真实采集运行证据、生成并应用 CSS 补丁、检查交互/呈现，再交替运行六次真实 Lighthouse。仅 Shopify CLI 源码传输被本地夹具替代，真实浏览器校验页面身份。该测试保留结果到终端输出的临时目录；不能作为任何实际店铺的提分证据。
+
+### 0.15.0 快照覆盖
+
+现有 checkpointDOM 原位扩展为 version 2，包含表单/多选、祖先实际禁用、焦点和滚动；混用版本、缺新字段或环境不一致拒绝比较。version 1 历史对比明确 legacy 覆盖。参见 [快照契约](rendered-html.md#快照-version-2)。原源码/动作绑定、受限请求、0.5 CSS px 最大容差与完整实测门槛不变。

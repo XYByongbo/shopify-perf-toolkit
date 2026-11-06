@@ -1,0 +1,18 @@
+{
+  "package.json": "packages/seo/package.json",
+  "package-lock.json": "packages/seo/package-lock.json",
+  "README.md": "packages/seo/README.md",
+  "SKILL.md": "packages/seo/SKILL.md",
+  "CHANGELOG.md": "packages/seo/CHANGELOG.md",
+  "agents": "packages/seo/agents",
+  "lib/core": "lib/core",
+  "lib/seo": "lib/seo",
+  "scripts/seokit.mjs": "scripts/seokit.mjs",
+  "scripts/audit_rendered_html.py": "scripts/audit_rendered_html.py",
+  "scripts/render_seo_report.py": "scripts/render_seo_report.py",
+  "references/seo-toolkit.md": "references/seo-toolkit.md",
+  "assets/examples/seo-batch.json": "assets/examples/seo-batch.json",
+  "tests/seo-toolkit.test.mjs": "tests/seo-toolkit.test.mjs",
+  "THIRD_PARTY_NOTICES.md": "THIRD_PARTY_NOTICES.md",
+  "licenses": "licenses"
+}

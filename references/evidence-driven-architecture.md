@@ -218,21 +218,10 @@ App 归属见 `app-owners.json`：精确 host + pathPrefix + 用途 + 实际复�
 
 ## 验证
 
-0.11.1 的审计问题、修复及新增验证见 [二次审计记录](p0-p1-audit.md)。
-
-更新架构后的跨阶段验证、人工交接、拒绝路径与实际环境记录见 [架构端到端验证](architecture-e2e.md)。`test:architecture` 自动阶段在缺少内容/视觉审阅时保留 `not-accepted` 和审阅材料；获授权操作者检查后提供独立 review 文件，第二阶段重用原始证据完成 CLI 验收、CI 与回滚，不重新采样。
+跨阶段测试、审阅交接与运行方法见 [架构端到端验证](architecture-e2e.md)。`test:architecture` 自动阶段在缺少内容/视觉审阅时保留 `not-accepted` 和审阅材料；获授权操作者检查后提供独立 review 文件，第二阶段重用原始证据完成 CLI 验收、CI 与回滚，不重新采样。
 
 `optimize verify` 自动把项目路径和主题 ID 绑定进 scenarios；显式冲突会在采样前拒绝。直接调用 `verify-optimization` 时，`before/after` 为测量目录，`patchEvidence` 可为实验 JSON 路径，`plan/regression/review` 为已读取的 JSON 对象。回归需保留新产生的 `sourceStable`、店铺/主题、`documentStable`、`finishedAt` 和完整远端核验信息。旧文件缺失这些记录须重新执行 scenarios 与远端核验；不得补造历史时间或通过标记。导航 LHR、默认 score 和评分阈值兼容。
 
 `npm run test:p0p1` 验证导入、策略、重复交互证据、目标与原门槛、CLI/batch。`npm run test:browser` 用已有 Chrome 与临时本地页面验证 Event Timing/交互 CPU/首次操作/动态 section；不访问实际店铺。完整回归仍执行 npm test、npm run test:lighthouse、npm run test:site 与 npm run test:demand-live。工具夹具通过不代表店铺已经提分。
-
-### 0.11.0 本地验证记录（2026-10-19）
-
-- Node 全量：379 个用例，370 通过、9 个专用浏览器用例在单独套件运行；该浏览器套件 9/9 通过。启用已有 Playwright 后，原 capture/map/scenarios 浏览器用例也在全量套件中执行。
-- 新增 P0/P1 协议测试 15/15；最后对目标/单补丁/CLI/batch 的相关回归 48/48。
-- Python 汇总、原评分、发行与 PDF：应用自带 Python 下 62/62，无跳过；系统 Python 缺少 PDF 库时的跳过不计作验证通过。
-- 隔离主题整站：40 次真实 Lighthouse，原评分门槛通过，功能断言、内容/几何、回滚源码字节检查通过。
-- 隔离主题单补丁：前后交替共 6 次真实 Lighthouse，0 失败，结果 promising；身份、精确差异、内容交互与目标收益检查通过，仍为探索结论。
-- CI reusable workflow YAML 与只读权限检查通过；发行白名单包含全部新模块、测试、文档与模板。CI 尚需主题仓库提供真实上下游 artifacts，未在 GitHub 或实际店铺执行。
 
 依据：[Shopify 2026 工作流](https://performance.shopify.com/blogs/blog/web-performance-tools-for-2026)、[原生样式裁剪](https://shopify.dev/docs/storefronts/themes/best-practices/performance/stylesheet-subsetting)、[INP](https://shopify.dev/docs/storefronts/themes/best-practices/performance/understanding-inp)、[CrUX API](https://developer.chrome.com/docs/crux/api)、[Long Animation Frames](https://developer.chrome.com/docs/web-platform/long-animation-frames)、[Lighthouse CI](https://shopify.dev/docs/storefronts/themes/tools/lighthouse-ci)。
