@@ -5,7 +5,7 @@ description: Diagnose and optimize Shopify Liquid themes at site, image, or comp
 
 # Shopify 主题性能优化
 
-版本 **0.17.0（2026-11-06）**。从本技能目录执行 `node scripts/perfkit.mjs`，用绝对 `--project` 指向真实主题。Node 22.19+、Python 3.9+；工具依赖在本目录 `npm ci --ignore-scripts`，不安装到主题。主题 ZIP 先解压；没有真实主题/URL时完成隔离验证并明确店铺未测。
+版本 **0.18.0（2026-11-06）**。从本技能目录执行 `node scripts/perfkit.mjs`，用绝对 `--project` 指向真实主题。Node 22.19+、Python 3.9+；工具依赖在本目录 `npm ci --ignore-scripts`，不安装到主题。主题 ZIP 先解压；没有真实主题/URL时完成隔离验证并明确店铺未测。
 
 用户要求优化时，目标是完成可逆的主题代码修改并验证实际收益；审计和报告用于定位。只要求检查或建议时保持只读。没有安全可验证候选时给出具体受限原因与已排除方案，不以重复测分代替修改。
 
@@ -25,6 +25,7 @@ description: Diagnose and optimize Shopify Liquid themes at site, image, or comp
 | 查询、隐藏 DOM、Section Rendering、首屏 Liquid | [扩展方法](references/extended-optimization.md)、[专项执行细则](references/task-workflows.md#证据驱动修改) |
 | 搜索、变体、Quick-add、加购/购物车 | [购物交互场景](references/interaction-scenarios.md)、[交互与线上证据](references/evidence-driven-architecture.md)；按影响范围选择场景，沿用原正式交互门禁 |
 | 独立 SEO 审查与 SEO 报告 | [SEO 工具](references/seo-toolkit.md)；使用 shopify-seo-toolkit / seokit |
+| 两主题差异、整改报告复核、JSON 内嵌业务代码 | [整改证据](references/theme-evidence.md)；theme-diff / audit-quality，区分当前状态、历史原因与性能收益 |
 | 综合代码审查（含旧 SEO 规则）、Theme Check、外链与脚本依赖 | [规范报告](references/code-quality.md)、[前期预检](references/precheck.md)、[官方性能规则](references/shopify-performance-rules.md)；audit-quality / check-performance / audit-resources |
 | 已保存的最终页面/Section HTML、表单/焦点快照 | [渲染后 HTML 与快照](references/rendered-html.md)；audit-html；batch 的 renderedHtml 仅消费显式输入 |
 | PDF 评估报告 | [PDF 契约](references/pdf-report.md)、[报告细则](references/task-workflows.md#pdf-评估报告)；report-pdf，绑定当前源码问题和实际验证 |

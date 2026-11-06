@@ -1,4 +1,4 @@
-# 命令参考（v0.16.0）
+# 命令参考（v0.18.0）
 
 在工具根目录执行 `node scripts/perfkit.mjs --help` 查看全部参数。所有 --out 均要求新文件/新目录，不覆盖旧证据。--project 是主题源码根目录，--target 是其内相对路径。doctor 检查可用性，不代表浏览器启动或网络已验证。
 
@@ -12,6 +12,7 @@
 | plan-resource-repair / verify-resource-repair | --project/--profile/--config，或 --config；--out | 受限坏图修复与独立内容恢复验收，不计性能收益 |
 | improve-cycle | --config，--out 新目录 | 审阅、同步、采集和正式验收的可恢复执行 |
 | audit-html | --input 绝对 HTML 路径；--fragment true/false、--lcp-id 可选，--out | 保存的渲染 HTML 检查；错误/警告退出 3，不证明源码身份或性能验收 |
+| theme-diff | --before、--after 主题目录，--out 新文件 | 全量哈希与 JSON 字段/内嵌代码差异；本地快照，不推断部署或提速 |
 | audit-quality | --project；--checks 可选，--out | 代码、SEO、结构依赖与归属的静态候选分析 |
 | sync-shopify-docs | --config 可选，--out 新目录 | 有界获取官方文档元数据；失败/截断保留 incomplete |
 | shopify-methods | --sources、--topic、--out 可选 | 导出方法卡、真实生成器参数与来源审阅状态 |
@@ -99,3 +100,5 @@ batch 的 status=complete 仅表示执行完成。reviewRequired=true、停止/�
 ## 源码 SEO 修复和自定义性能实现（0.17.0）
 
 `seokit plan/fix/apply/verify/rollback`、`perfkit request-implementation/plan-custom` 及 `improve prepare implementation` 的参数、配置与完整执行流程见 [源码修复流程](source-repair-workflow.md)。旧命令和原验收门槛保持。
+
+0.18.0：CLI 5 检查格式适配、失败证据、JSON 内嵌审计与两主题对照见 [整改证据](theme-evidence.md)。

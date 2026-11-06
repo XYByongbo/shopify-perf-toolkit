@@ -51,6 +51,7 @@ const specs = {
   'audit-resources': ['project', 'probe', 'out'],
   'plan-resource-repair':['project','config','profile','out'],
   'verify-resource-repair':['config','out'],
+  'theme-diff': ['before', 'after', 'out'],
   'audit-quality': ['project', 'checks', 'out'],
   'audit-html': ['input', 'fragment', 'lcp-id', 'out'],
   map: ['project', 'target', 'capture', 'out'],
@@ -116,6 +117,7 @@ const help = `Shopify Perf Toolkit ${version} (Node 22+, offline core)
   check-performance --project <theme> [--config <official-options.json>] --out <official-checks.json>
   audit-performance --project <theme> [--profiles <runtime-profile-array.json>] [--baseline <performance.json>] [--checks <check-import.json>] [--ownership <ownership.json>] --out <performance.json>
   import-check --project <theme> --input <theme-check.json> [--metadata <scan-contract.json>] [--baseline <prior-import.json>] --out <check-import.json>
+  theme-diff --before <baseline-theme> --after <candidate-theme> --out <diff.json>
   audit-quality --project <theme> [--checks <check-import.json>] --out <quality.json>
   audit-html --input <absolute-rendered.html> [--fragment true|false] [--lcp-id <trace-identified-img-id>] --out <html-audit.json>
   audit-resources --project <theme> [--probe true|false] --out <resource-audit.json>
@@ -390,7 +392,7 @@ export async function main(argv=process.argv.slice(2)) {
     const {assertPrecheckOutput}=await import('../lib/precheck.mjs');
     await assertPrecheckOutput(required(a,'project'),a.out);
     const {checkOfficialPerformance}=await import('../lib/official-performance.mjs');
-    const result=await checkOfficialPerformance({project:required(a,'project'),config:a.config?await readJSON(a.config):{}});
+    let result;try{result=await checkOfficialPerformance({project:required(a,'project'),config:a.config?await readJSON(a.config):{}});}catch(error){if(a.out&&error.officialChecks)await emit({schemaVersion:1,...error.officialChecks,status:'failed',error:error.message},a.out);throw error;}
     await emit(result,a.out);return result.reviewRequired?3:0;
   }
   if(command==='audit-performance') {
@@ -404,7 +406,8 @@ export async function main(argv=process.argv.slice(2)) {
   if(command==='precheck') {
     const {precheckTheme,assertPrecheckOutput}=await import('../lib/precheck.mjs');
     await assertPrecheckOutput(required(a,'project'),a.out);
-    const result=await precheckTheme({project:required(a,'project'),config:a.config?await readJSON(a.config):{}});
+    await newOutput(a.out);
+    let result;try{result=await precheckTheme({project:required(a,'project'),config:a.config?await readJSON(a.config):{}});}catch(error){if(a.out&&error.precheck)await emit({schemaVersion:1,...error.precheck,status:'failed',error:error.message},a.out);throw error;}
     await emit(result,a.out);return result.reviewRequired?3:0;
   }
   if(command==='import-check') {
@@ -418,6 +421,13 @@ export async function main(argv=process.argv.slice(2)) {
     const {auditRenderedHTML}=await import('../lib/rendered-html.mjs');
     const result=await auditRenderedHTML({input:required(a,'input'),fragment:a.fragment==='true',lcpId:a['lcp-id']??null});
     await emit(result,a.out);return result.reviewRequired?3:0;
+  }
+  if(command==='theme-diff') {
+    await newOutput(required(a,'out'));
+    const {assertPrecheckOutput}=await import('../lib/precheck.mjs');
+    await assertPrecheckOutput(required(a,'before'),a.out);await assertPrecheckOutput(required(a,'after'),a.out);
+    const {compareThemes}=await import('../lib/theme-diff.mjs');
+    const result=await compareThemes({before:a.before,after:a.after});await emit(result,a.out);return result.complete?0:3;
   }
   if(command==='audit-quality') {
     await newOutput(a.out);

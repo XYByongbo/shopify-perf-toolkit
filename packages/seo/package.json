@@ -1,6 +1,6 @@
 {
   "name": "shopify-seo-toolkit",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "private": true,
   "type": "module",
   "description": "Shopify source SEO audits, reversible repairs and source verification, independent of performance scoring",

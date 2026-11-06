@@ -10,7 +10,9 @@ batch 在测量前串行导入报告、分析外链/脚本，并将 checks.json/
 
 ## 报告接入
 
-支持两种输入：
+支持旧分组报告、CLI 5 结果和人工观察三种输入。CLI 5 的 `{valid, issues, errorCount, warningCount, infoCount}` 自动归一化到 0-based；metadata.positionBase 使用 0，原始 1-based issue 保留。详情见 [整改证据](theme-evidence.md)。
+
+原有输入：
 
 1. Theme Check 分文件 JSON 数组：`[{"path":"sections/a.liquid","offenses":[{"check":"UnknownFilter","severity":"error","start_row":0,"start_column":0,"message":"Unknown filter 'structured_data'"}]}]`。
 2. 人工从报告提取的 `check-observations`：见 [汇总输入示例](../assets/examples/check-observations.json)。保留页码、来源及原结论；只有汇总数时不要伪造逐文件结果。PDF 本身不能直接传给 CLI；先按 PDF 技能读取、核对，再生成结构化陈述。

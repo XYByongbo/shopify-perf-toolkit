@@ -6,9 +6,11 @@
 
 面向 Shopify Liquid 主题开发者的本地性能工具包。把主题源码、Chrome 运行采样、Lighthouse / PSI 测量与审阅记录串起来，帮助你回答：**哪里慢、该改什么、改完是否有效。** 可从 Codex 技能或 `perfkit` CLI 使用，输入为主题源码目录；主题 ZIP 需先解压。
 
-**当前版本：0.17.0 · 2026-11-06** · [更新记录](CHANGELOG.md) · [完整命令](references/commands.md) · [安装与运行](#安装与运行)
+**当前版本：0.18.0 · 2026-11-06** · [更新记录](CHANGELOG.md) · [完整命令](references/commands.md) · [安装与运行](#安装与运行)
 
-本版拆分为两个可独立安装的工具包：**perfkit 负责性能与评分，seokit 负责源码 SEO 修复**。二者共用源码扫描、解析和指纹能力，发行包各自自包含。性能命令及验收保持兼容；SEO 可独立完成 plan → apply → verify → rollback，fix 可一次执行；无需 Lighthouse 或 Chrome。性能新增 request-implementation / plan-custom，将 Codex 编写的自定义代码接回原实测、回滚及正式验收流程。详见 [新功能使用流程](references/source-repair-workflow.md)。
+本版增加 `theme-diff`、JSON 配置内嵌代码审计，并兼容 Shopify CLI 5 的检查输出；保持部署、正式采样、业务与视觉验收要求。详见 [主题整改证据与配置内嵌代码](references/theme-evidence.md)。
+
+工具包拆分为两个可独立安装的工具包：**perfkit 负责性能与评分，seokit 负责源码 SEO 修复**。二者共用源码扫描、解析和指纹能力，发行包各自自包含。性能命令及验收保持兼容；SEO 可独立完成 plan → apply → verify → rollback，fix 可一次执行；无需 Lighthouse 或 Chrome。性能新增 request-implementation / plan-custom，将 Codex 编写的自定义代码接回原实测、回滚及正式验收流程。详见 [新功能使用流程](references/source-repair-workflow.md)。
 
 - [SEO 工具包安装与使用](packages/seo/README.md)
 - [两套工具的边界、配置和迁移](references/seo-toolkit.md)
