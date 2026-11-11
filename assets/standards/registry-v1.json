@@ -1,0 +1,2114 @@
+{
+  "schemaVersion": 1,
+  "kind": "standards-registry",
+  "id": "shopify-seo-performance",
+  "version": "1.0",
+  "date": "2026-11-11",
+  "status": "draft-pending-review",
+  "enforcement": "reference-only",
+  "adoptionStatus": "recommendation-not-enforced",
+  "sources": [
+    {
+      "file": "01-governance.md",
+      "sha256": "57b716f427e89f061e5e3149312e2d2ed37c8c21701ed34f025e400a90d3fdb7"
+    },
+    {
+      "file": "02-performance-rules.md",
+      "sha256": "e14c7345d12cb9248684c76a768c7baa4c65ff0c232a4f62d21ecaba06e697fc"
+    },
+    {
+      "file": "03-seo-rules.md",
+      "sha256": "048222a1b330e32826f274b9633b593ecff00c5b8db182f80ba1004e51e1f009"
+    },
+    {
+      "file": "04-verification-and-tooling.md",
+      "sha256": "df3bed2098b81951975a709e7725145d8423b8486956388d535c86565afcd98f"
+    },
+    {
+      "file": "06-adoption-guide.md",
+      "sha256": "cfe5dda0d620c027755e22774f43958743223757d8796e608ec552fb8e579818"
+    }
+  ],
+  "rules": [
+    {
+      "id": "GOV-01",
+      "title": "每项指标和每类输出都有具名所有者",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "部门负责人",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "01-governance.md",
+        "line": 100
+      }
+    },
+    {
+      "id": "GOV-02",
+      "title": "所有上线改动都走发布清单",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "区块开发、主题负责人",
+      "evidenceRequirement": "E0–E2、E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "01-governance.md",
+        "line": 109
+      }
+    },
+    {
+      "id": "GOV-03",
+      "title": "引入应用或第三方脚本先评估再安装",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "应用与数据负责人",
+      "evidenceRequirement": "E2、E4",
+      "checkGuidance": "插件 P06、P07、P08",
+      "adoptionTier": "卡点",
+      "skillsRole": "—",
+      "pluginRole": "记录",
+      "source": {
+        "file": "01-governance.md",
+        "line": 118
+      }
+    },
+    {
+      "id": "GOV-04",
+      "title": "活动上线和下线都要清理",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "运营、应用与数据负责人",
+      "evidenceRequirement": "E1、E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "01-governance.md",
+        "line": 134
+      }
+    },
+    {
+      "id": "GOV-05",
+      "title": "例外必须登记",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "提出例外的人",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "卡点",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "01-governance.md",
+        "line": 143
+      }
+    },
+    {
+      "id": "GOV-06",
+      "title": "网址变更先定重定向",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "SEO 负责人",
+      "evidenceRequirement": "E1、E3",
+      "checkGuidance": "插件 S06",
+      "adoptionTier": "卡点",
+      "skillsRole": "—",
+      "pluginRole": "记录",
+      "source": {
+        "file": "01-governance.md",
+        "line": 152
+      }
+    },
+    {
+      "id": "GOV-07",
+      "title": "每月复盘真实用户数据",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "主题负责人、SEO 负责人",
+      "evidenceRequirement": "E3",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "01-governance.md",
+        "line": 159
+      }
+    },
+    {
+      "id": "GOV-08",
+      "title": "规范每季度复核一次来源",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "规范维护者",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "01-governance.md",
+        "line": 170
+      }
+    },
+    {
+      "id": "GOV-09",
+      "title": "不做只对测速工具有效的改动",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "全体",
+      "evidenceRequirement": "E2、E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "卡点",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "01-governance.md",
+        "line": 179
+      }
+    },
+    {
+      "id": "GOV-10",
+      "title": "每次上线都保留回滚路径",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "卡点",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "01-governance.md",
+        "line": 193
+      }
+    },
+    {
+      "id": "PERF-IMG-01",
+      "title": "首屏主视觉用 img 输出，不用 CSS 背景图",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E1、E2",
+      "checkGuidance": "插件 P01；插件待补（LCP 元素是否为背景图）",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 26
+      }
+    },
+    {
+      "id": "PERF-IMG-02",
+      "title": "LCP 图片不得延迟加载",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E1、E2",
+      "checkGuidance": "插件 P01、P09；插件待补（LCP 图片为 lazy 时直接判定）",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 61
+      }
+    },
+    {
+      "id": "PERF-IMG-03",
+      "title": "高优先级只给真正的 LCP 图片",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E1、E2",
+      "checkGuidance": "插件待补（多个 fetchpriority=high）",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 81
+      }
+    },
+    {
+      "id": "PERF-IMG-04",
+      "title": "首屏内容不等待脚本或动画才可见",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发、设计",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工（录屏与 trace 对照）",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "引导",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 92
+      }
+    },
+    {
+      "id": "PERF-IMG-05",
+      "title": "位置判断必须对 nil 安全",
+      "level": "必须",
+      "basis": "平台事实",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0、E1",
+      "checkGuidance": "人工（代码审查）",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 103
+      }
+    },
+    {
+      "id": "PERF-IMG-06",
+      "title": "组件内的第一项不等于页面首屏",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0、E1",
+      "checkGuidance": "人工（代码审查）",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 126
+      }
+    },
+    {
+      "id": "PERF-IMG-07",
+      "title": "用图片过滤器链生成标记",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0",
+      "checkGuidance": "Theme Check `DeprecatedFilter`、`RemoteAsset`",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 137
+      }
+    },
+    {
+      "id": "PERF-IMG-08",
+      "title": "srcset 与 sizes 对应真实布局",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E1、E2",
+      "checkGuidance": "插件 P09；插件待补（sizes 声明与实际显示宽度的差距）",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 150
+      }
+    },
+    {
+      "id": "PERF-IMG-09",
+      "title": "手机和桌面构图不同时用 picture",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E1、E2",
+      "checkGuidance": "插件待补（隐藏的重复图片仍被下载）",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 176
+      }
+    },
+    {
+      "id": "PERF-IMG-10",
+      "title": "所有图片和媒体预留空间",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0、E1",
+      "checkGuidance": "Theme Check `ImgWidthAndHeight`",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 187
+      }
+    },
+    {
+      "id": "PERF-IMG-11",
+      "title": "preload 只在测到发现延迟时使用",
+      "level": "应当",
+      "basis": "平台事实",
+      "responsibility": "区块开发、主题负责人",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "Theme Check `AssetPreload`",
+      "adoptionTier": "按需",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 198
+      }
+    },
+    {
+      "id": "PERF-IMG-12",
+      "title": "弹窗不得成为 LCP 元素",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "运营、应用与数据负责人",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "插件 P01",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 209
+      }
+    },
+    {
+      "id": "PERF-IMG-13",
+      "title": "视频按需加载",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "区块开发、运营",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "插件 P06",
+      "adoptionTier": "按需",
+      "skillsRole": "生成",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 222
+      }
+    },
+    {
+      "id": "PERF-IMG-14",
+      "title": "素材按规格上传",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "运营、设计",
+      "evidenceRequirement": "E2、E4",
+      "checkGuidance": "插件 P09",
+      "adoptionTier": "默认",
+      "skillsRole": "—",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 231
+      }
+    },
+    {
+      "id": "PERF-CLS-01",
+      "title": "为应用内容预留空间",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "区块开发、应用与数据负责人",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "插件 P02",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 250
+      }
+    },
+    {
+      "id": "PERF-CLS-02",
+      "title": "晚出现的内容不推挤已显示的内容",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "插件 P02",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 269
+      }
+    },
+    {
+      "id": "PERF-CLS-03",
+      "title": "不用固定高度裁掉内容来换稳定",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "引导",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 278
+      }
+    },
+    {
+      "id": "PERF-CLS-04",
+      "title": "动画只改变 transform 和 opacity",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "区块开发、设计",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "引导",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 285
+      }
+    },
+    {
+      "id": "PERF-JS-01",
+      "title": "外部脚本不阻塞解析",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发、主题负责人",
+      "evidenceRequirement": "E0",
+      "checkGuidance": "Theme Check `ParserBlockingScript`；插件 P08",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 308
+      }
+    },
+    {
+      "id": "PERF-JS-02",
+      "title": "关键内容由服务端输出",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "人工（禁用脚本检查）；插件待补（初始 HTML 与渲染后 DOM 的差异）",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 319
+      }
+    },
+    {
+      "id": "PERF-JS-03",
+      "title": "非关键功能按需加载，但不把成本推给第一次点击",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "插件 P03、P07",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 330
+      }
+    },
+    {
+      "id": "PERF-JS-04",
+      "title": "初始化可重复执行，卸载时清理干净",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工（按 04 的多实例与编辑器场景）",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "引导",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 341
+      }
+    },
+    {
+      "id": "PERF-JS-05",
+      "title": "事件处理要轻",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "插件 P03、P07",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 357
+      }
+    },
+    {
+      "id": "PERF-JS-06",
+      "title": "只读请求可取消，并忽略过期响应",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工（快速连续操作）",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 373
+      }
+    },
+    {
+      "id": "PERF-JS-07",
+      "title": "写请求一次提交对应一次写入，不自动重试",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工（Network 中的写请求计数）",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 382
+      }
+    },
+    {
+      "id": "PERF-JS-08",
+      "title": "局部更新代替整页重载",
+      "level": "应当",
+      "basis": "平台事实",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 395
+      }
+    },
+    {
+      "id": "PERF-JS-09",
+      "title": "不引入新的框架和运行库",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "区块开发、主题负责人",
+      "evidenceRequirement": "E0、E2",
+      "checkGuidance": "插件 P06",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 411
+      }
+    },
+    {
+      "id": "PERF-JS-10",
+      "title": "多个区块共用的模块通过 import map 加载",
+      "level": "建议",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 418
+      }
+    },
+    {
+      "id": "PERF-JS-11",
+      "title": "首屏必须依赖外部数据时尽早发请求",
+      "level": "建议",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 429
+      }
+    },
+    {
+      "id": "PERF-JS-12",
+      "title": "页面转场可以被用户操作打断",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 442
+      }
+    },
+    {
+      "id": "PERF-JS-13",
+      "title": "同一次用户动作只触发一次业务响应",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 453
+      }
+    },
+    {
+      "id": "PERF-CSS-01",
+      "title": "首屏样式同步加载",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "主题负责人、区块开发",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "插件 P02、P08",
+      "adoptionTier": "卡点",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 468
+      }
+    },
+    {
+      "id": "PERF-CSS-02",
+      "title": "首次绘制所需资源放在 content_for_header 之前，且不改动它",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E0、E2",
+      "checkGuidance": "Theme Check `ContentForHeaderModification`、`RequiredLayoutThemeObject`",
+      "adoptionTier": "按需",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 481
+      }
+    },
+    {
+      "id": "PERF-CSS-03",
+      "title": "区块样式自给自足",
+      "level": "必须",
+      "basis": "平台事实",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0、E2",
+      "checkGuidance": "Theme Check `ValidScopedCSSClass`",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 495
+      }
+    },
+    {
+      "id": "PERF-CSS-04",
+      "title": "同一个样式表只引入一次",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E1、E2",
+      "checkGuidance": "skills 的渲染 HTML 检查脚本；插件待补（重复样式表）",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 506
+      }
+    },
+    {
+      "id": "PERF-CSS-05",
+      "title": "stylesheet 和 javascript 标签里不写 Liquid",
+      "level": "必须",
+      "basis": "平台事实",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0",
+      "checkGuidance": "Theme Check `StaticStylesheetAndJavascriptTags`",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 527
+      }
+    },
+    {
+      "id": "PERF-CSS-06",
+      "title": "样式限定在组件范围内",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0、E4",
+      "checkGuidance": "人工（代码审查）",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 542
+      }
+    },
+    {
+      "id": "PERF-CSS-07",
+      "title": "字体加载受控",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E1、E2",
+      "checkGuidance": "插件 P10",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 549
+      }
+    },
+    {
+      "id": "PERF-CSS-08",
+      "title": "减少字体替换造成的位移",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "主题负责人、设计",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "插件 P02、P10",
+      "adoptionTier": "按需",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 573
+      }
+    },
+    {
+      "id": "PERF-CSS-09",
+      "title": "品牌允许时使用系统字体",
+      "level": "建议",
+      "basis": "官方建议",
+      "responsibility": "设计、主题负责人",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "插件 P10",
+      "adoptionTier": "按需",
+      "skillsRole": "—",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 584
+      }
+    },
+    {
+      "id": "PERF-LQD-01",
+      "title": "只读取要展示的数据",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0、E2（Theme Inspector）",
+      "checkGuidance": "人工",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 599
+      }
+    },
+    {
+      "id": "PERF-LQD-02",
+      "title": "分页深度与每页数量",
+      "level": "必须",
+      "basis": "平台事实",
+      "responsibility": "区块开发、运营",
+      "evidenceRequirement": "E0",
+      "checkGuidance": "Theme Check `PaginationSize`",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 622
+      }
+    },
+    {
+      "id": "PERF-LQD-03",
+      "title": "隐藏的组件不提前执行昂贵查询",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0、E2（Theme Inspector）",
+      "checkGuidance": "人工",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 631
+      }
+    },
+    {
+      "id": "PERF-LQD-04",
+      "title": "大型隐藏结构按需建立 DOM",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 657
+      }
+    },
+    {
+      "id": "PERF-LQD-05",
+      "title": "不在首次渲染时遍历全部变体",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0、E2（Theme Inspector）",
+      "checkGuidance": "人工",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 670
+      }
+    },
+    {
+      "id": "PERF-LQD-06",
+      "title": "元字段和元对象的访问受控",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0、E2（Theme Inspector）",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 683
+      }
+    },
+    {
+      "id": "PERF-LQD-07",
+      "title": "循环内的重复开销移出循环",
+      "level": "建议",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E2（Theme Inspector）",
+      "checkGuidance": "Theme Check `DeprecatedTag`、`UnusedAssign`；其余人工",
+      "adoptionTier": "参考",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 696
+      }
+    },
+    {
+      "id": "PERF-LQD-08",
+      "title": "区块规模不超过检查预算",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0",
+      "checkGuidance": "Theme Check `ValidSchemaName`、`ExcessiveSettingsCount`、`LiquidComplexity`、`LiquidNestingDepth`",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 715
+      }
+    },
+    {
+      "id": "PERF-LQD-09",
+      "title": "组合商品的子商品按需加载",
+      "level": "建议",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 733
+      }
+    },
+    {
+      "id": "PERF-NET-01",
+      "title": "资源经 Shopify CDN 提供",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "区块开发、主题负责人",
+      "evidenceRequirement": "E0",
+      "checkGuidance": "Theme Check `RemoteAsset`、`MissingAsset`",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 746
+      }
+    },
+    {
+      "id": "PERF-NET-02",
+      "title": "店铺前面不加额外代理",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工（DNS 与响应头）",
+      "adoptionTier": "按需",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 757
+      }
+    },
+    {
+      "id": "PERF-NET-03",
+      "title": "预连接只给平台发现不了的关键第三方",
+      "level": "应当",
+      "basis": "平台事实",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E0、E2",
+      "checkGuidance": "Theme Check `CdnPreconnect`",
+      "adoptionTier": "按需",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 766
+      }
+    },
+    {
+      "id": "PERF-NET-04",
+      "title": "不重复实现平台已有的能力",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "主题负责人、区块开发",
+      "evidenceRequirement": "E0",
+      "checkGuidance": "人工（代码审查）",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 779
+      }
+    },
+    {
+      "id": "PERF-NET-05",
+      "title": "审慎扩展推测导航",
+      "level": "建议",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E3",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 788
+      }
+    },
+    {
+      "id": "PERF-3P-01",
+      "title": "维护一份第三方清单",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "应用与数据负责人",
+      "evidenceRequirement": "E2、E4",
+      "checkGuidance": "插件 P06（应用与资源来源）",
+      "adoptionTier": "卡点",
+      "skillsRole": "—",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 805
+      }
+    },
+    {
+      "id": "PERF-3P-02",
+      "title": "按实际执行归因，不按域名猜测",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "应用与数据负责人、主题负责人",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "插件 P06、P07",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 823
+      }
+    },
+    {
+      "id": "PERF-3P-03",
+      "title": "卸载应用后清理残留",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "应用与数据负责人",
+      "evidenceRequirement": "E1、E2",
+      "checkGuidance": "插件 P06",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 836
+      }
+    },
+    {
+      "id": "PERF-3P-04",
+      "title": "没有实验时移除防闪烁代码",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "应用与数据负责人",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工",
+      "adoptionTier": "卡点",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 845
+      }
+    },
+    {
+      "id": "PERF-3P-05",
+      "title": "应用资源只在需要的页面加载",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "应用与数据负责人",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "插件 P06、P08",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 856
+      }
+    },
+    {
+      "id": "PERF-3P-06",
+      "title": "延迟加载不得绕过同意，也不得漏记访问",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "应用与数据负责人",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 865
+      }
+    },
+    {
+      "id": "PERF-3P-07",
+      "title": "标记依赖 ScriptTag 接口的应用",
+      "level": "应当",
+      "basis": "平台事实",
+      "responsibility": "应用与数据负责人",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 872
+      }
+    },
+    {
+      "id": "PERF-3P-08",
+      "title": "手机上不使用到站即遮挡内容的弹层",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "运营",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "—",
+      "pluginRole": "引导",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 881
+      }
+    },
+    {
+      "id": "PERF-MOB-01",
+      "title": "手机和桌面共用一套结构",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E1、E2",
+      "checkGuidance": "插件待补（重复结构与隐藏图片）",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 898
+      }
+    },
+    {
+      "id": "PERF-MOB-02",
+      "title": "手机上保留同样的核心内容",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发、运营",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "引导",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 911
+      }
+    },
+    {
+      "id": "PERF-MOB-03",
+      "title": "窄屏不出现整页横向滚动",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E2、E4",
+      "checkGuidance": "插件 D11",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 920
+      }
+    },
+    {
+      "id": "PERF-MOB-04",
+      "title": "触控目标足够大",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "设计、区块开发",
+      "evidenceRequirement": "E2、E4",
+      "checkGuidance": "插件 D10",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 935
+      }
+    },
+    {
+      "id": "PERF-MOB-05",
+      "title": "在手机条件下测试",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发、主题负责人",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 944
+      }
+    },
+    {
+      "id": "PERF-MOB-06",
+      "title": "视口声明正确",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "判定",
+      "source": {
+        "file": "02-performance-rules.md",
+        "line": 953
+      }
+    },
+    {
+      "id": "SEO-META-01",
+      "title": "页面标题由 layout 统一输出",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 S01",
+      "adoptionTier": "卡点",
+      "skillsRole": "审查",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 28
+      }
+    },
+    {
+      "id": "SEO-META-02",
+      "title": "页面描述由 layout 统一输出",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 S02",
+      "adoptionTier": "卡点",
+      "skillsRole": "审查",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 48
+      }
+    },
+    {
+      "id": "SEO-META-03",
+      "title": "canonical 使用平台提供的值",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 S03",
+      "adoptionTier": "卡点",
+      "skillsRole": "审查",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 63
+      }
+    },
+    {
+      "id": "SEO-META-04",
+      "title": "每个可收录页面都有专门撰写的标题和描述",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "运营、SEO 负责人",
+      "evidenceRequirement": "E1、E4",
+      "checkGuidance": "插件 S01、S02",
+      "adoptionTier": "卡点",
+      "skillsRole": "—",
+      "pluginRole": "记录",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 72
+      }
+    },
+    {
+      "id": "SEO-META-05",
+      "title": "分享卡片信息完整",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "主题负责人、运营",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 S11",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 87
+      }
+    },
+    {
+      "id": "SEO-META-06",
+      "title": "声明页面语言",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 D01",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 94
+      }
+    },
+    {
+      "id": "SEO-META-07",
+      "title": "区块不输出页面级标签",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0、E1",
+      "checkGuidance": "skills 的渲染 HTML 检查脚本（片段模式）；插件待补（页面级标签出现在区块内）",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 101
+      }
+    },
+    {
+      "id": "SEO-CONT-01",
+      "title": "主要内容在初始 HTML 中",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "人工（查看初始响应）；插件 S13",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 112
+      }
+    },
+    {
+      "id": "SEO-CONT-02",
+      "title": "标题层级服从整页结构",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "区块开发、主题负责人",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 S12",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "记录",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 121
+      }
+    },
+    {
+      "id": "SEO-CONT-03",
+      "title": "导航用真实的链接",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0、E1",
+      "checkGuidance": "Theme Check `HardcodedRoutes`；插件 S13",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 135
+      }
+    },
+    {
+      "id": "SEO-CONT-04",
+      "title": "链接文字说明去向",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "运营、区块开发",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 D03",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 150
+      }
+    },
+    {
+      "id": "SEO-CONT-05",
+      "title": "图片替代文字准确描述内容",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "运营、区块开发",
+      "evidenceRequirement": "E1、E4",
+      "checkGuidance": "插件 D02",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 157
+      }
+    },
+    {
+      "id": "SEO-CONT-06",
+      "title": "折叠的内容保留在页面中",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 171
+      }
+    },
+    {
+      "id": "SEO-CONT-07",
+      "title": "分页与无限滚动保留可抓取的链接",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 S13",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 178
+      }
+    },
+    {
+      "id": "SEO-CONT-08",
+      "title": "访客和搜索引擎看到相同的内容",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "全体",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 185
+      }
+    },
+    {
+      "id": "SEO-SD-01",
+      "title": "每类实体只有一个输出方",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "SEO 负责人、主题负责人",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 S07、S08；插件待补（同一实体的描述互相矛盾）",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "记录",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 198
+      }
+    },
+    {
+      "id": "SEO-SD-02",
+      "title": "商品结构化数据优先使用平台过滤器",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 S08",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 209
+      }
+    },
+    {
+      "id": "SEO-SD-03",
+      "title": "商品数据完整并与页面一致",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "SEO 负责人",
+      "evidenceRequirement": "E1、E3",
+      "checkGuidance": "插件 S08；Search Console；插件待补（结构化数据与页面可见价格的对比）",
+      "adoptionTier": "卡点",
+      "skillsRole": "审查",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 224
+      }
+    },
+    {
+      "id": "SEO-SD-04",
+      "title": "评分和评价只来自真实数据",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "SEO 负责人、应用与数据负责人",
+      "evidenceRequirement": "E1、E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "记录",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 239
+      }
+    },
+    {
+      "id": "SEO-SD-05",
+      "title": "自定义 JSON-LD 用过滤器编码",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0、E1",
+      "checkGuidance": "插件 S07",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 248
+      }
+    },
+    {
+      "id": "SEO-SD-06",
+      "title": "辅助类型按页面类型提供",
+      "level": "建议",
+      "basis": "部门约定",
+      "responsibility": "SEO 负责人",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 S07",
+      "adoptionTier": "按需",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 267
+      }
+    },
+    {
+      "id": "SEO-SD-07",
+      "title": "不为已取消的展示形式新增标记",
+      "level": "应当",
+      "basis": "平台事实",
+      "responsibility": "SEO 负责人",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 272
+      }
+    },
+    {
+      "id": "SEO-SD-08",
+      "title": "上线前用官方工具验证",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "SEO 负责人",
+      "evidenceRequirement": "E1、E3",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 281
+      }
+    },
+    {
+      "id": "SEO-IDX-01",
+      "title": "robots.txt 默认不修改",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "SEO 负责人",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 S04",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 300
+      }
+    },
+    {
+      "id": "SEO-IDX-02",
+      "title": "用正确的方式让页面不被收录",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "SEO 负责人、运营",
+      "evidenceRequirement": "E1、E3",
+      "checkGuidance": "插件 S05",
+      "adoptionTier": "卡点",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 318
+      }
+    },
+    {
+      "id": "SEO-IDX-03",
+      "title": "提交并跟踪 sitemap",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "SEO 负责人",
+      "evidenceRequirement": "E3",
+      "checkGuidance": "插件 S09",
+      "adoptionTier": "默认",
+      "skillsRole": "—",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 335
+      }
+    },
+    {
+      "id": "SEO-IDX-04",
+      "title": "每个商品只用一个网址做内部链接",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E0、E1",
+      "checkGuidance": "人工（代码审查）",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 344
+      }
+    },
+    {
+      "id": "SEO-IDX-05",
+      "title": "不把筛选、排序和参数网址当作落地页",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "SEO 负责人、运营",
+      "evidenceRequirement": "E1、E3",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "—",
+      "pluginRole": "记录",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 353
+      }
+    },
+    {
+      "id": "SEO-IDX-06",
+      "title": "网址变更同时建立重定向",
+      "level": "必须",
+      "basis": "平台事实",
+      "responsibility": "SEO 负责人、运营",
+      "evidenceRequirement": "E1、E3",
+      "checkGuidance": "插件 S06",
+      "adoptionTier": "卡点",
+      "skillsRole": "—",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 362
+      }
+    },
+    {
+      "id": "SEO-IDX-07",
+      "title": "下架和缺货的商品按情况处理",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "运营、SEO 负责人",
+      "evidenceRequirement": "E1、E3",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 380
+      }
+    },
+    {
+      "id": "SEO-IDX-08",
+      "title": "站内链接不指向失效或被跳转的地址",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "运营",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 S06",
+      "adoptionTier": "默认",
+      "skillsRole": "—",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 396
+      }
+    },
+    {
+      "id": "SEO-INTL-01",
+      "title": "hreflang 只有一个输出来源",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "SEO 负责人、主题负责人",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 S14",
+      "adoptionTier": "卡点",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 409
+      }
+    },
+    {
+      "id": "SEO-INTL-02",
+      "title": "本地化页面的 canonical 指向自己",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "插件 S03、S14",
+      "adoptionTier": "卡点",
+      "skillsRole": "审查",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 422
+      }
+    },
+    {
+      "id": "SEO-INTL-03",
+      "title": "市场的网址结构保持稳定",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "SEO 负责人",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 433
+      }
+    },
+    {
+      "id": "SEO-INTL-04",
+      "title": "翻译覆盖所有与搜索有关的内容",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "运营",
+      "evidenceRequirement": "E1、E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "生成",
+      "pluginRole": "引导",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 440
+      }
+    },
+    {
+      "id": "SEO-INTL-05",
+      "title": "不强制按地区跳转",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "SEO 负责人",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 447
+      }
+    },
+    {
+      "id": "SEO-OPS-01",
+      "title": "一个搜索意图对应一个主页面",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "SEO 负责人、运营",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 462
+      }
+    },
+    {
+      "id": "SEO-OPS-02",
+      "title": "集合页有说明文字",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "运营",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 471
+      }
+    },
+    {
+      "id": "SEO-OPS-03",
+      "title": "商品页内容完整且各不相同",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "运营",
+      "evidenceRequirement": "E1、E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 476
+      }
+    },
+    {
+      "id": "SEO-OPS-04",
+      "title": "重要页面可以通过链接到达",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "运营、SEO 负责人",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 483
+      }
+    },
+    {
+      "id": "SEO-OPS-05",
+      "title": "文章和指南链接到商品与集合",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "运营",
+      "evidenceRequirement": "E1",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 490
+      }
+    },
+    {
+      "id": "SEO-OPS-06",
+      "title": "上传图片时填写替代文字",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "运营",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "插件 D02",
+      "adoptionTier": "默认",
+      "skillsRole": "—",
+      "pluginRole": "判定",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 495
+      }
+    },
+    {
+      "id": "SEO-OPS-07",
+      "title": "活动页复用固定网址",
+      "level": "应当",
+      "basis": "部门约定",
+      "responsibility": "运营、SEO 负责人",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 500
+      }
+    },
+    {
+      "id": "SEO-OPS-08",
+      "title": "机器生成的内容要有人核对",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "运营",
+      "evidenceRequirement": "E4",
+      "checkGuidance": "人工",
+      "adoptionTier": "卡点",
+      "skillsRole": "—",
+      "pluginRole": "—",
+      "source": {
+        "file": "03-seo-rules.md",
+        "line": 507
+      }
+    },
+    {
+      "id": "MEA-01",
+      "title": "用真实用户数据判断是否达标",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "主题负责人、SEO 负责人",
+      "evidenceRequirement": "E3",
+      "checkGuidance": "人工",
+      "adoptionTier": "卡点",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "04-verification-and-tooling.md",
+        "line": 30
+      }
+    },
+    {
+      "id": "MEA-02",
+      "title": "实验室对比固定条件，每组至少三次取中位数",
+      "level": "必须",
+      "basis": "官方建议",
+      "responsibility": "区块开发、主题负责人",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工；插件待补（两次扫描的差异对比）",
+      "adoptionTier": "卡点",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "04-verification-and-tooling.md",
+        "line": 47
+      }
+    },
+    {
+      "id": "MEA-03",
+      "title": "在店面预览里测性能，不在主题编辑器里测",
+      "level": "必须",
+      "basis": "平台事实",
+      "responsibility": "区块开发",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "插件待补（记录主题标识、角色、语言和币种）",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "04-verification-and-tooling.md",
+        "line": 58
+      }
+    },
+    {
+      "id": "MEA-04",
+      "title": "用指标之间的间隔定位问题",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E2、E3",
+      "checkGuidance": "插件 P01、P05",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "记录",
+      "source": {
+        "file": "04-verification-and-tooling.md",
+        "line": 69
+      }
+    },
+    {
+      "id": "MEA-05",
+      "title": "Lighthouse 分数不是验收线",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "全体",
+      "evidenceRequirement": "E2",
+      "checkGuidance": "人工",
+      "adoptionTier": "默认",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "04-verification-and-tooling.md",
+        "line": 85
+      }
+    },
+    {
+      "id": "MEA-06",
+      "title": "没有数据就写“未取得”",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "全体",
+      "evidenceRequirement": "—",
+      "checkGuidance": "人工",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "判定",
+      "source": {
+        "file": "04-verification-and-tooling.md",
+        "line": 98
+      }
+    },
+    {
+      "id": "MEA-07",
+      "title": "实验室与真实数据不一致时的解读",
+      "level": "应当",
+      "basis": "官方建议",
+      "responsibility": "主题负责人",
+      "evidenceRequirement": "E2、E3",
+      "checkGuidance": "人工",
+      "adoptionTier": "按需",
+      "skillsRole": "审查",
+      "pluginRole": "—",
+      "source": {
+        "file": "04-verification-and-tooling.md",
+        "line": 108
+      }
+    },
+    {
+      "id": "MEA-08",
+      "title": "报告收益必须有前后对比",
+      "level": "必须",
+      "basis": "部门约定",
+      "responsibility": "全体",
+      "evidenceRequirement": "E2、E3",
+      "checkGuidance": "人工",
+      "adoptionTier": "卡点",
+      "skillsRole": "生成",
+      "pluginRole": "—",
+      "source": {
+        "file": "04-verification-and-tooling.md",
+        "line": 118
+      }
+    }
+  ]
+}

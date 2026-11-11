@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "id": "approved-export",
+      "input": "/absolute/approved/field.json",
+      "approvalRef": "replace-with-actual-source-approval",
+      "release": {
+        "version": "replace-with-deployed-version",
+        "sourceHash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "deployedAt": "2026-11-01T00:00:00Z"
+      }
+    }
+  ],
+  "previous": [],
+  "schedule": {
+    "cycles": 1,
+    "intervalMs": 60000
+  },
+  "maxRelativeIncrease": 0.1
+}

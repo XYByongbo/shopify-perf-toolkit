@@ -1,0 +1,15 @@
+{
+  "input": "/absolute/authorized-tests/manifest.json",
+  "identity": {
+    "sourceHash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "store": "example.myshopify.com",
+    "themeId": "123"
+  },
+  "requiredCases": [
+    "double-submit",
+    "section-null",
+    "same-variant-properties",
+    "empty-cart",
+    "uncertain-write"
+  ]
+}

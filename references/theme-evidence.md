@@ -35,3 +35,5 @@ node scripts/perfkit.mjs report --input /absolute/run/theme-diff.json --out /abs
 执行检查前移除继承的 SHOPIFY_FLAG_*，由命令行显式指定只读检查范围。不要给互斥的 INIT/AUTO_CORRECT 变量赋字符串 false。独立命令失败时 --out 保存失败命令及诊断；退出 2，不能拿失败包作为成功检查导入。有效告警保持待复核退出语义。
 
 正式评分、五样本、部署身份、内容/视觉与交互回归继续沿用原验收协议；本功能不降低门槛、不通过禁用规则清零。
+
+0.19.0：跨框架对比要将隔离层、模板/内容变更和加载优化分开；先核实真实 LCP 对象及延迟恢复窗口，再论证收益。具体采集与案例经验见 [LCP 身份与重复加载检查](runtime-integrity.md)。

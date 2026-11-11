@@ -1,0 +1,12 @@
+{
+  "project": "/absolute/candidate",
+  "beforeProject": "/absolute/baseline",
+  "components": [
+    "assets/drawer.js"
+  ],
+  "limits": {
+    "componentLines": 200,
+    "componentJsBytes": 10240
+  },
+  "exceptions": []
+}

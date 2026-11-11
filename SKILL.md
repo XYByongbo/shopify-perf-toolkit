@@ -5,7 +5,7 @@ description: Diagnose and optimize Shopify Liquid themes at site, image, or comp
 
 # Shopify 主题性能优化
 
-版本 **0.18.0（2026-11-06）**。从本技能目录执行 `node scripts/perfkit.mjs`，用绝对 `--project` 指向真实主题。Node 22.19+、Python 3.9+；工具依赖在本目录 `npm ci --ignore-scripts`，不安装到主题。主题 ZIP 先解压；没有真实主题/URL时完成隔离验证并明确店铺未测。
+版本 **0.20.0（2026-11-09）**。从本技能目录执行 `node scripts/perfkit.mjs`，用绝对 `--project` 指向真实主题。Node 22.19+、Python 3.9+；工具依赖在本目录 `npm ci --ignore-scripts`，不安装到主题。主题 ZIP 先解压；没有真实主题/URL时完成隔离验证并明确店铺未测。
 
 用户要求优化时，目标是完成可逆的主题代码修改并验证实际收益；审计和报告用于定位。只要求检查或建议时保持只读。没有安全可验证候选时给出具体受限原因与已排除方案，不以重复测分代替修改。
 
@@ -25,6 +25,7 @@ description: Diagnose and optimize Shopify Liquid themes at site, image, or comp
 | 查询、隐藏 DOM、Section Rendering、首屏 Liquid | [扩展方法](references/extended-optimization.md)、[专项执行细则](references/task-workflows.md#证据驱动修改) |
 | 搜索、变体、Quick-add、加购/购物车 | [购物交互场景](references/interaction-scenarios.md)、[交互与线上证据](references/evidence-driven-architecture.md)；按影响范围选择场景，沿用原正式交互门禁 |
 | 独立 SEO 审查与 SEO 报告 | [SEO 工具](references/seo-toolkit.md)；使用 shopify-seo-toolkit / seokit |
+| LCP 数值异常、重复资源/初始化、延迟加载器复核 | [身份与重复加载](references/runtime-integrity.md)；profile-runtime / audit-runtime-integrity，旧证据不补造，显式验收门禁需部署绑定 |
 | 两主题差异、整改报告复核、JSON 内嵌业务代码 | [整改证据](references/theme-evidence.md)；theme-diff / audit-quality，区分当前状态、历史原因与性能收益 |
 | 综合代码审查（含旧 SEO 规则）、Theme Check、外链与脚本依赖 | [规范报告](references/code-quality.md)、[前期预检](references/precheck.md)、[官方性能规则](references/shopify-performance-rules.md)；audit-quality / check-performance / audit-resources |
 | 已保存的最终页面/Section HTML、表单/焦点快照 | [渲染后 HTML 与快照](references/rendered-html.md)；audit-html；batch 的 renderedHtml 仅消费显式输入 |
@@ -35,6 +36,10 @@ description: Diagnose and optimize Shopify Liquid themes at site, image, or comp
 全部参数见 [命令参考](references/commands.md)。`batch` 编排测量与诊断，不会自动优化源码；`status=complete` 也不等于优化验收。HTML/源码检查、规范告警和真实收益分别报告，不能用检查通过代替性能结论。
 
 内置方法不能覆盖当前瓶颈时，按 [自定义实现流程](references/source-repair-workflow.md) 执行 request-implementation，阅读请求中的源码并编写候选，plan-custom 审阅后以 improve prepare 的 implementation 接回原会话。不能因为没有内置策略就只输出建议；缺少实测证据或预算时说明具体阻塞。候选检查清单不是通过证据，仍须实际预览和实验。
+
+## 跨主题交付与持续治理（0.20）
+
+按 [交付能力与门禁](references/delivery-governance.md) 使用 toolkit-manifest、theme-capabilities / resolve-adapter、strategy-contract、verify-business、audit-window-budget、audit-policy 和 field-monitor。新交付建议显式选择 `policy: "delivery-v1"`；旧配置继续兼容，但不得声称启用了新门禁。带 adapter 的计划应用时必须提供当前 adapterContext / --adapter-context。复杂输入与故障模拟可在 scenarios 执行；注入故障结果保持 constrained，真实购物写入仍由授权外部测试和原始证据接入。
 
 ## 共同执行边界
 
@@ -51,6 +56,8 @@ description: Diagnose and optimize Shopify Liquid themes at site, image, or comp
 本地补丁后显式同步到已授权候选预览，独立确认远端身份再复测；不自动 push/publish 或移除 App。无收益或回归则修复/回滚，保留完整 history、失败证据和预算；连续低收益/证据受限/耗尽预算时停止新增候选，缺测明确未验收。有收益但低于原目标时按恢复流程作为中间基线继续，不下调门槛冒充完成。
 
 ## 实测验收与交付
+
+显式要求按规范进行指标验收时，读取 [规范对齐扩展](references/standards-upgrade.md)：`acceptancePolicy: "standards-v1"` 需要明确 loading/interaction 目标、项目 Theme Check 前后原始报告、改动范围观察及部署绑定的 integrityProfiles。省略该字段保持以下原分数流程；不得在失败后切换策略绕过门槛。PageOtter 导入是提议的 handoff v1 外部观察接口，不是正式验收证据。
 
 - 探索显式 `purpose=exploration`（默认 3 次），不能充当正式验收。正式每页每设备前后各至少 **5 次独立报告**，锁定引擎/版本/状态/完整配置，保留全部有效样本与失败记录。默认移动最低 75/中位 80，桌面最低 85/中位 90，见 [评分契约](references/score-acceptance.md)。
 - 新优化任务的两侧测量启用 deployment；测量前后核验远端文本源码、店铺/主题/页面身份。最终使用 `verify-optimization` 同时检查收益、关键指标无退步、部署身份、功能与内容视觉；`verify-site` 或 CI 达标不等于完成优化。95→80 不因仍过门槛而接受。

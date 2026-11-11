@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "kind": "pageotter-handoff",
+  "producer": {"name": "PageOtter", "version": "adapter-example-not-a-real-scan"},
+  "capturedAt": "2026-11-11T00:00:00Z",
+  "identity": {
+    "url": "https://example.com/products/example",
+    "themeId": "replace-with-observed-theme-id",
+    "themeRole": "preview",
+    "pageType": "product",
+    "language": "en",
+    "currency": "USD",
+    "viewport": {"width": 375, "height": 812}
+  },
+  "ruleScope": ["PERF-IMG-02"],
+  "checks": [{
+    "ruleId": "PERF-IMG-02",
+    "subject": "page",
+    "status": "NOT RUN",
+    "summary": "LCP image loading",
+    "reason": "Example only. Replace with actual observed identity, conditions and evidence."
+  }]
+}

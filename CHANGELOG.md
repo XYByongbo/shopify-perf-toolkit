@@ -1,4 +1,34 @@
+## 未发布 — 2026-11-11
+
+- 完成第二、三批规范对齐：显式 standards-v1 指标验收、真实项目 Theme Check 差异门禁、按范围的证据清单；旧策略默认保持，新增策略要求部署绑定的完整性检查。
+- 新增八项有范围边界的浏览器观察，性能规则共 39 项；HTML 首先给出要修/待确认/未测，新增提议的 PageOtter handoff v1 导入与严格同范围前后对比。
+- 统一诊断复用请求内源码索引并逐次核对内容指纹；修复 CSS AST 循环引用克隆和移动端布局视口溢出识别，增加真实 Chrome 与已安装 Shopify CLI 验证。
+- 新入口与兼容边界见 references/standards-upgrade.md；规范登记仍是待评审参考，不自动成为部门政策。
+
+- 修复 CrUX 聚合 p75 因无样本总数而遗漏阈值告警与诊断优先级；新增阈值/样本/趋势资格字段，保留旧 limited 状态及严格趋势、窗口边界。
+- 正式验收新增 PASS / FAIL / NOT RUN / N/A 检查结果，缺失证据与已执行失败分别报告；旧 checks.pass、验收策略及退出语义保留。
+- 固定 130 条待评审规范元数据及来源指纹，为现有 31 项性能检测增加规范编号关联和报告展示；映射不等于完整覆盖或启用规范门禁。
+- 新增隔离回归测试，说明见 references/standards-foundation.md。
+
+## 0.20.0 — 2026-11-09
+
+- Added content-addressed release/validation manifests and explicit delivery-v1 policy without weakening legacy performance gates.
+- Added source-bound theme capability adapters, stale-context rejection, reviewed strategy contracts and raw external business verification.
+- Extended existing scenarios with fill/select/Chromium IME and bounded GET fault injection; writes remain blocked.
+- Extended resource budgets with explicit observation windows and ownership/component deltas; added incremental engineering policy audit.
+- Added approved field-export monitoring, bounded scheduling, release/window-aware trend reports and local alerts.
+- Added reusable lifecycle, scoped Section style and queued Cart protocol primitives with isolated positive/negative/recovery fixtures.
+
 # 更新记录
+
+## 0.19.0 · 2026-11-08
+
+- 运行采集增加实际 LCP 元素可见性/尺寸/文字与祖先样式、显式期望 selector、同文档请求上下文和有界初始化事件日志。
+- 新增 audit-runtime-integrity，识别 LCP 身份异常、重复脚本/样式请求和重复初始化信号；不将请求等同执行，不用缺证据换通过。
+- 接入性能审计、诊断与 HTML 报告；显式 integrityProfiles 可在 optimize / improve / verify 中要求部署绑定的完整性验收。
+- 沉淀视频分流、关键 CSS、统一延迟调度与组件生命周期方法；保留 content_for_header，排除指标对象污染。
+- 操作或 trace 采集失败时保留已捕获请求，并标记网络窗口不完整，避免把丢失证据误判为无重复。
+- 增加单元、CLI、正式证据合同和真实 Chrome 合成回归。SEO 包只同步发行版本，没有新增 SEO 规则。
 
 ## 0.18.0 — 2026-11-06
 

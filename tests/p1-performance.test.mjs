@@ -41,7 +41,7 @@ const transitions = '.panel { transition-property: all; transition-duration: 120
 test('P1 catalog has 16 independently identified official-guidance checks', () => {
   assert.equal(performanceRules.filter(r => r.phase === 'P1').length, 16);
   assert.equal(new Set(performanceRules.map(r => r.id)).size, performanceRules.length);
-  assert.ok(performanceRules.every(r => r.source.startsWith('https://shopify.dev/')));
+  assert.ok(performanceRules.filter(r => r.phase !== 'integrity').every(r => r.source.startsWith('https://shopify.dev/')));
 });
 test('hint analysis counts Liquid preloads and keeps branch, credentials and media distinctions', () => {
   const found = inspect(duplicate).findings.find(f => f.suggestedStrategy === 'liquid-dedupe-resource-hint');
@@ -197,12 +197,12 @@ test('scan/analysis/CLI/site report integrate P1 and reuse native stylesheet dep
   assert.equal(review.recipe.evidence.cancellationNotRequired, undefined);
   const audit = await auditPerformance({ project: f.project });
   assert.ok(ids(audit).has('PERF_STYLESHEET_SCOPE')); assert.equal(audit.nativeStylesheets.kind, 'stylesheet-audit');
-  assert.equal(audit.coverage.length, 27); assert.match(renderReport(audit), /PERF_PRELOAD_BUDGET/);
+  assert.equal(audit.coverage.length, 39); assert.match(renderReport(audit), /PERF_PRELOAD_BUDGET/);
   assert.equal(audit.coverage.find(r => r.id === 'PERF_DIALOG_LCP').static, 'not-applicable-runtime-only');
   assert.equal(audit.coverage.find(r => r.id === 'PERF_JS_DOM_READY_FETCH').runtime, 'not-assessed');
   const out = path.join(f.root, 'p1.json');
   const cli = spawnSync(process.execPath, ['scripts/perfkit.mjs', 'audit-performance', '--project', f.project, '--out', out], { encoding: 'utf8' });
-  assert.equal(cli.status, 3, cli.stderr); assert.equal(JSON.parse(await readFile(out, 'utf8')).coverage.length, 27);
+  assert.equal(cli.status, 3, cli.stderr); assert.equal(JSON.parse(await readFile(out, 'utf8')).coverage.length, 39);
   const run = await siteRun(t, { devices: ['mobile'] }), site = await auditSite({ project: f.project, run: run.root });
   assert.ok(ids(site).has('PERF_PRELOAD_BUDGET')); assert.ok(ids(site).has('PERF_STYLESHEET_SCOPE'));
 });

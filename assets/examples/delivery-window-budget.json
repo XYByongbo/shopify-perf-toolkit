@@ -1,0 +1,35 @@
+{
+  "profiles": [
+    "/absolute/run/profile.json"
+  ],
+  "beforeProfiles": [
+    "/absolute/baseline/profile.json"
+  ],
+  "windows": [
+    {
+      "id": "navigation-ten-seconds",
+      "anchor": "navigation",
+      "fromMs": 0,
+      "toMs": 10000,
+      "maxTransferBytes": 1048576
+    },
+    {
+      "id": "component-interaction",
+      "anchor": "interaction",
+      "fromMs": 0,
+      "toMs": 3000,
+      "owner": "theme",
+      "component": "drawer",
+      "maxDeltaBytes": 10240
+    }
+  ],
+  "owners": [
+    {
+      "origin": "https://example.com",
+      "pathPrefix": "/cdn/shop/t/123/assets/drawer",
+      "owner": "theme",
+      "component": "drawer"
+    }
+  ],
+  "exceptions": []
+}

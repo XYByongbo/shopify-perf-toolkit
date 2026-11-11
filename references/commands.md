@@ -1,10 +1,13 @@
-# 命令参考（v0.18.0）
+# 命令参考（v0.20.0）
 
 在工具根目录执行 `node scripts/perfkit.mjs --help` 查看全部参数。所有 --out 均要求新文件/新目录，不覆盖旧证据。--project 是主题源码根目录，--target 是其内相对路径。doctor 检查可用性，不代表浏览器启动或网络已验证。
 
 | 命令 | 主要参数 | 结果 |
 | --- | --- | --- |
 | doctor | --out 可选 | 当前版本与本机能力；不替代实际启动和回归 |
+| check-theme | --project、--out | 实际项目 Theme Check 的版本、规则列表、生效配置、原始诊断与源码绑定；不自动修复 |
+| plan-verification | --config、--out | beforeFiles/afterFiles/scope 推断最低验证级别及未运行清单 |
+| import-pageotter | --input、--out；--project/--baseline 可选 | 提议的 handoff v1 外部观察导入；同范围显式复测对比，不替代正式验收 |
 | diagnose-performance | --project、--profiles；--run/--checks/--ownership/--performance-baseline 可选，--out | 统一候选排序、资源/字体调查、归属与结构上下文 |
 | profile-domain | --config，--out 新目录 | 测量前后部署身份绑定的 runtime/Liquid 证据 |
 | optimize | --config，--out 新目录 | prepare/apply/verify；verify 的 resourceProfiles 接入采样前及正式验收 |
@@ -102,3 +105,21 @@ batch 的 status=complete 仅表示执行完成。reviewRequired=true、停止/�
 `seokit plan/fix/apply/verify/rollback`、`perfkit request-implementation/plan-custom` 及 `improve prepare implementation` 的参数、配置与完整执行流程见 [源码修复流程](source-repair-workflow.md)。旧命令和原验收门槛保持。
 
 0.18.0：CLI 5 检查格式适配、失败证据、JSON 内嵌审计与两主题对照见 [整改证据](theme-evidence.md)。
+
+## 运行完整性复核（0.19.0）
+
+`audit-runtime-integrity --input <runtime-profile.json> --out <NEW-integrity.json>` 从原始字段重算，退出 0/3/2 分别为窗口内未见异常/需复核或缺证据/输入执行错误。`profile-runtime` 新增 initializationEvents / expectedLcpSelectors；显式 integrityProfiles 正式门禁及完整边界见 [运行完整性](runtime-integrity.md)。
+
+
+## 交付与持续治理（0.20.0）
+
+- `toolkit-manifest --out <manifest.json>`：发行白名单内容指纹。
+- `theme-capabilities --project <theme> [--config <identity-context.json>] --out <capabilities.json>`。
+- `resolve-adapter --config <registry.json> --out <resolution.json>`。
+- `verify-business --config <business-import.json> --out <verification.json>`。
+- `audit-window-budget --config <window-budget.json> --out <budget.json>`。
+- `audit-policy --config <policy-audit.json> --out <audit.json>`。
+- `strategy-contract --config <contract.json> --out <contract-plan.json>`。
+- `field-monitor --config <monitor.json> --out <new-run-directory>`。
+
+详细字段、边界、示例和迁移见 [delivery-governance](delivery-governance.md)。apply 带主题适配器的计划须提供 `--adapter-context <current-context.json>`；optimize/improve apply 使用 adapterContext。真实业务证据另行接入，scenarios 不开放写请求。

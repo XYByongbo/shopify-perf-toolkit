@@ -5,7 +5,7 @@ description: Audit and repair Shopify Liquid source SEO metadata, canonical, JSO
 
 # Shopify SEO 源码优化
 
-版本 0.18.0。用户要求优化时，完成实际源码修改与复核，不只交报告。输入为绝对主题目录；源码流程不要求 URL、浏览器或 Python。发行包从本目录运行 `node scripts/seokit.mjs`，先 `npm ci --ignore-scripts`；仓库开发从仓库根运行。Node 22.19+。
+版本 0.20.0。用户要求优化时，完成实际源码修改与复核，不只交报告。输入为绝对主题目录；源码流程不要求 URL、浏览器或 Python。发行包从本目录运行 `node scripts/seokit.mjs`，先 `npm ci --ignore-scripts`；仓库开发从仓库根运行。Node 22.19+。
 
 先读目标项目指令和 [主题代码规范](../../theme-code-generation/SKILL.md)，保护已有修改。按 [源码修复流程](../../references/source-repair-workflow.md) 执行：
 

@@ -1,12 +1,12 @@
 # Shopify SEO 工具包
 
-当前版本 **0.18.0**。以 Shopify 主题代码为输入，检查并修复元数据、JSON-LD、链接与图片替代文本问题，提供计划、写入、回滚和源码复核。
+当前版本 **0.20.0**。以 Shopify 主题代码为输入，检查并修复元数据、JSON-LD、链接与图片替代文本问题，提供计划、写入、回滚和源码复核。
 
 这是源码发行包，需要 Node.js 22.19+；HTML 检查使用 Python 3.9+ 标准库。修复使用锁定版本的 Shopify Liquid 解析器，不需要安装 Lighthouse、Chrome 或另一个性能工具包。
 
 ## 安装与运行
 
-解压 `shopify-seo-toolkit-v0.18.0.zip` 后，在解压目录执行：
+解压 `shopify-seo-toolkit-v0.20.0.zip` 后，在解压目录执行：
 
 ```sh
 npm ci --ignore-scripts

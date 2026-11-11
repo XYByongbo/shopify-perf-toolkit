@@ -31,6 +31,17 @@ class ReleaseTests(unittest.TestCase):
     def write_package(self):
         self.write("package.json", json.dumps(self.package))
 
+    def test_opt_in_manifest_hashes_match_archived_bytes(self):
+        import hashlib
+        output = build_release(self.root, with_manifest=True)
+        with zipfile.ZipFile(output) as archive:
+            manifest = json.loads(archive.read("example-toolkit/RELEASE-MANIFEST.json"))
+            for entry in manifest["files"]:
+                self.assertEqual(entry["sha256"], hashlib.sha256(archive.read("example-toolkit/" + entry["file"])).hexdigest())
+            identity = "".join(f"{e['file']}\0{e['sha256']}\n" for e in manifest["files"])
+            self.assertEqual(manifest["sourceHash"], hashlib.sha256(identity.encode()).hexdigest())
+            self.assertEqual(manifest["validation"], "not-assessed")
+
     def test_default_package_has_manifest_docs_sources_and_tests(self):
         output = build_release(self.root)
         self.assertEqual(output, self.root / "releases/example-toolkit-v0.2.0.zip")

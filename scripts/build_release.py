@@ -5,6 +5,7 @@ The package manifest is always included; all other inputs must be allowlisted.
 """
 
 import argparse
+import hashlib
 import json
 import re
 import stat
@@ -83,7 +84,7 @@ def _output_path(root, output):
     return output
 
 
-def build_release(root, output=None):
+def build_release(root, output=None, with_manifest=False):
     """Return the new ZIP path; reject invalid inputs and existing outputs."""
     root = Path(root)
     if root.is_symlink():
@@ -126,6 +127,16 @@ def build_release(root, output=None):
         info = zipfile.ZipInfo.from_file(source, arcname=archive_name)
         info.compress_type = zipfile.ZIP_DEFLATED
         contents.append((info, source.read_bytes()))
+    if with_manifest:
+        entries = [{"file": str(source.relative_to(root).as_posix()), "sha256": hashlib.sha256(content).hexdigest()}
+                   for source, (_, content) in zip(sorted(selected), contents)]
+        identity = "".join(f"{entry['file']}\0{entry['sha256']}\n" for entry in entries)
+        manifest = {"schemaVersion": 1, "kind": "toolkit-manifest", "name": package["name"],
+                    "version": package["version"], "sourceHash": hashlib.sha256(identity.encode()).hexdigest(),
+                    "files": entries, "validation": "not-assessed"}
+        info = zipfile.ZipInfo(f"{package['name']}/RELEASE-MANIFEST.json")
+        info.compress_type = zipfile.ZIP_DEFLATED
+        contents.append((info, json.dumps(manifest, ensure_ascii=False, indent=2).encode()))
     output.parent.mkdir(parents=True, exist_ok=True)
     created = False
     try:
@@ -143,9 +154,10 @@ def build_release(root, output=None):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", help="New ZIP path; relative paths start at the toolkit root")
+    parser.add_argument("--with-manifest", action="store_true", help="Embed content hashes; validation remains separate")
     args = parser.parse_args(argv)
     try:
-        output = build_release(Path(__file__).resolve().parent.parent, args.out)
+        output = build_release(Path(__file__).resolve().parent.parent, args.out, with_manifest=args.with_manifest)
     except (OSError, ValueError) as error:
         print(f"Release build failed: {error}", file=sys.stderr)
         return 2

@@ -6,7 +6,9 @@
 
 面向 Shopify Liquid 主题开发者的本地性能工具包。把主题源码、Chrome 运行采样、Lighthouse / PSI 测量与审阅记录串起来，帮助你回答：**哪里慢、该改什么、改完是否有效。** 可从 Codex 技能或 `perfkit` CLI 使用，输入为主题源码目录；主题 ZIP 需先解压。
 
-**当前版本：0.18.0 · 2026-11-06** · [更新记录](CHANGELOG.md) · [完整命令](references/commands.md) · [安装与运行](#安装与运行)
+**当前版本：0.20.0 · 2026-11-09** · [更新记录](CHANGELOG.md) · [完整命令](references/commands.md) · [安装与运行](#安装与运行)
+
+未发布的规范对齐扩展：可显式选择 `acceptancePolicy: "standards-v1"`，按具体指标、项目 Theme Check 与改动范围证据验收；省略时保留旧分数流程。新增八项浏览器观察、PageOtter handoff v1 导入和处理清单报告。见 [第二、三批使用说明](references/standards-upgrade.md)。
 
 本版增加 `theme-diff`、JSON 配置内嵌代码审计，并兼容 Shopify CLI 5 的检查输出；保持部署、正式采样、业务与视觉验收要求。详见 [主题整改证据与配置内嵌代码](references/theme-evidence.md)。
 
@@ -265,3 +267,12 @@ test:lighthouse 是 Python 汇总、评分与打包测试，合成报告不算�
 恢复执行与正式采集：[`improve-cycle`](references/recovery-cycle.md) 复用持久会话，在无收益后重新诊断、生成另一份已审阅机制的补丁、同步核验预览并实测。资源预算按每页面/设备/采样核对真实字节和请求数，缺失证据不放行。
 
 架构与恢复闭环：正式证据采集、最终验收和会话状态链已分离；无收益后会同步回滚基线、重新采集源码绑定的运行时/Liquid 证据，再诊断、生成其他机制的补丁并按原门槛验证。官方方法支持审阅后续跑，详见 [恢复闭环](references/recovery-cycle.md)。
+
+0.19.0 新增 [LCP 身份与重复加载检查](references/runtime-integrity.md)：浏览器采集、离线重算、全流程报告和可选部署绑定验收门禁。无异常仅限已观察窗口；旧报告缺字段显示未检测。
+
+
+## 0.20 跨主题交付与持续治理
+
+见 [交付能力、标准及迁移说明](references/delivery-governance.md)。复用现有 plan/apply/experiment/verify；新增能力档案、适配器、业务证据接入、窗口预算、增量工程规则及现场汇总趋势。`delivery-v1` 为显式选择的加强门禁，旧流程不被默认为已验证新能力。
+
+`npm run validate:delivery -- --out /absolute/external/new-run` 保存绑定包指纹的完整回归记录；`npm run release -- --out /absolute/external/toolkit.zip` 输出附哈希清单的源码包。商家主题与现场收益仍需独立验证。

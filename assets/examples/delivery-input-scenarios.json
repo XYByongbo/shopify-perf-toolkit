@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "url": "https://example.com/search",
+  "scenarios": [
+    {
+      "name": "ime-search",
+      "steps": [
+        {
+          "action": "fill",
+          "selector": "#search",
+          "value": ""
+        },
+        {
+          "action": "ime",
+          "selector": "#search",
+          "text": "中文",
+          "commit": true
+        },
+        {
+          "action": "assert-text",
+          "selector": "#query-label",
+          "text": "中文"
+        }
+      ]
+    }
+  ]
+}

@@ -9,6 +9,14 @@ import { spawnSync } from 'node:child_process';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const { version } = JSON.parse(await fs.readFile(path.join(here, '../package.json'), 'utf8'));
 const specs = {
+  'toolkit-manifest':['out'],
+  'theme-capabilities':['project','config','out'],
+  'resolve-adapter':['config','out'],
+  'verify-business':['config','out'],
+  'audit-policy':['config','out'],
+  'audit-window-budget':['config','out'],
+  'field-monitor':['config','out'],
+  'strategy-contract':['config','out'],
   'request-implementation':['previous','candidate','files','out'],
   'plan-custom':['request','candidate','out'],
   'sync-shopify-docs':['config','out'],
@@ -34,6 +42,7 @@ const specs = {
   experiment: ['config', 'out'],
   'code-strategies': ['out'],
   'analyze-code': ['project', 'target', 'out'],
+  'audit-runtime-integrity': ['input', 'out'],
   'profile-runtime': ['config', 'out'],
   'profile-devtools': ['config', 'out'],
   'profile-liquid': ['config', 'out'],
@@ -46,6 +55,9 @@ const specs = {
   scan: ['project', 'pages', 'out'],
   precheck: ['project', 'config', 'out'],
   'check-performance': ['project', 'config', 'out'],
+  'check-theme': ['project','out'],
+  'plan-verification': ['config','out'],
+  'import-pageotter': ['input','project','baseline','out'],
   'audit-performance': ['project', 'profiles', 'baseline', 'checks', 'ownership', 'out'],
   'import-check': ['project', 'input', 'metadata', 'baseline', 'out'],
   'audit-resources': ['project', 'probe', 'out'],
@@ -66,7 +78,7 @@ const specs = {
   inspect: ['project', 'target', 'capture', 'out'],
   'plan-image': ['project', 'target', 'inspection', 'image', 'sizes', 'widths', 'out'],
   'plan-component': ['project', 'target', 'replacement', 'rule', 'reason', 'validators', 'out'],
-  apply: ['project', 'plan', 'out'],
+  apply: ['project', 'plan', 'out','adapter-context'],
   rollback: ['project', 'plan', 'out'],
   capture: ['url', 'selector', 'out', 'width', 'height', 'dpr', 'wait-ms', 'timeout-ms', 'project', 'target'],
   verify: ['before', 'after', 'out'],
@@ -75,6 +87,14 @@ const specs = {
   'score-target': ['before', 'after', 'minimum', 'target', 'out'],
 };
 const help = `Shopify Perf Toolkit ${version} (Node 22+, offline core)
+  toolkit-manifest --out <manifest.json>
+  theme-capabilities --project <theme> [--config <identity-context.json>] --out <capabilities.json>
+  resolve-adapter --config <registry.json> --out <resolution.json>
+  verify-business --config <business-import.json> --out <verification.json>
+  audit-policy --config <policy-audit.json> --out <audit.json>
+  audit-window-budget --config <window-budget.json> --out <budget.json>
+  field-monitor --config <field-monitor.json> --out <monitor-run-directory>
+  strategy-contract --config <strategy-contract.json> --out <contract.json>
   request-implementation --previous <session.json> --candidate <candidateId> [--files <paths.json>] --out <request.json>
   plan-custom --request <request.json> --candidate <implementation.json> --out <plan.json>
   sync-shopify-docs [--config <bounded-sync.json>] --out <NEW-directory>
@@ -98,6 +118,7 @@ const help = `Shopify Perf Toolkit ${version} (Node 22+, offline core)
   experiment --config <single-patch-experiment.json> --out <NEW-directory>
   verify-patch --config <patch-evidence.json> --out <decision.json>
   verify-preservation --config <checkpoint-evidence.json> --out <preservation.json>
+  audit-runtime-integrity --input <profile.json> --out <integrity.json>
   profile-runtime --config <runtime.json> --out <NEW-directory>
   profile-devtools --config <devtools.json> --out <NEW-directory>
   profile-liquid --config <liquid-profile.json> --out <profile.json>
@@ -114,6 +135,9 @@ const help = `Shopify Perf Toolkit ${version} (Node 22+, offline core)
   summarize --run <measurement-directory> [--out <summary.json>]
   evaluate-iteration --config <history.json> [--out <decision.json>]
   precheck --project <theme> [--config <precheck-options.json>] --out <precheck.json>
+  check-theme --project <theme> --out <project-checks.json>
+  plan-verification --config <source-manifests-and-scope.json> --out <verification-plan.json>
+  import-pageotter --input <handoff-v1.json> [--project <theme>] [--baseline <prior-import.json>] --out <import.json>
   check-performance --project <theme> [--config <official-options.json>] --out <official-checks.json>
   audit-performance --project <theme> [--profiles <runtime-profile-array.json>] [--baseline <performance.json>] [--checks <check-import.json>] [--ownership <ownership.json>] --out <performance.json>
   import-check --project <theme> --input <theme-check.json> [--metadata <scan-contract.json>] [--baseline <prior-import.json>] --out <check-import.json>
@@ -226,6 +250,20 @@ export async function main(argv=process.argv.slice(2)) {
   const {command,args:a}=parse(argv);
   outputFormat=a.format??'summary';
   if(command==='help') { console.log(help); return 0; }
+  if(['toolkit-manifest','theme-capabilities','resolve-adapter','verify-business','audit-policy','audit-window-budget','field-monitor','strategy-contract'].includes(command)){
+    if(command!=='field-monitor')await newOutput(a.out);
+    const config=a.config?await readJSON(a.config):{};let result;
+    if(command==='toolkit-manifest')result=await (await import('../lib/toolkit-manifest.mjs')).toolkitManifest();
+    if(command==='theme-capabilities')result=await (await import('../lib/theme-capabilities.mjs')).inspectThemeCapabilities({project:required(a,'project'),...config});
+    if(command==='resolve-adapter')result=await (await import('../lib/theme-capabilities.mjs')).resolveAdapterRegistry(config);
+    if(command==='verify-business')result=await (await import('../lib/business-evidence.mjs')).verifyBusinessEvidence(config);
+    if(command==='audit-policy')result=await (await import('../lib/policy-audit.mjs')).auditPolicy(config);
+    if(command==='audit-window-budget')result=await (await import('../lib/resource-budget.mjs')).auditWindowBudget(config);
+    if(command==='field-monitor')result=await (await import('../lib/field-monitor.mjs')).monitorField({config,output:required(a,'out')});
+    if(command==='strategy-contract')result=await (await import('../lib/strategy-contract.mjs')).prepareStrategyContract(config);
+    await emit(result,command==='field-monitor'?undefined:a.out);
+    return ['rejected','ambiguous','not-accepted','review-required','failed','limited'].includes(result.status??result.outcome)?3:0;
+  }
   if(command==='improve-cycle') {
     const {runRecoveryCycle}=await import('../lib/recovery-cycle.mjs');
     const result=await runRecoveryCycle({config:await readJSON(required(a,'config')),output:required(a,'out')});
@@ -357,11 +395,16 @@ export async function main(argv=process.argv.slice(2)) {
     const output=required(a,'out');
     await emit(await createOfficialPlan({project:required(a,'project'),diagnosis:await readJSON(required(a,'diagnosis')),config:await readJSON(required(a,'config')),profiles,sources:a.sources?await readJSON(a.sources):undefined}),output);return 0;
   }
+  if(command==='audit-runtime-integrity'){
+    const {inspectRuntimeIntegrity}=await import('../lib/runtime-integrity.mjs');
+    const result=inspectRuntimeIntegrity(await readJSON(required(a,'input')));
+    await emit(result,required(a,'out'));return result.reviewRequired?3:0;
+  }
   if (['profile-runtime','profile-devtools','optimize'].includes(command)) {
     const config = await readJSON(required(a, 'config')), output = required(a, 'out');
     const run = command === 'profile-runtime' ? (await import('../lib/runtime-profile.mjs')).profileRuntime
       : command === 'profile-devtools' ? (await import('../lib/devtools-profile.mjs')).profileDevtools : (await import('../lib/optimize.mjs')).runOptimization;
-    const result = await run({ config, output }); await emit(result); return ['complete','optimization-accepted','awaiting-preview-sync'].includes(result.status) ? 0 : 3;
+    const result = await run({ config, output }); await emit(result); return ['complete','optimization-accepted','awaiting-preview-sync'].includes(result.status)&&!(command==='profile-runtime'&&result.reviewRequired) ? 0 : 3;
   }
   if (command === 'profile-liquid') {
     const { profileLiquid } = await import('../lib/liquid-profile.mjs'); const result = await profileLiquid({ config: await readJSON(required(a, 'config')) });
@@ -386,6 +429,23 @@ export async function main(argv=process.argv.slice(2)) {
     const {scanTheme}=await import('../lib/scan.mjs');
     const result=await scanTheme({project:required(a,'project'),pages:a.pages?await readJSON(a.pages):[]});
     await emit(result,a.out);return result.complete===false?3:0;
+  }
+  if(command==='check-theme'){
+    const {checkThemeProject}=await import('../lib/theme-check-project.mjs');
+    const {assertPrecheckOutput}=await import('../lib/precheck.mjs');
+    await assertPrecheckOutput(required(a,'project'),required(a,'out'));
+    try{const result=await checkThemeProject({project:a.project});await emit(result,a.out);return result.reviewRequired?3:0;}
+    catch(error){if(error.themeCheck)await emit({...error.themeCheck,status:'failed',error:error.message},a.out);throw error;}
+  }
+  if(command==='plan-verification'){
+    const {verificationPlan}=await import('../lib/standards-policy.mjs');
+    await emit(verificationPlan(await readJSON(required(a,'config'))),required(a,'out'));return 0;
+  }
+  if(command==='import-pageotter'){
+    const {importPageOtter}=await import('../lib/pageotter-import.mjs');
+    if(a.project){const {assertPrecheckOutput}=await import('../lib/precheck.mjs');await assertPrecheckOutput(a.project,required(a,'out'));}
+    const result=await importPageOtter({input:await readJSON(required(a,'input')),project:a.project,baseline:a.baseline?await readJSON(a.baseline):undefined});
+    await emit(result,required(a,'out'));return result.reviewRequired?3:0;
   }
   if(command==='check-performance') {
     await newOutput(a.out);
@@ -522,7 +582,8 @@ export async function main(argv=process.argv.slice(2)) {
     await prepareReceiptOutput(a.out);
     if(plan.kind==='site-change-plan') {
       const {applySitePlan,rollbackSitePlan}=await import('../lib/site-changes.mjs');
-      return emitOperationReceipt(()=>(command==='apply'?applySitePlan:rollbackSitePlan)(plan,project),a.out);
+      const adapterContext=a['adapter-context']?await readJSON(a['adapter-context']):undefined;
+      return emitOperationReceipt(()=>(command==='apply'?applySitePlan:rollbackSitePlan)(plan,project,adapterContext),a.out);
     }
     return emitOperationReceipt(()=>(command==='apply'?applyPlan:rollbackPlan)(plan,project),a.out);
   }

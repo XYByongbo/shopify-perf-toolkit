@@ -1,0 +1,13 @@
+{
+  "identity": {
+    "store": "example.myshopify.com",
+    "themeId": "123",
+    "vendor": "reviewed-vendor",
+    "version": "reviewed-version"
+  },
+  "context": {
+    "appRevision": "replace-with-current-revision",
+    "generatorRevision": "replace-with-current-revision",
+    "configurationRevision": "replace-with-current-revision"
+  }
+}

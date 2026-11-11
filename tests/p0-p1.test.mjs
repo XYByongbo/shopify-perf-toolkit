@@ -84,6 +84,10 @@ test('unified diagnosis connects interaction phases, current source and field pr
     resources:[],cpu:[],interactionCpu:[{selfMs:90,url:'https://cdn.test/a.js',source}],afterActions:{interactions:[{interactionId:1,name:'click',target:'#buy',duration:240,inputDelay:120,processing:80},{interactionId:1,name:'pointerup',target:'#buy',duration:248,inputDelay:128,processing:80}]}};
   const d=await diagnoseUnified({project,profiles:[p],field:normalizeFieldData(fieldInput()),goal:{kind:'interaction',target:'#buy',event:'click'}});
   assert.equal(d.candidates[0].kind,'interaction-cpu');assert.equal(d.phases[0].interactions[0].dominantPhase,'input');
+  const cruxInput=fieldInput();cruxInput.source='crux';cruxInput.groups[0].samples=null;
+  const cruxDiagnosis=await diagnoseUnified({project,profiles:[p],field:normalizeFieldData(cruxInput),goal:{kind:'interaction',target:'#buy',event:'click'}});
+  assert.equal(cruxDiagnosis.fieldStatus,'limited');assert.equal(cruxDiagnosis.candidates[0].priority.fieldBreach,true);
+  assert.equal(cruxDiagnosis.candidates[0].priority.affectedSamples,null);
   const otherTarget=fieldInput();otherTarget.groups[0].target='#unrelated';
   const scoped=normalizeFieldData(otherTarget);
   assert.equal(fieldSegments(scoped,p.config.url,p.config.device,{target:'#buy'}).length,0);
