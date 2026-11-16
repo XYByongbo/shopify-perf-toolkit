@@ -2,7 +2,7 @@
 
 0.10.0 提分任务优先走 [源码归因、按需加载与单补丁实验](demand-engine.md)，下述原有策略和正式验收继续适用。
 
-先定位损失最多的评分指标，再追到代码、形成补丁、验证收益。文件变小、告警变少、报告生成成功都不是提分证据。所有项目输出放到工具目录之外的新任务目录。
+先按 [新旧验收策略](standards-upgrade.md#两种正式验收策略) 确定目标和口径，再定位影响目标的成本、追到代码、形成补丁、验证收益。省略 acceptancePolicy 保留原分数流程；显式 standards-v1 使用指标及规范证据验收。文件变小、告警变少、报告生成成功都不是性能收益证据。所有项目输出放到工具目录之外的新任务目录。
 
 ## 接入能力
 
@@ -15,7 +15,7 @@
 | Shopify 官方 Liquid HTML parser | analyze-code / plan-site / plan-split | 使用 AST 源码位置处理 HTML/Liquid；Acorn 处理 JS，PostCSS 处理 CSS。解析失败或不满足边界拒绝生成。 |
 | 代码拆分 | plan-split | 首屏/非首屏 CSS 拆分；具备 activate/destroy 契约的组件按首次点击加载；新文件一起应用、回滚。 |
 | 候选身份 | measure.deployment | 指定远端主题仅拉取 Liquid/JS/CSS/JSON 到临时目录比哈希，核对各页 Shopify.theme.id 与 Shopify.shop；随后清理临时源码。不拉图片、不覆盖本地主题、不推送。 |
-| 提分验收 | verify-gain / verify-optimization / optimize | 原门槛、可测分数收益、关键指标无实质退步、候选身份、功能回归、内容视觉审阅。 |
+| 性能验收 | verify-gain / verify-optimization / optimize | verify-gain 检查收益；完整验收按所选策略检查目标收益、关键指标无实质退步、候选身份、功能回归、内容视觉及适用的规范证据。 |
 
 在工具目录执行 `npm ci --ignore-scripts`。使用已有 Chrome，可设 PERF_KIT_BROWSER_EXECUTABLE；使用已有 Shopify CLI 登录，可设 PERF_KIT_SHOPIFY_CLI。浏览器正常请求网页资源，但不额外下载图片原件。限写采集不能证明真实加购、支付或统计成功。
 
@@ -89,7 +89,7 @@ verify-optimization 直接验证已有数据：before、after、expectedSourceHa
 
 ## 判定收益
 
-保留移动每次最低 75/中位 80、桌面 85/90，正式每组前后各至少 5 次。verify-site 新增退步拦截；独立 score-target 仍只是原分数门槛。
+两种策略的正式验收都要求每组前后各至少 5 次。旧流程保留移动每次最低 75/中位 80、桌面 85/90；standards-v1 不以分数门槛或分数退步决定正式通过，但保留具体指标保护。verify-site 与独立 score-target 仍执行原评分契约，不能代替 verify-optimization。
 
 verify-gain 至少 3 次独立样本、同引擎/版本/配置/页面设备矩阵。默认分数改善至少 3 分；LCP/TBT/CLS/FCP/SI 退步阈值为 200ms/50ms/0.02/100ms/200ms，分别与前后 MAD 的 3 倍取大值。任一组实质退步都拦截，完整保留原始分布。MAD 是决策噪声带，不是统计显著性或因果证明。
 

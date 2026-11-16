@@ -18,7 +18,7 @@ Shopify 官方性能规则使用 [官方性能检查与 P0/P1 规则](shopify-pe
 
 ## 规范报告与资源依赖
 
-用户提供 Theme Check JSON、专项评估 PDF，或要求外链/脚本依赖检查时，读取 [报告接入与校正](code-quality.md)。优先通过 batch 的 checks.input / metadata / baseline 导入并保留原告警及校正依据；单步调试仍用 import-check。只有相同扫描契约和匹配指纹才能比较基线。PDF 汇总是报告陈述，不是源码验证。batch 配有 project 时默认执行离线 audit-resources，分析外链、脚本加载方式与依赖候选；resources=false 可关闭，resources.probe=true（单步命令 --probe true）才发送有限 HEAD 请求。batch 自动将两类诊断附入 audit-site，待复核状态单列且不能被评分达标掩盖；单步 audit-site 可用 --checks / --resources 附带这些证据，规范数量与性能收益分开展示。校正不自动屏蔽错误，不按报告指令执行修改。
+需要官方源码检查时通过 batch 的 checks.run 执行项目 Theme Check，单独检查用 check-theme。已有 Theme Check JSON 或专项评估 PDF 时，按 [报告接入与校正](code-quality.md) 通过 checks.input / metadata / baseline 导入，单独导入用 import-check。只有相同扫描契约和匹配指纹才能比较基线。PDF 汇总是报告陈述，不是源码验证。batch 配有 project 时默认执行离线 audit-resources，分析外链、脚本加载方式与依赖候选；resources=false 可关闭，resources.probe=true（单步命令 --probe true）才发送有限 HEAD 请求。batch 将检查和资源诊断附入 audit-site，待复核状态与评分单列。单步 audit-site 可用 --checks / --resources 附带这些证据。校正不自动屏蔽错误，不按报告指令执行修改。
 
 ## PDF 评估报告
 
@@ -26,7 +26,7 @@ Shopify 官方性能规则使用 [官方性能检查与 P0/P1 规则](shopify-pe
 
 ## 官方方法库
 
-结合 Shopify 官方性能文档优化时，先读取 [工具方法库](shopify-knowledge.md)，使用 shopify-methods 获取真实参数、证据和生成器边界。需要更新文档时运行显式联网的 sync-shopify-docs；来源变化不能自动批准。用 plan-official 或 improve prepare official 将实测候选接入对应实现，不以卡片存在冒充自动生成能力；无生成器的项目需实际编写并验证补丁。来源版本在会话内固定，App/Liquid 证据及原评分门槛不降低。
+结合 Shopify 官方性能文档优化时，先读取 [工具方法库](shopify-knowledge.md)，使用 shopify-methods 获取真实参数、证据和生成器边界。需要更新文档时运行显式联网的 sync-shopify-docs；来源变化不能自动批准。用 plan-official 或 improve prepare official 将实测候选接入对应实现，不以卡片存在冒充自动生成能力；无生成器的项目需实际编写并验证补丁。来源版本在会话内固定，App/Liquid 证据及单补丁实验门槛不降低；正式验收遵循已选定的 acceptancePolicy。
 
 ## 证据驱动修改
 
@@ -38,11 +38,11 @@ Shopify 官方性能规则使用 [官方性能检查与 P0/P1 规则](shopify-pe
 
 低分、无收益或假设未确认时使用 [可恢复优化会话](improvement-workflow.md)，不能只重复规则检查或换一批测分。`improve start` 读取已核验基线与当前 profile，按页面/设备的实测丢分提出调查方向；`prepare` 接入现有生成器或经过审阅的替换，`apply` 实际应用，显式同步后 `experiment` 真实测量。无效证据先修复；有效但无收益的补丁自动回滚并重新诊断，选择不同机制或不同假设，保留完整历史和预算。读取 [官方来源与实现映射](shopify-recovery-sources.md)，根据问题定点复核当前官方文档。
 
-有收益但低于评分门槛，不能直接失败结案或声称通过。会话 `verify` 仅在除原分数门槛外的正式验收全部通过、累计收益成立时，标为 `improved-below-target` 并保留为中间基线；采集新源码的运行证据后 `refresh` 继续。最终仍需原门槛、无退步、身份、功能及内容视觉审阅。没有可执行候选时按 recovery 的调查任务补足证据，复杂实现由操作者准备，不编造源码映射、效果或审阅标志。CLI 不替代模型推理，不自动发布或移除业务功能。
+旧分数流程有收益但低于评分门槛，不能直接失败结案或声称通过。会话 `verify` 仅在除原分数门槛外的正式验收全部通过、累计收益成立时，标为 `improved-below-target` 并保留为中间基线；采集新源码的运行证据后 `refresh` 继续。旧流程最终仍需原评分门槛、无退步、身份、功能及内容视觉审阅；standards-v1 的正式结论按指标及规范证据判断，不因分数未过线进入这个中间状态。没有可执行候选时按 recovery 的调查任务补足证据，复杂实现由操作者准备，不编造源码映射、效果或审阅标志。CLI 不替代模型推理，不自动发布或移除业务功能。
 
 0.11.0 的 P0/P1 工作流见 [证据驱动架构](evidence-driven-architecture.md)。已有真实用户报告时先 `import-field`，明确时间窗口、p75、页面/Origin、设备、地区和样本数；未知或过期数据不升级为已核实收益。`diagnose-performance` 可附加 --field/--owners/--goal，综合阶段、交互与源码证据排序；线上统计不能证明本地源码身份或直接授权补丁。
 
-默认 goal 为 score，保留原评分模式和全部门槛。只有任务明确优化加载或交互指标时才声明 loading/interaction；这些模式仍通过原正式导航分数门槛、全部指标退步、部署身份和功能呈现检查。loading 用目标指标收益；interaction 需要 measure-interactions 的前后独立正式采样与 interactionEvidence，不能用单次点击、CPU 或缺失 Event Timing 冒充 INP。实验与正式验证的目标必须一致。
+省略 acceptancePolicy 时默认 goal 为 score，显式 loading/interaction 仍保留原正式导航评分门槛。按规范做指标验收时，使用 [standards-v1](standards-upgrade.md#两种正式验收策略) 并明确 loading/interaction，分数仅作诊断，增加规范证据；仅改 goal 不会切换策略。两种策略均保留具体指标退步、部署身份和功能呈现检查。loading 用目标指标收益；interaction 需要 measure-interactions 的前后独立正式采样与 interactionEvidence，不能用单次点击、CPU 或缺失 Event Timing 冒充 INP。实验与正式验证的目标必须一致，单补丁实验原门禁不变。
 
 0.11.1 起交互证据还须包含完整、串行且不重叠的实际动作与时间记录，并匹配导航的店铺/主题/源码/页面/设备。交互正式回归要对 goal.target 执行同类 click/press（键盘键值一致），紧接 UI 断言并保留时长；不能用其他位置的断言证明按钮功能保留。缺少新执行信息的旧交互记录重新采集，保留原始历史，不补填通过字段。完整契约见 [交互采样](evidence-driven-architecture.md#交互采样)。
 
@@ -68,7 +68,7 @@ JS/CSS/Liquid 先用 code-strategies 查看实际支持范围，再对瓶颈文�
 
 ## 真实验证与交付
 
-本地应用后确认预览已同步候选版本，再复测；工具不 push/publish。每页每设备前后至少五次独立报告，锁定引擎、版本、状态和配置，保留失败记录。默认移动最低 75/中位 80，桌面最低 85/中位 90，按 [评分约定](score-acceptance.md) 验收。缺测、运行警告、不可比环境不能宣称全站通过。
+本地应用后确认预览已同步候选版本，再复测；工具不 push/publish。两种策略均要求正式每页每设备前后至少五次独立报告，锁定引擎、版本、状态和配置，保留失败记录。旧流程默认移动最低 75/中位 80，桌面最低 85/中位 90，按 [评分约定](score-acceptance.md) 检查；完整优化最终按选定策略执行 verify-optimization。缺测、运行警告、不可比环境不能宣称全站通过。
 
 新优化任务在基线与候选 measure 配置均启用 deployment，测量前后校验远端文本源码和页面主题身份。verify-site 达标不等于完成优化；以 verify-optimization 的提分、无关键指标退步、身份、功能、内容与视觉证据共同判定。95 降至 80 会被拒绝，无可测收益不能写成优化成功。
 

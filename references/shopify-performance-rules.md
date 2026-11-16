@@ -26,7 +26,7 @@ node scripts/perfkit.mjs analyze-code --project /absolute/theme \
 
 `scan` 自动包含 P0 静态候选及 `performance` 详细库存；`audit-site` 自动包含 `performance-audit` 补充报告和发现，用 `--official /absolute/run/official.json` 接入官方检查结果。`diagnose-performance` 的 `performance` 字段包含专项候选，但不会把它们自动提升为已有证据引擎的可执行 CPU/资源假设。老 runtime profile 缺少 LCP presentation 时应重新采集；已有有效 CPU 候选仍保留，CLI 可能因待复核返回 3。
 
-batch 使用 `officialChecks: true` 或 `officialChecks: {"timeoutMs":120000}` 在测量前运行官方性能检查。与 `precheck` 两项结构检查、`checks.input` 外部报告并存，分别保留证据。quality 优先使用外部报告，其次官方性能报告，再次结构预检；整站审计仍并列保留。标准 [batch 模板](../assets/examples/batch.json) 已开启官方性能检查，已有未声明的配置不会自动调用 CLI。
+batch 使用 `officialChecks: true` 或 `officialChecks: {"timeoutMs":120000}` 在测量前运行官方性能检查。它与 `precheck` 两项结构检查、`checks.run` 项目检查或 `checks.input` 外部报告并存，分别保留证据。quality 优先使用项目检查或导入报告，其次官方性能报告，再次结构预检。标准 [batch 模板](../assets/examples/batch.json) 已开启官方性能检查，已有未声明的配置不会自动调用 CLI。
 
 ## 官方检查范围
 

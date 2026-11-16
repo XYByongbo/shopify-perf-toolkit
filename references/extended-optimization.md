@@ -127,7 +127,7 @@ node scripts/perfkit.mjs plan-domain --project /absolute/candidate-theme --diagn
 
 Section fetch 必须 checkpoint 到 sectionSelector，并有 click/press + 业务断言测试原消费者。采集真实 fetch 状态、完成标志、响应体哈希和实际区块正文解析结果。候选响应须包含当前区块；空值、错误 ID、缺失正文或发生原整页回退都不能作为优化成功证据。不能用无关按钮或提前存在的静态内容掩盖请求失败。
 
-以上行为检查通过后才进行前后交替的独立 Lighthouse 导航样本；正式验收继续要求原评分门槛、完整矩阵、无其他指标退步和内容视觉审阅。常规请求不被屏蔽。
+以上行为检查通过后才进行前后交替的独立 Lighthouse 导航样本；单补丁实验保留原门禁。正式验收按 [新旧验收策略](standards-upgrade.md#两种正式验收策略) 执行：旧流程保留原评分门槛，standards-v1 以目标指标与规范证据验收；两者都要求完整矩阵、无其他导航指标实质退步和内容视觉审阅。常规请求不被屏蔽。
 
 ## 无收益后的调整
 

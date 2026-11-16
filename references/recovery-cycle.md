@@ -63,7 +63,7 @@ cycle.json 每步保存最新 session，异常时还保留 pending 步骤目录�
 - 字节和请求数直接读取 Lighthouse resource-summary 的 total 行。third-party 是与类型重叠的统计，不能再次加到总量。
 - maxByType 使用指定分类行。零上限有效；未知键、负数、小数、非有限数、空配置拒绝。
 - 缺失/重复/无效行、缺少 total 或指定分类，不视为零资源，返回 invalid-evidence。
-- 已配置预算是硬门禁。它不替代原分数、收益、行为和部署身份验证，也不能在后续 verify 中被放宽。
+- 已配置预算是硬门禁。它不替代所选验收策略的收益、行为、部署身份及评分或规范证据要求，也不能在后续 verify 中被放宽。策略差异见 [新旧验收策略](standards-upgrade.md#两种正式验收策略)。
 
 ## 验证
 
@@ -76,7 +76,7 @@ cycle.json 每步保存最新 session，异常时还保留 pending 步骤目录�
 ## 模块职责与续跑约束
 
 - `optimization-collection.mjs`：只采集样本、行为回归和部署证据；不应用/回滚主题，也不裁决正式通过。
-- `optimization-verification.mjs`：读取既有证据，检查原评分、收益、资源预算和行为门槛；不发起新导航。
+- `optimization-verification.mjs`：读取既有证据，按所选策略检查收益、资源预算、身份和行为；旧流程保留原评分门槛，standards-v1 增加规范证据，分数仅作诊断；不发起新导航。
 - `improvement-state.mjs`：验证会话链、来源目录、累计预算和历史完整性；`improvement-session.mjs` 负责动作转换、预算记账和产物固定。
 - `optimize.mjs`：兼容原命令接口，prepare/apply 显式改源码，verify 组合一次采集和一次验收。
 - `theme-source.mjs`：独立源码快照与浏览器路径能力，打断 runtime → measure → deployment → runtime 的静态依赖环。

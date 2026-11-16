@@ -4,12 +4,25 @@
 
 ## 两种正式验收策略
 
+本节统一说明当前正式优化验收。旧配置、独立评分命令和单补丁实验保持兼容；选择 `goal: loading/interaction` 本身不会切换验收策略。
+
+| 项目 | 旧流程（省略 acceptancePolicy） | 新流程（standards-v1） |
+| --- | --- | --- |
+| 目标 | 默认 score，也支持 loading/interaction | 必须显式 loading/interaction，拒绝 score |
+| 分数 | 默认移动最低 75/中位 80、桌面最低 85/中位 90；保留分数退步保护 | 分数及门槛结果仅作诊断，不决定正式验收 |
+| 指标收益 | 证明声明的目标收益，其他导航指标无实质退步 | 同样要求；interaction 使用独立交互收益证据 |
+| 正式导航样本 | 每页每设备前后各至少 5 次，环境和矩阵可比 | 相同 |
+| 共同证据 | 源码/部署身份、适用的补丁实验、功能与内容视觉、已配置资源预算 | 相同 |
+| 新增规范证据 | 不因省略字段自动启用 | 项目 Theme Check 前后差异、改动范围观察、部署绑定的 integrityProfiles |
+
+“实质退步/改善”按既有最小幅度与前后样本波动判断，不表示每个微小波动都失败，也不构成统计显著性或因果证明。规范 MEA-02 的每组至少 3 次是实验室对比的最低建议；工具探索默认 3 次，正式验收保持更严格的至少 5 次，探索报告不能充当正式证据。
+
 省略 `acceptancePolicy` 时，原 score 默认值、分数门槛、收益判定、部署、业务/视觉、回滚及 CLI 退出语义保持原样。
 
 显式使用 `acceptancePolicy: "standards-v1"` 时：
 
 - 必须指定 `goal: {kind: "loading", metric: "lcp"}` 等具体指标，或原有 interaction 目标；不能默认使用 score。
-- 分数与原分数门槛仍输出供诊断，但不决定此策略的通过。目标指标必须有超过既有噪声/最小幅度要求的实测改善；其他导航指标不得退步。interaction 仍必须提供独立交互证据。
+- 分数与原分数门槛仍输出供诊断，但不决定此策略的通过。目标指标必须有达到既有噪声/最小幅度要求的实测改善；其他导航指标不得实质退步。interaction 仍必须提供独立交互证据。
 - 正式每页每设备前后至少五次、环境匹配、源码/部署身份、单补丁实验、功能、内容视觉及已配置资源预算继续有效。不降低现有单补丁探索门禁。
 - 必须提供部署绑定的 `regression.integrityProfiles`，检查 LCP 身份、重复请求与初始化；缺少或异常均拒绝。
 - 增加 Theme Check 前后差异门禁和按源码改动范围要求的观察记录。必要项目 `NOT RUN` 不能通过。
@@ -18,6 +31,12 @@
 `policy: "delivery-v1"` 是另一项交付适配器策略，可与 `acceptancePolicy` 同时使用；不互相替代。
 
 `verify-optimization`、`optimize verify`、`improve collect` 和 `improve verify` 均接入新字段。collect 在正式导航前检查规范证据，缺失时不浪费测量预算。improve 第一次正式验证选择的策略会固定在会话中，后续不能换策略绕过失败。缺失证据可以补齐后继续复用已固定的样本。
+
+配置位置：`verify-optimization` 与 `optimize` 在配置顶层提供 `acceptancePolicy`、`goal`、`standardsEvidence`；`improve collect` 在 `formal` 中提供策略与规范证据，`improve verify` 在 `verification` 中提供，目标沿用会话的 `goal`。`legacy-score` 是结果中的策略标识，不是可传入的配置值；保留旧流程应省略字段，不填写 null 或改写旧配置。
+
+运行完整性证据的位置随入口不同：直接 verify-optimization 使用 `regression.integrityProfiles`，optimize verify 使用顶层 `integrityProfiles`，improve collect 使用 `formal.integrityProfiles`，improve verify 使用 `verification.regression.integrityProfiles`。这些字段引用实际采集的证据，不能用待执行清单或自行填入的 PASS 替代。
+
+`verify-site`、`score-target`、`batch.acceptance` 和 `ci-check` 继续执行各自原评分契约，不接受这个策略作为绕过参数。其评分失败不单独决定 standards-v1 的结论，评分通过也不代表完整优化通过；最终查看 `verify-optimization`（或 optimize/improve 调用该验证器）的 `outcome`。新策略仅改变正式验收，不放宽 `experiment` / `verify-patch` 原有单补丁探索门禁。
 
 ## Theme Check 使用真实项目配置
 
@@ -88,7 +107,7 @@ AssetSizeJavaScript:
 
 ## 检测与报告
 
-新增八项 settled DOM 观察，现有性能规则从第一批的 31 项扩到 39 项，映射版本为 2：
+新增八项 settled DOM 观察，现有性能规则从第一批的 31 项扩到 39 项，映射版本为 2，关联 37 个不同规范编号。这是候选检查映射，不是 37 条完整覆盖或 130 条自动验收；130 条目录的评估状态仍为 not-assessed，48/56/25/1 的卡点/默认/按需/参考档位仍是执行建议。
 
 | 观察 | 规范编号 | 结论边界 |
 | --- | --- | --- |

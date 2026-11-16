@@ -22,13 +22,14 @@ CLI 默认 stdout 是至多约 4 KiB 的紧凑 JSON，最多显示配置顺序�
 
 | 字段 | 行为 |
 | --- | --- |
+| checks.run | 设为 true，调用已安装的 Shopify CLI 执行项目 Theme Check。需要 project，输出目录位于主题外。与导入字段互斥 |
 | checks.input | 规范报告 JSON 的绝对路径；需要 project。支持 Theme Check 和结构化报告陈述，PDF 需先提取 |
 | checks.metadata | 可选的扫描契约 JSON 绝对路径；缺少完整来源时保留 incomplete |
 | checks.baseline | 可选的历史 import-check 输出绝对路径；不是性能 before 目录 |
 | resources | project 存在时默认启用离线分析；false 关闭 |
 | resources.probe | 仅 true 时做受限 HEAD，默认 false；其余字段拒绝，避免拼写错误静默失效 |
 
-checks/resources 阶段共用剩余墙钟预算，通过受控子进程执行并保存 transport。HEAD 最多 40 个 URL，每个至多 5 秒和 3 次跳转；受总剩余时间进一步限制。尝试/失败预算仍用于测量，HEAD 不冒充测量样本。显式探测时遗漏、未验证或失败均标记待复核；离线 not-probed 不作为网络通过。
+checks/resources 阶段共用剩余墙钟预算。项目 Theme Check 最多运行 120 秒，保留命令记录、原始诊断、生效配置和源码指纹。导入和资源分析通过受控子进程执行并保存 transport。HEAD 最多 40 个 URL，每个至多 5 秒和 3 次跳转；受总剩余时间进一步限制。尝试/失败预算仍用于测量，HEAD 不冒充测量样本。显式探测时遗漏、未验证或失败均标记待复核；离线 not-probed 不作为网络通过。
 
 导入 exit=3 表示保留的诊断需要复核，batch 继续保存资源与性能证据；格式错误或子进程执行失败则停止后续阶段并保留失败记录。超时标记 stopped。尚未执行的诊断标记 not-run。
 
@@ -46,7 +47,7 @@ measurement 的 budget 默认：maxWallTimeMs=3600000、maxAttempts=80、maxFail
 
 ## 探索与正式验收分开
 
-purpose 默认 acceptance，runs 仍只能 5–10。显式 purpose=exploration 才允许 1–4 次（默认 3），run.json 和摘要始终携带 purpose，verify-site 拒绝任何 exploration 数据。正式验收仍要求每页/设备前后至少 5 次；移动最低 75/中位 80、桌面最低 85/中位 90，运行警告、不可比环境、缺测仍不能通过。预算或早停不改变这些规则。
+purpose 默认 acceptance，runs 仍只能 5–10。显式 purpose=exploration 才允许 1–4 次（默认 3），run.json 和摘要始终携带 purpose，verify-site 与完整正式验收拒绝 exploration 数据。两种验收策略均要求每页/设备前后至少 5 次，运行警告、不可比环境、缺测不能通过。旧流程默认移动最低 75/中位 80、桌面最低 85/中位 90；显式 standards-v1 的完整验收将分数仅作诊断，见 [新旧验收策略](standards-upgrade.md#两种正式验收策略)。预算或早停不改变采样要求和选定策略；本节 evaluate-iteration 的探索决策也不替代正式验收。
 
 探索先选一个代表性、受影响页面/设备，使用同引擎/浏览器/节流/页面状态。历史 baseline 可以是完整正式矩阵；early-stop 只比较候选声明的组合，使用 baseline 中该组的全部样本，双方各至少 3 份；会记录评估范围。这只是候选决策，不是全站验收。
 

@@ -39,7 +39,7 @@ node scripts/inspect_lantern_fcp.mjs /absolute/report.json /absolute/trace.json 
 
 ## 前后比较
 
-verify-site 要求相同引擎、页面 id/设备矩阵、每组完整报告、同一页面 URL（仅忽略 preview_theme_id），并逐组调用 score-target 校验环境与门槛。目录逃逸、符号链接、重复路径、额外/遗漏 JSON、失败/缺失组均不允许全站通过。原始 JSON 和 manifest 是本地可修改文件，校验不构成外部签名或主题发布证明。
+verify-site 要求相同引擎、页面 id/设备矩阵、每组完整报告、同一页面 URL（仅忽略 preview_theme_id），并逐组调用 score-target 校验环境与门槛。目录逃逸、符号链接、重复路径、额外/遗漏 JSON、失败/缺失组均不允许评分通过。它保持原评分契约；完整优化最终使用 verify-optimization，显式 standards-v1 时分数只作诊断，见 [新旧验收策略](standards-upgrade.md#两种正式验收策略)。原始 JSON 和 manifest 是本地可修改文件，校验不构成外部签名或主题发布证明。
 
 每次 apply 后必须确认实际预览已同步补丁。记录主题 ID/源码指纹、内容、同意状态、App 配置、地区和机器负载。没有真实主题时只能做隔离工具验证。功能、视觉、CWV 和未来分数不由实验室门槛证明。
 

@@ -27,7 +27,7 @@ description: Diagnose and optimize Shopify Liquid themes at site, image, or comp
 | 独立 SEO 审查与 SEO 报告 | [SEO 工具](references/seo-toolkit.md)；使用 shopify-seo-toolkit / seokit |
 | LCP 数值异常、重复资源/初始化、延迟加载器复核 | [身份与重复加载](references/runtime-integrity.md)；profile-runtime / audit-runtime-integrity，旧证据不补造，显式验收门禁需部署绑定 |
 | 两主题差异、整改报告复核、JSON 内嵌业务代码 | [整改证据](references/theme-evidence.md)；theme-diff / audit-quality，区分当前状态、历史原因与性能收益 |
-| 综合代码审查（含旧 SEO 规则）、Theme Check、外链与脚本依赖 | [规范报告](references/code-quality.md)、[前期预检](references/precheck.md)、[官方性能规则](references/shopify-performance-rules.md)；audit-quality / check-performance / audit-resources |
+| 综合代码审查（含旧 SEO 规则）、Theme Check、外链与脚本依赖 | [规范报告](references/code-quality.md)、[前期预检](references/precheck.md)、[官方性能规则](references/shopify-performance-rules.md)；check-theme 或 batch 的 checks.run，结合 audit-quality / check-performance / audit-resources |
 | 已保存的最终页面/Section HTML、表单/焦点快照 | [渲染后 HTML 与快照](references/rendered-html.md)；audit-html；batch 的 renderedHtml 仅消费显式输入 |
 | PDF 评估报告 | [PDF 契约](references/pdf-report.md)、[报告细则](references/task-workflows.md#pdf-评估报告)；report-pdf，绑定当前源码问题和实际验证 |
 | 无收益、低于目标或恢复执行 | [可恢复会话](references/improvement-workflow.md)、[恢复执行器](references/recovery-cycle.md)；improve / improve-cycle，不重复收集已固定的正式样本 |
@@ -57,11 +57,11 @@ description: Diagnose and optimize Shopify Liquid themes at site, image, or comp
 
 ## 实测验收与交付
 
-显式要求按规范进行指标验收时，读取 [规范对齐扩展](references/standards-upgrade.md)：`acceptancePolicy: "standards-v1"` 需要明确 loading/interaction 目标、项目 Theme Check 前后原始报告、改动范围观察及部署绑定的 integrityProfiles。省略该字段保持以下原分数流程；不得在失败后切换策略绕过门槛。PageOtter 导入是提议的 handoff v1 外部观察接口，不是正式验收证据。
+开始时按 [新旧验收策略](references/standards-upgrade.md#两种正式验收策略) 确定口径。省略 acceptancePolicy 保留旧分数流程；显式要求按规范进行指标验收时使用 `acceptancePolicy: "standards-v1"`，明确 loading/interaction 目标，提供项目 Theme Check 前后原始报告、改动范围观察及部署绑定的 integrityProfiles，分数仅作诊断。只声明 loading/interaction 不会启用新策略；不得在失败后切换策略绕过门槛。PageOtter 导入是提议的 handoff v1 外部观察接口，不是正式验收证据。
 
-- 探索显式 `purpose=exploration`（默认 3 次），不能充当正式验收。正式每页每设备前后各至少 **5 次独立报告**，锁定引擎/版本/状态/完整配置，保留全部有效样本与失败记录。默认移动最低 75/中位 80，桌面最低 85/中位 90，见 [评分契约](references/score-acceptance.md)。
-- 新优化任务的两侧测量启用 deployment；测量前后核验远端文本源码、店铺/主题/页面身份。最终使用 `verify-optimization` 同时检查收益、关键指标无退步、部署身份、功能与内容视觉；`verify-site` 或 CI 达标不等于完成优化。95→80 不因仍过门槛而接受。
-- 默认 goal=score。显式 loading/interaction 仍通过原导航分数及全部保护；interaction 需要独立、串行、不重叠的实际动作/Event Timing，匹配页面/设备/店铺/主题/源码与紧随动作的 UI 断言。单次点击、TBT、CPU 或瞬时 observer 不证明 INP/线上 p75。
+- 两种策略均要求正式每页每设备前后各至少 **5 次独立报告**，锁定引擎/版本/状态/完整配置，保留全部有效样本与失败记录。探索显式 `purpose=exploration`（默认 3 次），不能充当正式验收。旧流程默认移动最低 75/中位 80，桌面最低 85/中位 90，见 [评分契约](references/score-acceptance.md)。
+- 新优化任务的两侧测量启用 deployment；测量前后核验远端文本源码、店铺/主题/页面身份。最终使用 `verify-optimization` 检查目标收益、关键指标无实质退步、部署身份、功能与内容视觉及所选策略要求；`verify-site` 或 CI 达标不等于完成优化。旧流程中 95→80 不因仍过门槛而接受；新策略仍保留具体指标的退步保护。
+- 旧流程默认 goal=score；其中显式 loading/interaction 仍保留原导航分数保护。两种策略的 interaction 都需要独立、串行、不重叠的实际动作/Event Timing，匹配页面/设备/店铺/主题/源码与紧随动作的 UI 断言。单次点击、TBT、CPU 或瞬时 observer 不证明 INP/线上 p75。
 - 按 [验证协议](references/verification.md) 和 [验收清单](references/acceptance.md) 选择受影响检查。capture/scenarios 拦截写请求，不能证明真实加购、统计、支付；缺少条件标记 NOT RUN。version 2 快照增加表单/焦点状态，不替代业务断言、视觉与正式采样；旧证据不补造新字段。
 - 交付实际改动、计划/receipt、报告、功能/画面证据、未测范围及补丁保留/回滚状态。合成测试、静态告警减少、字节下降或单次高分都不能写成真实主题达标。
 

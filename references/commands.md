@@ -4,14 +4,14 @@
 
 | 命令 | 主要参数 | 结果 |
 | --- | --- | --- |
-| doctor | --out 可选 | 当前版本与本机能力；不替代实际启动和回归 |
+| doctor | 无命令专属参数；不支持 --out | 当前版本与本机能力，输出到 stdout；不替代实际启动和回归 |
 | check-theme | --project、--out | 实际项目 Theme Check 的版本、规则列表、生效配置、原始诊断与源码绑定；不自动修复 |
 | plan-verification | --config、--out | beforeFiles/afterFiles/scope 推断最低验证级别及未运行清单 |
 | import-pageotter | --input、--out；--project/--baseline 可选 | 提议的 handoff v1 外部观察导入；同范围显式复测对比，不替代正式验收 |
 | diagnose-performance | --project、--profiles；--run/--checks/--ownership/--performance-baseline 可选，--out | 统一候选排序、资源/字体调查、归属与结构上下文 |
 | profile-domain | --config，--out 新目录 | 测量前后部署身份绑定的 runtime/Liquid 证据 |
 | optimize | --config，--out 新目录 | prepare/apply/verify；verify 的 resourceProfiles 接入采样前及正式验收 |
-| verify-optimization | --config，--out | 原分数、收益、身份、功能、视觉及资源等价验收 |
+| verify-optimization | --config，--out | 按所选策略验收目标收益、身份、功能、视觉及适用的资源/规范证据；省略 acceptancePolicy 保留原分数门禁 |
 | plan-resource-repair / verify-resource-repair | --project/--profile/--config，或 --config；--out | 受限坏图修复与独立内容恢复验收，不计性能收益 |
 | improve-cycle | --config，--out 新目录 | 审阅、同步、采集和正式验收的可恢复执行 |
 | audit-html | --input 绝对 HTML 路径；--fragment true/false、--lcp-id 可选，--out | 保存的渲染 HTML 检查；错误/警告退出 3，不证明源码身份或性能验收 |
@@ -49,6 +49,10 @@
 | score-target | --before 原始报告目录，--after，--minimum/--target 可选，--out 可选 | 单页/单设备门槛 |
 
 capture 可指定 --width 390 --height 844 --dpr 1 --wait-ms 1500 --timeout-ms 30000；--project 与 --target 用于源码关联。尺寸与状态应在前后保持相同。
+
+保存 doctor 输出可用 `node scripts/perfkit.mjs doctor > /absolute/run/doctor.json`，目录须已存在，目标应为新文件；`seokit doctor` 同样不支持 --out。Shell 重定向不提供 CLI 的防覆盖保护。
+
+正式优化的配置位置、两种策略及采样要求见 [新旧验收策略](standards-upgrade.md#两种正式验收策略)。只设置 goal 不会切换策略；verify-site / score-target / batch.acceptance / ci-check 保留原评分行为，最终优化结论来自 verify-optimization。
 
 退出码：0 表示该命令完成/该门槛通过；2 表示无效输入、证据或执行错误；3 表示诊断不完整、回归、未达标或需复核；4 表示相关浏览器依赖缺失。scan/audit-site 返回 0 不是性能通过，inspect 也不证明无瓶颈。measure 的 complete 仅表示本轮采样有效，评分由 verify-site 判断。
 

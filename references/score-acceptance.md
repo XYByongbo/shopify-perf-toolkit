@@ -1,5 +1,7 @@
 # 页面评分验收约定
 
+本文件说明旧流程及独立 `score-target` / `verify-site` 的评分契约。省略 `acceptancePolicy` 时完整优化继续采用此门槛；显式 `standards-v1` 的完整优化仅将评分结果作诊断，具体指标、规范证据及配置位置见 [新旧验收策略](standards-upgrade.md#两种正式验收策略)。两种策略都保留正式前后各至少五次导航采样；独立评分命令本身不切换策略。
+
 ## 本项目的默认目标
 
 同一页面、同一设备和状态的优化前后各至少五次独立 Lighthouse navigation 报告。按用户要求，移动端至少 75 分，桌面端更高；默认采用下列可配置验收门槛：
@@ -59,7 +61,7 @@ verify-site 在原门槛外调用 verify-gain，对分数和 LCP/TBT/CLS/FCP/SI 
 完整优化使用 verify-optimization，另要求基线/候选测量前后 deployment 核验、当前候选哈希、可测分数收益、功能断言和内容视觉审阅。无收益、旧预览或缺失回归不接受。配置与噪声带定义见 [执行引擎](performance-engine.md)。
 ## 0.11.0 目标扩展
 
-默认 score 模式及下述全部正式门槛不变。loading 允许声明目标指标收益，interaction 使用独立重复 Event Timing 证据，但完整优化仍要求原导航分数门槛、无实质指标退步、部署身份和功能呈现通过；CI 通过也不等于完整优化验收。详见 [目标与验收契约](evidence-driven-architecture.md)。
+以下为旧流程的目标扩展：loading 允许声明目标指标收益，interaction 使用独立重复 Event Timing 证据，但省略 acceptancePolicy 时完整优化仍要求原导航分数门槛、无实质指标退步、部署身份和功能呈现通过；CI 通过也不等于完整优化验收。显式 standards-v1 的差异见本文开头；旧目标契约详见 [架构说明](evidence-driven-architecture.md)。
 
-0.11.1 对 interaction 加严独立捕获、实际动作与事件窗口、前后部署范围一致性和目标 UI 断言。缺少新增执行记录的旧交互证据须重采；默认 score 的原最低分、中位数、5 次正式样本、可比性和退步检查保持不变。95→80 即使达到门槛且 LCP 改善，score/loading 的 CI 与完整验收仍不通过。
+0.11.1 对 interaction 加严独立捕获、实际动作与事件窗口、前后部署范围一致性和目标 UI 断言。缺少新增执行记录的旧交互证据须重采；默认 score 的原最低分、中位数、5 次正式样本、可比性和退步检查保持不变。95→80 即使达到门槛且 LCP 改善，score/loading 的 CI 与旧流程完整验收仍不通过。
 

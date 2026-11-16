@@ -17,7 +17,7 @@ node scripts/perfkit.mjs report --input /absolute/run/precheck.json --out /absol
 {"maxComplexity":120,"maxDepth":10,"timeoutMs":120000}
 ```
 
-预检采用独立配置 `extends: theme-check:nothing` 并仅启用两项规则。读取主题标准目录内 Liquid/JSON 的临时快照，明确覆盖默认阈值；**不继承项目 `.theme-check.yml` 的 ignore、禁用规则或自定义阈值**。需要项目阈值时通过上述配置显式传入。项目原有完整规范检查继续使用 `checks.input`，两份报告并列，不冒充全量检查覆盖。
+预检采用独立配置 `extends: theme-check:nothing` 并仅启用两项规则。读取主题标准目录内 Liquid/JSON 的临时快照，明确覆盖默认阈值；**不继承项目 `.theme-check.yml` 的 ignore、禁用规则或自定义阈值**。需要项目阈值时通过上述配置显式传入。使用 `checks.run` 按项目配置运行 Theme Check，或用 `checks.input` 导入已有报告，两份报告并列。
 
 官方检查在快照内执行，无自动修复或初始化参数。临时文件自动清理；快照检查后逐文件核对哈希，再核对原主题全部扫描文件。检测源码漂移、检查器修改快照、缺少规则支持或无效输出时失败；不会返回“通过”。记录 CLI/Theme Check 版本、实际生效配置、完整官方 JSON、源码指纹和本地解释。当前阈值是维护性预算，不是 Liquid 运行时硬限制。
 
@@ -25,7 +25,7 @@ node scripts/perfkit.mjs report --input /absolute/run/precheck.json --out /absol
 
 在现有 batch 配置添加 `"precheck": true`，或 `"precheck": {"maxComplexity":120,"maxDepth":10}`；必须提供 project。现有配置未声明时不启用，以保留原有纯测量/离线导入工作流；标准 batch.json 模板已启用。示例见 [batch-with-precheck.json](../assets/examples/batch-with-precheck.json)。
 
-执行顺序为 precheck → 原有报告导入/资源与质量审计 → 性能测量 → 整站审计/验收。预检共用剩余批次时间预算。可与 checks.input 并用；quality:true 时优先使用全量导入报告，没有全量报告则使用预检的两规则报告，不声称其他规则已检查。
+预检在项目 Theme Check 或报告导入、资源与质量审计、性能测量及整站验收之前运行。各阶段共用剩余批次时间预算。quality:true 时优先使用项目检查或导入报告，其次使用官方性能检查报告，再次使用预检报告。
 
 产物：
 

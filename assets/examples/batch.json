@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "agents": 1,
   "project": "/absolute/theme",
+  "checks": {"run": true},
   "precheck": true,
   "officialChecks": true,
   "before": "/absolute/baseline/measurement",

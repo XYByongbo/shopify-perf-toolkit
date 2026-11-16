@@ -10,7 +10,7 @@
 
 `toolkit-manifest --out /absolute/manifest.json` 按 package.files 的发行白名单生成文件 SHA-256 与总指纹。`npm run release -- --out /absolute/package.zip` 在 ZIP 内加入 RELEASE-MANIFEST.json；它证明内容身份，不证明测试通过。`npm run validate:delivery -- --out /absolute/new-run` 串行执行单元、Python、浏览器、站点及按需加载流水线，保存每项原始日志、退出码、哈希、前后包指纹和完整 validation.json。必须匹配发行包指纹才能引用该测试结果；不自动安装或发布。
 
-正式 `verify-optimization`、`optimize verify` 及 `improve collect` 的 formal 配置可设置 `policy: "delivery-v1"`。它要求绑定主题适配器；媒体、加载器、关键样式、自定义替换等策略要求部署绑定的 integrityProfiles。缺证据停止正式采样，异常不通过。未指定 policy 的旧配置保留兼容，输出明确 legacy-policy-not-enabled / not-assessed。报告附来源版本、配置指纹与各门禁状态；原分数、MAD、独立采样、部署、功能和视觉门槛继续有效。
+正式 `verify-optimization`、`optimize verify` 及 `improve collect` 的 formal 配置可设置 `policy: "delivery-v1"`。它要求绑定主题适配器；媒体、加载器、关键样式、自定义替换等策略要求部署绑定的 integrityProfiles。缺证据停止正式采样，异常不通过。未指定 policy 的旧配置保留兼容，输出明确 legacy-policy-not-enabled / not-assessed。报告附来源版本、配置指纹与各门禁状态。policy 不决定分数是否为正式门禁；它与 [acceptancePolicy](standards-upgrade.md#两种正式验收策略) 独立、可同时使用。省略 acceptancePolicy 保留原分数门禁；两种验收策略都保留 MAD、独立采样、部署、功能和视觉保护。
 
 `theme-capabilities --project /theme --config /identity.json --out /profile.json` 复用 source-graph；identity 支持 store/themeId/vendor/version，context 支持 appRevision/generatorRevision/configurationRevision。静态 JSON 模板、Theme Blocks、jQuery、生成器线索只提供调查入口，不自动证明运行能力。
 

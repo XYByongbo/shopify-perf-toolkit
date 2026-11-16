@@ -10,6 +10,8 @@
 
 ## 会话步骤
 
+正式验收的策略与证据位置见 [新旧验收策略](standards-upgrade.md#两种正式验收策略)。省略 acceptancePolicy 保留原流程；显式 standards-v1 时，collect 的 formal 或 verify 的 verification 中传入策略和 standardsEvidence，goal 沿用会话。第一次正式选择会固定，后续不能切换；新策略不放宽单补丁 experiment/verify-patch 的原门禁。
+
 每一步使用新的输出目录，除 start 外传入上一步的 `session.json`。输出必须位于主题目录之外。所有配置使用 `schemaVersion:1`。
 
 ```sh
@@ -55,7 +57,7 @@ prepared-experiment.json 沿用 [patch-experiment.json](../assets/examples/patch
 {"schemaVersion":1,"action":"verify","previous":"/absolute/step-03/session.json","verification":"/absolute/formal-verification.json"}
 ```
 
-verification 仅接受 after、before、regression、review、interactionEvidence、liquidEvidence、budget。plan、expectedSourceHash、goal、patchEvidence 由会话固定，不接受调用方覆盖；before 默认为当前基线，显式提供其他 before 时先执行同源码正式基线校验。regression/review 可提供绝对 JSON 文件路径。首次提供的资源 budget 即固定并跨方案继承；省略不取消，执行预算与计数不能通过 verification 重设。本命令重算已有正式证据，不代替外部采集。缺失内容视觉审阅仍不能通过；缺失审阅文件也不能解除已有效导航、交互或 Liquid 样本的固定。
+verification 接受 after、before、regression、review、interactionEvidence、liquidEvidence、budget，以及 policy、businessEvidence、acceptancePolicy、standardsEvidence。plan、expectedSourceHash、goal、patchEvidence 由会话固定，不接受调用方覆盖；before 默认为当前基线，显式提供其他 before 时先执行同源码正式基线校验。regression/review 可提供绝对 JSON 文件路径。首次提供的资源 budget 即固定并跨方案继承；省略不取消，执行预算与计数不能通过 verification 重设。本命令重算已有正式证据，不代替外部采集。缺失内容视觉审阅仍不能通过；缺失审阅文件也不能解除已有效导航、交互或 Liquid 样本的固定。
 
 ## 无收益之后做什么
 

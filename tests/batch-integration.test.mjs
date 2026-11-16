@@ -74,7 +74,29 @@ test('unsupported config and missing project fail before creating batch output',
   for(const [i,config] of [
     {...f.config,project:undefined}, {...f.config,checks:{input:'relative.json'}}, {...f.config,checks:{input:f.input,metdata:f.metadata}},
     {...f.config,resources:{probe:'true'}}, {...f.config,resources:{unknown:true}}, {...f.config,resources:true}, {...f.config,checks:null},
+    {...f.config,checks:{run:true,input:f.input}}, {...f.config,checks:{run:false}},
   ].entries()) {const output=path.join(f.root,'bad-'+i);await assert.rejects(runBatch({config,output}));await assert.rejects(access(output));}
+});
+
+test('explicit Theme Check failure keeps diagnostics and never reports formal acceptance',async t=>{
+  const f=await fixture(t);
+  const output=path.join(f.root,'official-failure');
+  const {run,...config}=f.config;
+  const r=await runBatch({config:{...config,checks:{run:true},
+    measurement:{schemaVersion:1,engine:'lighthouse',pages:[{id:'home',url:'https://shop.example.com/'}]}},output,
+  dependencies:{
+    checkThemeProject:async({timeoutMs})=>{
+      assert.ok(timeoutMs>=1000 && timeoutMs<=20000);
+      throw Object.assign(new Error('Shopify CLI unavailable'),{code:'ENOENT'});
+    },
+    measureSite:async()=>assert.fail('must not measure after a failed requested check'),
+  }});
+  assert.equal(r.status,'failed');
+  assert.equal(r.acceptance,'not-evaluated');
+  assert.equal(r.diagnostics.checks.status,'failed');
+  assert.equal(r.reviewRequired,true);
+  assert.equal((await json(path.join(output,'checks-failure.json'))).code,'ENOENT');
+  assert.ok(!r.artifacts['checks.json']);
 });
 
 test('malformed report stops the batch, saves failure evidence and never starts measurement',async t=>{

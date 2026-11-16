@@ -39,7 +39,7 @@
 2. **再修改。** 选择瓶颈，生成并审阅补丁计划，本地应用后显式同步到候选预览。
 3. **用实测决定下一步。** 小样本实验有收益后进入正式验收；无收益或发生回归则回滚、保留失败历史，再选择其他方案。[improve 会话](references/improvement-workflow.md) 可持续记录状态与预算。
 
-正式验收同时检查收益、指标退步、部署身份、功能及内容视觉证据。默认每页每设备前后各至少 5 次独立导航测量；候选端移动最低 **75 / 中位 80**，桌面最低 **85 / 中位 90**，门槛可配置。工具测试与隔离夹具验证不能代替商家主题实测，也不保证任意主题提分。
+正式验收同时检查目标收益、指标退步、部署身份、功能及内容视觉证据，两种策略均要求每页每设备前后各至少 5 次独立导航测量。省略 acceptancePolicy 保留旧流程：候选端移动最低 **75 / 中位 80**，桌面最低 **85 / 中位 90**，门槛可配置；显式 standards-v1 将分数仅作诊断，增加项目 Theme Check、范围观察和运行完整性证据。只声明 loading/interaction 不会切换策略，详见 [新旧验收策略](references/standards-upgrade.md#两种正式验收策略)。工具测试与隔离夹具验证不能代替商家主题实测，也不保证任意主题提分。
 
 `batch` 编排测量与诊断；`optimize` 分阶段编排补丁与验收。主题预览同步由调用方显式执行。更多操作见 [代码优化工作流](references/site-workflow.md)，各层职责与完整流程见下文。
 
@@ -71,7 +71,7 @@ flowchart TB
   review --> apply["apply：本地应用与执行回执"]
   apply -.->|"调用方显式同步"| sync["候选预览已同步"]
   sync --> experiment["单补丁实验：收益与内容、布局、交互保留"]
-  experiment -->|"promising 后进入正式验证"| acceptance["正式验收：原评分门槛 + 目标收益 + 身份与功能呈现"]
+  experiment -->|"promising 后进入正式验证"| acceptance["正式验收：选定策略 + 目标收益 + 身份与功能呈现"]
   optimize -.->|"verify 阶段编排"| acceptance
   visual["人工审阅：候选内容与视觉证据"] --> acceptance
   acceptance --> result["JSON / HTML / PDF / 验收结果"]
@@ -82,7 +82,7 @@ flowchart TB
 
 “自动执行”指调用方提供配置并启动后由程序完成；审阅由用户或获授权的操作者完成。哈希校验不能代替业务、语义或视觉判断。
 
-完整验收会重新校验计划及其前后文件；功能回归必须绑定候选源码、店铺/主题、页面/设备和实际完成的全部声明步骤，回归结束后再核验远端源码。缺少内容/视觉审阅时保留 `not-accepted`，可审阅已有产物后用 `verify-optimization` 复核，无需重跑 Lighthouse。旧回归记录缺少身份、稳定性或结束时间时需重新采集，不能补填通过字段；原导航评分规则不变。
+完整验收会重新校验计划及其前后文件；功能回归必须绑定候选源码、店铺/主题、页面/设备和实际完成的全部声明步骤，回归结束后再核验远端源码。缺少内容/视觉审阅时保留 `not-accepted`，可审阅已有产物后用 `verify-optimization` 复核，无需重跑 Lighthouse。旧回归记录缺少身份、稳定性或结束时间时需重新采集，不能补填通过字段；独立评分命令与旧流程的导航评分规则不变。
 
 `npm run test:architecture`，用隔离主题将预检、batch、待审计划、apply、显式同步、单补丁实验、正式验证和审阅交接连通；审阅后继续验证 CI 与回滚。运行环境、两段命令及测试边界见 [架构端到端验证](references/architecture-e2e.md)。
 
@@ -107,10 +107,10 @@ flowchart TB
 | 采集与证据 | 前后引擎、页面/设备矩阵和环境可比，保留原始报告及失败；完整优化的测量前后部署身份已核验。缺测、运行警告、重复/无效样本或源码漂移不自动通过 |
 | 计划、应用与预览 | 审阅差异和验证要求，计划与当前源码匹配；以成功 receipt 确认本地应用，再由调用方同步预览并核验候选身份 |
 | 单补丁实验 | 一个假设、一个代表页面/设备、源码差异仅含计划；导航前后交替各 3 或 4 次；目标收益成立、无关键指标退步、双侧内容/几何/样式/交互保留，才是 promising，仍需正式验收 |
-| 正式优化验收 | 每页每设备前后各至少 5 次导航样本；候选端移动每次最低 75/中位 80，桌面每次最低 85/中位 90；声明收益、无关键指标退步、前后身份、功能覆盖与源码绑定的内容视觉审阅全部通过，才是 optimization-accepted |
+| 正式优化验收 | 每页每设备前后各至少 5 次导航样本；按选定策略检查声明收益、无关键指标实质退步、前后身份、功能覆盖与源码绑定的内容视觉审阅；旧流程另要求评分门槛，standards-v1 另要求规范证据，全部必要项通过才是 optimization-accepted |
 | CI 与交付 | CI 的 passed 表示回归门禁通过；默认 score 可持平，loading/interaction 另需目标收益。报告分别展示评分、完整验收、待复核及未测项；回滚后仍须显式同步预览 |
 
-完整优化默认 `score` 要求可测分数提升；`loading` 要求声明的 LCP/FCP/TBT/CLS/SI 收益；`interaction` 另需每侧 5–10 次完整、独立、不重叠的交互采样，与导航源码/店铺/主题/页面/设备一致，并对目标执行同类 click/press 后紧接 UI 断言。三种模式均保留原导航评分与退步检查，95→80 即使达到门槛仍不通过。
+旧流程默认 `score` 要求可测分数提升；`loading` 要求声明的 LCP/FCP/TBT/CLS/SI 收益；`interaction` 另需每侧 5–10 次完整、独立、不重叠的交互采样，与导航源码/店铺/主题/页面/设备一致，并对目标执行同类 click/press 后紧接 UI 断言。旧流程三种目标均保留原导航评分与退步检查，95→80 即使达到门槛仍不通过。显式 standards-v1 只接受 loading/interaction，分数仅作诊断，具体指标退步保护与独立交互要求继续有效。
 
 详细模块映射、阶段状态、默认收益下限、数据契约与 CI 接入见 [架构与验收说明](references/evidence-driven-architecture.md)。
 
@@ -132,7 +132,7 @@ flowchart TB
 | `profile-runtime` | Chrome CPU 调用栈、trace、JS/CSS 覆盖率、请求发起链、LCP 分段、源码正文哈希映射 |
 | `profile-devtools` / `profile-liquid` | 官方 Chrome DevTools MCP/LCP skill、Shopify Liquid 服务端分析 |
 | `plan-split` / `optimize` | CSS 拆分、组件首次交互加载、新资产可逆创建；prepare/apply/verify 分阶段闭环 |
-| `verify-deployment` / `verify-gain` / `verify-optimization` | 候选身份、实测分数收益和关键指标退步拦截，结合功能与视觉证据验收 |
+| `verify-deployment` / `verify-gain` / `verify-optimization` | 候选身份、实测目标收益和关键指标退步拦截；完整验收按所选策略结合功能、视觉及适用的规范证据 |
 | `batch` | 串行导入规范报告、分析外链/脚本、测量、审计与评分验收；共用预算 |
 | `summarize` / `evaluate-iteration` | 离线精简摘要、全部候选收益与早停判断 |
 | `doctor` | 检查本机依赖与测量配置 |
@@ -154,7 +154,7 @@ flowchart TB
 | `plan-image` / `plan-component` | 单图和单组件工作流 |
 | `lighthouse` / `score-target` | 汇总、验收已有原始 Lighthouse 报告 |
 
-静态结果是候选；资源同名不等于已确定源码位置。按指标加权丢分和版本匹配的评分曲线安排优先级，Lighthouse 机会估值不相加。21 项 [可执行代码策略](references/code-strategies.md) 和两类拆分计划生成真实补丁；每项仍需结合主题逻辑和页面证据审阅，不支持的模式明确拒绝。95 分降到 80 分会被退步门槛拒绝；单纯“分数达标”不能冒充“已提分”。
+静态结果是候选；资源同名不等于已确定源码位置。围绕声明目标安排优先级，评分诊断使用指标加权丢分和版本匹配的评分曲线，Lighthouse 机会估值不相加。21 项 [可执行代码策略](references/code-strategies.md) 和两类拆分计划生成真实补丁；每项仍需结合主题逻辑和页面证据审阅，不支持的模式明确拒绝。旧流程中 95 分降到 80 分会被退步门槛拒绝；两种策略都不能用单纯“分数达标”冒充“优化已验收”。
 
 ## 安装与运行
 
@@ -179,9 +179,11 @@ node scripts/perfkit.mjs --help
 node scripts/perfkit.mjs batch --config /absolute/batch.json --out /absolute/new-run
 ```
 
-提供 project 时默认离线分析外链与脚本；用 checks.input 接入原生 Theme Check 或已结构化的报告陈述，metadata / baseline 可选。完整示例见 [batch-with-checks.json](assets/examples/batch-with-checks.json)。PDF 需先提取为结构化陈述。resources.probe=true 才联网，resources=false 可关闭分析。诊断 JSON/HTML 自动保存并附入整站报告；reviewRequired 与评分分别记录，待复核时即使评分达标也返回 3。
+标准模板用 `"checks": {"run": true}` 调用已安装的 Shopify CLI，按主题的 `.theme-check.yml` 执行官方源码检查。可单独运行 `check-theme --project /absolute/theme --out /absolute/run/checks.json`。已有报告可用 [batch-with-checks.json](assets/examples/batch-with-checks.json) 导入。诊断 JSON/HTML 附入整站报告，`reviewRequired` 与 Lighthouse/PSI 评分分别记录，待复核时即使评分达标也返回 3。详见 [规范报告](references/code-quality.md)。
 
-默认预算为一小时、80 次尝试、batch 最多 3 次失败、2 轮候选。时间/尝试耗尽保留部分证据并标为 stopped，不能通过验收。新增候选先用 [exploration.json](assets/examples/exploration.json) 小样本探索；低收益早停只限制继续探索，**不降低正式每组前后各 5 次和 75/80、85/90 门槛**。完整配置、模型 token 计量边界、续轮 history 和离线导入见 [执行协议](references/execution.md)。
+提供 project 时默认离线分析外链与脚本。`resources.probe=true` 才发送探测请求，`resources=false` 可关闭资源分析。
+
+默认预算为一小时、80 次尝试、batch 最多 3 次失败、2 轮候选。时间/尝试耗尽保留部分证据并标为 stopped，不能通过验收。新增候选先用 [exploration.json](assets/examples/exploration.json) 小样本探索；低收益早停只限制继续探索，**不降低正式每组前后各 5 次，也不改变已选定的验收策略**。旧流程的 75/80、85/90 门槛保持兼容。完整配置、模型 token 计量边界、续轮 history 和离线导入见 [执行协议](references/execution.md)。
 
 ## 一次完整优化
 
@@ -207,7 +209,7 @@ node scripts/perfkit.mjs verify-site --before /absolute/run/before --after /abso
 node scripts/perfkit.mjs report --input /absolute/run/verification.json --out /absolute/run/verification.html
 ```
 
-这里的 verification.json 是评分检查结果。已有完整证据时，按 [执行引擎](references/performance-engine.md) 准备含 before/after、expectedSourceHash、regression、review 及所需 plan/patchEvidence/goal/interactionEvidence 的验证配置，再进行完整验收：
+这里的 verification.json 是原评分检查结果；即使使用 standards-v1，verify-site 本身仍按原评分契约运行。已有完整证据时，按 [执行引擎](references/performance-engine.md) 准备含 before/after、expectedSourceHash、regression、review 及所需 plan/patchEvidence/goal/interactionEvidence 的验证配置；新规范流程另外按 [策略说明](references/standards-upgrade.md#两种正式验收策略) 提供 acceptancePolicy、standardsEvidence 和部署绑定的 integrityProfiles，再进行完整验收：
 
 ```sh
 node scripts/perfkit.mjs verify-optimization --config /absolute/run/optimization-verification.json --out /absolute/run/optimization-result.json

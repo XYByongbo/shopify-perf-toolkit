@@ -434,6 +434,7 @@ export async function main(argv=process.argv.slice(2)) {
     const {checkThemeProject}=await import('../lib/theme-check-project.mjs');
     const {assertPrecheckOutput}=await import('../lib/precheck.mjs');
     await assertPrecheckOutput(required(a,'project'),required(a,'out'));
+    await newOutput(a.out);
     try{const result=await checkThemeProject({project:a.project});await emit(result,a.out);return result.reviewRequired?3:0;}
     catch(error){if(error.themeCheck)await emit({...error.themeCheck,status:'failed',error:error.message},a.out);throw error;}
   }
