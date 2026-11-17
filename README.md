@@ -255,17 +255,15 @@ npm run test:site
 npm run release -- --out /absolute/Codex-Outputs/shopify-perf-toolkit-v0.17.0.zip
 ```
 
-[Toolkit regression 工作流](.github/workflows/regression.yml)在 PR、合并队列的 `checks_requested` 事件和手动触发时运行。三个测试作业使用 `macos-15`，兼容现有 `/private/tmp` 夹具。`Toolkit regression gate` 仅在三个作业均为 `success` 时通过，失败、跳过、取消或超时都会使门禁无法通过。GitHub 上要将这个检查设为合并要求，需在目标分支的规则中添加 `Toolkit regression gate`。
-
-| 作业 | 运行条件 | 失败标准 |
+| 测试 | 运行条件 | 失败标准 |
 | --- | --- | --- |
-| 离线 | Node.js 22.19 或更高、Python 3，以及监听 `127.0.0.1` 的权限。CI 使用 Node.js 22 和 Python 3.12，先单独运行 `test:boundaries`，再跑 `test:offline` 和 `test:lighthouse`。 | 架构检测到循环或越层、架构套件缺失或有跳过、任一命令非零退出。离线 Node 组保留平台相关跳过，Python PDF 用例在缺少可选渲染依赖时跳过。 |
-| 浏览器 | 已安装的 Chrome/Chromium、playwright-core 和本地 HTTP 夹具。CI 使用 runner 自带的 Chrome。测试串行运行，仅启用 `PERF_KIT_BROWSER_TESTS`。 | 依赖预检失败，或出现用例失败、跳过、TODO、空结果或缺少汇总。 |
-| 官方校验 | CI 安装 Shopify CLI 5.0.1，检查其支持 `--no-input`、`--list`、`--print`，再对隔离本地主题运行 Theme Check。测试串行运行，仅启用 `PERF_KIT_THEME_CHECK_TESTS`。 | CLI 缺失或能力不足，或出现用例失败、跳过、TODO、空结果或缺少汇总。夹具中的预期 Shopify 告警按测试断言验证。 |
+| 架构和离线 | Node.js 22.19 或更高、Python 3，以及监听 `127.0.0.1` 的权限。`test:offline` 包含架构检查，也可用 `test:boundaries` 单独运行。 | 架构检测到循环或越层、架构套件缺失或有跳过、任一命令非零退出。离线 Node 组保留平台相关跳过，Python PDF 用例在缺少可选渲染依赖时跳过。 |
+| 浏览器 | 已安装的 Chrome/Chromium、playwright-core 和本地 HTTP 夹具。测试串行运行，仅启用 `PERF_KIT_BROWSER_TESTS`。 | 依赖预检失败，或出现用例失败、跳过、TODO、空结果或缺少汇总。 |
+| 官方校验 | 已安装的 Shopify CLI，需支持 `--no-input`、`--list`、`--print`。Theme Check 对隔离本地主题运行，测试串行运行，仅启用 `PERF_KIT_THEME_CHECK_TESTS`。 | CLI 缺失或能力不足，或出现用例失败、跳过、TODO、空结果或缺少汇总。夹具中的预期 Shopify 告警按测试断言验证。 |
 
 `test:offline`、`test:browser`、`test:official` 按测试文件名分组，隔离外部继承的启用开关。Node 入口通过时退出 `0`，断言失败、用例取消、TODO、任一测试文件没有实际用例结果或汇总不完整时退出 `1`，依赖预检受阻、启用 Node 测试筛选参数或入口配置有误时退出 `2`。可用 `node scripts/run_tests.mjs browser --list` 查看分组文件。本地使用 `PERF_KIT_BROWSER_EXECUTABLE` 或 `PERF_KIT_SHOPIFY_CLI` 指定已安装程序的绝对路径，测试入口本身不安装依赖。
 
-`test:lighthouse` 是 Python 汇总、评分与打包测试。`test:site` 使用隔离测试主题，运行首页和商品页、移动和桌面、修改前后各 5 次，共 40 次真实 Lighthouse，并验证补丁、交互、内容和回滚。它需要 Chrome 和 Playwright，独立于 PR 门禁。
+`test:lighthouse` 是 Python 汇总、评分与打包测试。`test:site` 使用隔离测试主题，运行首页和商品页、移动和桌面、修改前后各 5 次，共 40 次真实 Lighthouse，并验证补丁、交互、内容和回滚。它需要 Chrome 和 Playwright。
 
 项目仅保留最新工具源码、测试、使用文档、配置模板和运行依赖。报告、测量结果、主题快照与回滚资料通过输出路径保存到工具目录之外的独立任务目录；工具目录不保留这些任务数据或生成的发行包。
 
