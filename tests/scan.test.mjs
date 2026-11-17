@@ -4,7 +4,11 @@ import { mkdtemp, mkdir, writeFile, readFile, symlink, rm } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import fs from 'node:fs/promises';
+import { syncBuiltinESMExports } from 'node:module';
 import { scanTheme } from '../lib/scan.mjs';
+import { inspectSource } from '../lib/inspect.mjs';
+import { createSourceSyntaxCache } from '../lib/source-syntax-cache.mjs';
 
 async function theme(t, content) {
   const project = await mkdtemp(path.join(tmpdir(), 'perfkit-scan-'));
@@ -112,6 +116,64 @@ test('source caps and binary disguised as source produce explicit incomplete cov
   assert.equal(scan.summary.inspectedFiles, 0); assert.ok(scan.inventory.files.every((file) => /^[a-f0-9]{64}$/.test(file.sha256)));
   assert.equal(scan.candidates.length, 1); assert.equal(scan.candidates[0].ruleId, 'RAW_BYTES');
   assert.ok(scan.candidates[0].basis.includes('not network transfer bytes'));
+});
+
+test('whole-theme inspection uses inventoried bytes once and keeps the standalone candidates', async t => {
+  const file = 'sections/hero.liquid';
+  const source = '<img src="{{ section.settings.hero | image_url: width: 1000 }}">';
+  const project = await theme(t, {[file]: source});
+  const expected = await inspectSource({project, target: file});
+  let opens = 0, standaloneReads = 0;
+  const {open, readFile} = fs;
+  const opened = t.mock.method(fs, 'open', (...args) => {
+    if (String(args[0]).endsWith(file)) opens++;
+    return open(...args);
+  });
+  const read = t.mock.method(fs, 'readFile', (...args) => {
+    if (String(args[0]).endsWith(file)) standaloneReads++;
+    return readFile(...args);
+  });
+  syncBuiltinESMExports();
+  let scan;
+  try { scan = await scanTheme({project}); }
+  finally {
+    opened.mock.restore();
+    read.mock.restore();
+    syncBuiltinESMExports();
+  }
+  assert.equal(opens, 1);
+  assert.equal(standaloneReads, 0);
+  const actual = scan.findings.filter(finding => finding.file === file && /^IMG/.test(finding.ruleId));
+  assert.deepEqual(actual, expected.findings.map(finding => ({
+    ...finding, id: file + ':' + finding.id, file, sourceHash: expected.sourceHash,
+  })));
+});
+
+test('invalid UTF-8 can be inventoried but cannot produce source-bound inspection findings', async t => {
+  const file = 'sections/hero.liquid';
+  const bytes = Buffer.concat([Buffer.from('<img src="'), Buffer.from([0xff]), Buffer.from('">')]);
+  const project = await theme(t, {[file]: bytes});
+  const scan = await scanTheme({project});
+  assert.equal(scan.complete, false);
+  assert.equal(scan.inventory.files[0].sha256, createHash('sha256').update(bytes).digest('hex'));
+  assert.equal(scan.inventory.files[0].inspected, false);
+  assert.deepEqual(scan.errors.map(error => [error.file, error.code]), [[file, 'FILE_CHANGED']]);
+  assert.equal(scan.findings.length, 0);
+  assert.equal(scan.performance.length, 0);
+});
+
+test('parser results are reused for exact text while distinct Acorn grammar and failed parses stay distinct', () => {
+  const syntax = createSourceSyntaxCache();
+  const liquid = '<p>{{ product.title }}</p>';
+  const css = 'p { opacity: 0; transition: opacity 1s; }';
+  assert.equal(syntax.liquid(liquid), syntax.liquid(liquid));
+  assert.equal(syntax.css(css), syntax.css(css));
+  assert.notEqual(syntax.css(css), syntax.css(css + '\n'));
+  const source = 'return 1;';
+  assert.throws(() => syntax.javascript(source), /return.*outside/i);
+  const permissive = syntax.javascript(source, {allowReturnOutsideFunction: true});
+  assert.equal(permissive, syntax.javascript(source, {allowReturnOutsideFunction: true}));
+  assert.throws(() => syntax.javascript(source), /return.*outside/i);
 });
 
 test('representative pages use real supplied URLs and do not invent resource handles', async (t) => {

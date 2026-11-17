@@ -86,8 +86,33 @@ verification 接受 after、before、regression、review、interactionEvidence�
 - maxAttempts 统计会话执行的实验导航尝试；runner 异常且进度未知时，保守消耗该轮全部预留次数，记录失败并回滚，不能免费重试。maxCandidateRounds 在进入 apply 写入前计数；应用异常进入 apply-recovery-required，不能重复 apply。无效、无收益实验及正式退化均计入失败预算。到预算即停止新试验，但保留 rollback 和已有证据的 verify。
 - 每步写入独立 session.json；父链哈希防止无意修改或预算回退，next-step.json 独占占用阻止同一步被并发消费。续接必须从原输出目录进行，复制 session.json 不能绕过后继占用。哈希不是签名或批准证明。
 - 新会话固定基线、探索实验及提交过的正式测量的 manifest 和每份原始 LHR 内容指纹，后续步骤发现文件变化就拒绝继续；rollback 不受证据损坏阻挡。首份评分/收益证据有效的正式候选样本集固定，补功能或视觉审阅不能换一批更高分样本。已验证收益仍低于目标时，仅允许真实 targets-not-met，评分器失效或 review-required 不会推进中间基线。
-- 配置或验证错误会保存 error，继续时必须使用最新输出的 session.json。若进程在修改期间被终止，读取 next-step.json 指向的目录、operation intent 和 receipt，再用既有 apply/rollback 按源码指纹恢复；不盲目删除锁或重复执行。
+- 配置或验证错误会保存 error，继续时必须使用最新输出的 session.json。进程中断按下述 recover 流程恢复；不删除 next-step.json 或盲目重复执行。
 - 本地回滚不同步远端。每次新实验仍实际核验两侧部署身份。保留的历史补丁都有独立 plan，完整回退时按保留顺序逆序处理并同步预览。
+
+## 进程中断恢复
+
+会话入口 `improvement-session.mjs` 负责接续、调度和提交。动作准入与状态变化集中在 `improvement-transitions.mjs`，`improvement-evidence.mjs` 固定并校验来源与证据，`improvement-budget.mjs` 管理尝试数和时间。实际步骤由 `improvement-actions.mjs` 和 `improvement-formal.mjs` 执行。原 `session.json` v1、检查点、意图文件与回执继续沿用原格式。
+
+新步骤先原子保存 `checkpoint.json`，再独占发布父会话原目录的 `next-step.json`。通过符号链接访问同一父会话也共用这把锁。应用、回滚、采样及同步前保存执行阶段和已占用预算，最终 `session.json` 也以完整文件原子发布。
+
+原进程退出后，读取最后一个完整会话目录中的 `next-step.json`，使用它记录的原输出目录。恢复配置如下，`previous` 仍指向中断步骤的父会话：
+
+```json
+{"schemaVersion":1,"action":"recover","previous":"/absolute/step-02/session.json"}
+```
+
+```sh
+node scripts/perfkit.mjs improve --config /absolute/recover.json --out /absolute/interrupted-step-03
+```
+
+`recover` 是输出目录必须已存在的唯一会话动作。它核对父链、检查点、原目录和本机进程归属，再补齐该目录的 `session.json`；重复或并发恢复复用同一结果。原进程仍存活、无法确认退出、检查点损坏或目录不符时拒绝恢复。恢复返回待处理状态（CLI 退出码 3），不声明优化通过，也不执行源码修改、同步或采样。
+
+- 只读步骤中断后，从恢复出的 `session.json` 显式执行下一步；源码漂移和原预算约束仍然有效。
+- 在应用、回滚、同步、实验、正式采集或验证阶段中断且仍有活动补丁时，恢复会话只允许 `rollback`。先检查 intent、receipt、源码，并确认原采集/同步子进程已停止，再显式回滚；回滚冲突保持待处理，不覆盖外部修改。
+- 若源码已经恢复、进程在保存回执前中断，恢复后重试回滚会确认已恢复的文件并补齐回执。
+- 已预留的尝试数和候选轮次保留。采样/验证中断写入失败历史，同一补丁不能通过改名重新试验；已有正式样本路径和父会话证据锁保留，不自动重新采样。当前恢复入口采用保守回滚，不直接续跑中断的正式验收。
+- 无法确定实际退出时刻，因此恢复将检查点之后的墙钟时间（含停机等待，最多计至会话时间预算）保守计入耗时；预算耗尽后仍可回滚。恢复不会重置模型用量计数。
+- 旧版本的中断目录没有 `checkpoint.json` 时，保留原人工核对 intent/receipt 和源码恢复方式，程序不会猜测会话状态。首个 `start` 尚未产出会话且没有父链时，可检查其只读产物后在新目录重新开始。
 
 ## 测试
 

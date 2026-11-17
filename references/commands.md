@@ -1,10 +1,19 @@
 # 命令参考（v0.20.0）
 
-在工具根目录执行 `node scripts/perfkit.mjs --help` 查看全部参数。所有 --out 均要求新文件/新目录，不覆盖旧证据。--project 是主题源码根目录，--target 是其内相对路径。doctor 检查可用性，不代表浏览器启动或网络已验证。
+在工具根目录执行 `node scripts/perfkit.mjs --help` 查看全部参数。--out 要求新文件/新目录，不覆盖旧证据；唯一例外是 improve 的 action=recover，必须使用 next-step.json 指向的原中断目录，原子补齐缺失的 session.json。--project 是主题源码根目录，--target 是其内相对路径。doctor 检查可用性，不代表浏览器启动或网络已验证。
+
+用 `perfkit <命令> --help` 或 `perfkit help <命令>` 查看单个命令的参数。方括号表示可选项，有多种合法值的参数会列出可选值。对于接受 `--config` 的命令，可先检查 JSON 配置：
+
+```sh
+node scripts/perfkit.mjs validate-config --command measure --config /absolute/measurement.json
+```
+
+`validate-config` 检查配置的字段、值和可在本地判断的约束，返回 JSON 到标准输出。部分采样命令会返回预计样本或场景数量，超出尝试预算时给出提示。通过时退出 0，配置错误退出 2。校验无需 `--out`，也不会启动任务、创建输出、启动浏览器或执行 Shopify 命令。证据引用的内容、环境能力、源码指纹和部署身份由正式命令校验。`improve-cycle` 中引用的本地官方方法配置会按需读取，以核对方法和执行器是否一致。
 
 | 命令 | 主要参数 | 结果 |
 | --- | --- | --- |
 | doctor | 无命令专属参数；不支持 --out | 当前版本与本机能力，输出到 stdout；不替代实际启动和回归 |
+| validate-config | --command、--config | 只读配置预检。用 `validate-config --help` 查看支持的命令 |
 | check-theme | --project、--out | 实际项目 Theme Check 的版本、规则列表、生效配置、原始诊断与源码绑定；不自动修复 |
 | plan-verification | --config、--out | beforeFiles/afterFiles/scope 推断最低验证级别及未运行清单 |
 | import-pageotter | --input、--out；--project/--baseline 可选 | 提议的 handoff v1 外部观察导入；同范围显式复测对比，不替代正式验收 |
@@ -20,7 +29,7 @@
 | sync-shopify-docs | --config 可选，--out 新目录 | 有界获取官方文档元数据；失败/截断保留 incomplete |
 | shopify-methods | --sources、--topic、--out 可选 | 导出方法卡、真实生成器参数与来源审阅状态 |
 | plan-official | --project、--config、--diagnosis、--out；--profiles、--sources 可选 | 当前证据绑定的官方方法补丁；见 shopify-knowledge.md |
-| improve | --config，--out 新目录 | 可恢复的实测优化会话：应用、实验、无收益回滚重诊断、低分中间基线、累计验收；见 improvement-workflow.md |
+| improve | --config，--out 新目录；action=recover 使用原中断目录 | 可恢复的实测优化会话及显式中断恢复；保留预算、证据和历史，副作用阶段中断先回滚；见 improvement-workflow.md |
 | batch | --config，--out 新目录 | 报告导入/外链脚本分析/测量/审计验收；预算/早停 |
 | summarize | --run，--out 可选 | 全部单次分数与警告的精简摘要 |
 | evaluate-iteration | --config，--out 可选 | 候选历史收益、负向、噪声门槛及早停 |

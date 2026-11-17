@@ -403,3 +403,27 @@ test('session descendants cannot drop inherited evidence locks or resource budge
   }
   await writeFile(file,JSON.stringify(child));assert.equal((await readImprovementSession(file)).sessionHash,child.sessionHash);
 });
+
+test('a completed schema v1 chain without checkpoints can resume and roll back with inherited pins', async t => {
+  const f = await setup(t);
+  const start = await f.step({action:'start'});
+  const prepared = await f.prepare('function heavy(){ return 2; }');
+  const applied = await f.step({action:'apply',reviewedPlanHash:prepared.active.planHash});
+  // Completed v1 steps predate checkpoints. Their session and continuation files are sufficient.
+  for (const step of [start,prepared,applied]) await rm(path.join(step.output,'checkpoint.json'));
+  const previous = path.join(applied.output,'session.json');
+  const saved = await readFile(previous,'utf8');
+  assert.equal((await readImprovementSession(previous)).schemaVersion,1);
+  const rolledBack = await f.step({action:'rollback'});
+  assert.equal(rolledBack.error,undefined);
+  assert.equal(rolledBack.id,start.id);
+  assert.equal(rolledBack.step,applied.step+1);
+  assert.equal(rolledBack.parentHash,applied.sessionHash);
+  assert.equal(rolledBack.active,null);
+  assert.equal(rolledBack.previewSyncRequired,true);
+  assert.deepEqual(rolledBack.counts,applied.counts);
+  assert.deepEqual(rolledBack.evidenceRuns,applied.evidenceRuns);
+  assert.equal((await sourceSnapshot(f.project)).hash,start.baselineHash);
+  assert.equal(await readFile(previous,'utf8'),saved);
+  assert.equal((await readImprovementSession(path.join(rolledBack.output,'session.json'))).sessionHash,rolledBack.sessionHash);
+});
