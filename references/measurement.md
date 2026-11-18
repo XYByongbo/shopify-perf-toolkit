@@ -8,6 +8,7 @@ measure 支持固定版本本地 Lighthouse 和 Google PSI v5。参考 [配置�
 | --- | --- |
 | schemaVersion | 1 |
 | engine | lighthouse 或 psi |
+| throttlingMethod | 本地 Lighthouse 可选 simulate 或 devtools；缺省 simulate |
 | pages | 非空唯一 id/url 列表；id 使用小写安全名称，URL 为 HTTP(S)，不含用户密码或 fragment |
 | devices | mobile / desktop，不重复；缺省两者 |
 | runs | 每组 5–10 次；缺省 5 |
@@ -25,7 +26,7 @@ PSI 仅支持公开可访问的地址，不接受本地/私网目标，不继承
 
 `fcp.json` 使用同版本 Lighthouse 和原始设置离线重放 Lantern；模拟 FCP 必须与 LHR 相差不超过 0.001ms，原始 FCP 必须与 LHR 的整数值一致（允许 1ms 舍入差）。它记录乐观/悲观图、观察时间、模拟时间、网络依赖和同任务内的脚本/首次 Layout。这个容差是重放一致性检查，**不是性能验收阈值**。缺文件、错版本或重放不一致标为 `unavailable`，不能编造原因；PSI 不提供这套本地原始导航资产。
 
-Lighthouse simulate 与 observed FCP 使用不同时间轴，不能直接相减归因。脚本执行与首次 Layout 落在同一 RunTask 时，Lantern 可能保留整段脚本依赖；defer 本身不能排除这条路径。
+对于使用实际请求与呈现时序验证首屏假设的任务，可以在建立基线前显式选择 `throttlingMethod: "devtools"`。基线、实验和正式采样须使用相同模式。Lighthouse simulate 与 observed FCP 使用不同时间轴，不能直接相减归因。脚本执行与首次 Layout 落在同一 RunTask 时，Lantern 可能保留整段脚本依赖；defer 本身不能排除这条路径。
 
 FCP 退步而原始 observed FCP 未退步时，恢复流程读取每一个样本的绑定图，辨别任务合并引起的依赖变化。模型敏感性改变原因判断，不改变已拒收结论，不开放原补丁重试，不用 observed 指标替换模拟评分。可对已有原始文件执行以下只读重放（只写新的分析文件，不启动浏览器）：
 

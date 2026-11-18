@@ -8,13 +8,14 @@
 node scripts/perfkit.mjs validate-config --command measure --config /absolute/measurement.json
 ```
 
-`validate-config` 检查配置的字段、值和可在本地判断的约束，返回 JSON 到标准输出。部分采样命令会返回预计样本或场景数量，超出尝试预算时给出提示。通过时退出 0，配置错误退出 2。校验无需 `--out`，也不会启动任务、创建输出、启动浏览器或执行 Shopify 命令。证据引用的内容、环境能力、源码指纹和部署身份由正式命令校验。`improve-cycle` 中引用的本地官方方法配置会按需读取，以核对方法和执行器是否一致。
+`validate-config` 检查配置的字段、值和可在本地判断的约束，返回 JSON 到标准输出。部分采样命令会返回预计样本或场景数量，超出尝试预算时给出提示。通过时退出 0，配置错误退出 2。`optimize verify` 会计算探索和正式采样的总尝试次数，预算确定不足时返回 `insufficient-budget` 并退出 3。校验无需 `--out`，也不会启动任务、创建输出、启动浏览器或执行 Shopify 命令。证据引用的内容、环境能力、源码指纹和部署身份由正式命令校验。`improve-cycle` 中引用的本地官方方法配置会按需读取，以核对方法和执行器是否一致。
 
 | 命令 | 主要参数 | 结果 |
 | --- | --- | --- |
 | doctor | 无命令专属参数；不支持 --out | 当前版本与本机能力，输出到 stdout；不替代实际启动和回归 |
 | validate-config | --command、--config | 只读配置预检。用 `validate-config --help` 查看支持的命令 |
 | check-theme | --project、--out | 实际项目 Theme Check 的版本、规则列表、生效配置、原始诊断与源码绑定；不自动修复 |
+| plan-sampling | --audit、--finding、--url、--out；可选 --device、--selector、--theme-id、--store、--settle-ms | 从性能审计生成 profile-runtime 或 profile-domain 配置，保留发现与源码指纹 |
 | plan-verification | --config、--out | beforeFiles/afterFiles/scope 推断最低验证级别及未运行清单 |
 | import-pageotter | --input、--out；--project/--baseline 可选 | 提议的 handoff v1 外部观察导入；同范围显式复测对比，不替代正式验收 |
 | diagnose-performance | --project、--profiles；--run/--checks/--ownership/--performance-baseline 可选，--out | 统一候选排序、资源/字体调查、归属与结构上下文 |

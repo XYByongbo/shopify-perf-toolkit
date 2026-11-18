@@ -87,15 +87,44 @@ test('failed sync or stale deployment never starts measurement',async t=>{
     const s=await readImprovementSession(r.session);assert.equal(s.counts.rounds,1);assert.equal(s.previewSyncRequired,true);
   }
 });
-test('invalid experiment evidence stops instead of consuming the next mechanism',async t=>{
-  const f=await fixture(t),r=await f.run(f.config,{...f.deps,runPatchExperiment:async()=>({status:'invalid-evidence',counts:{attempted:6,failed:1}})});
-  assert.equal(r.status,'invalid-evidence');assert.equal((await readImprovementSession(r.session)).counts.rounds,1);
-  assert.equal(await readFile(path.join(f.project,'assets/main.js'),'utf8'),f.original);
+test('invalid experiment evidence pauses the cycle and resumes with the same applied patch',async t=>{
+  const f=await fixture(t,{firstPromising:true});
+  const r=await f.run(f.config,{...f.deps,runPatchExperiment:async()=>({status:'invalid-evidence',counts:{attempted:6,failed:1}})});
+  const pending=await readImprovementSession(r.session);
+  assert.equal(r.status,'invalid-evidence');
+  assert.equal(pending.counts.rounds,1);
+  const plan=await read(pending.active.plan);
+  assert.equal(await readFile(path.join(f.project,'assets/main.js'),'utf8'),plan.changes[0].after);
+  const resumed=await f.run({...f.config,previous:r.session});
+  assert.equal(resumed.status,'optimization-accepted');
+  assert.equal((await readImprovementSession(resumed.session)).counts.rounds,1);
+  assert.equal(f.observed.experiments,1);
 });
 test('session round and attempt budgets survive the cycle and prevent extra work',async t=>{
   const f=await fixture(t,{budget:{maxCandidateRounds:1}}),r=await f.run(f.config);
   const s=await readImprovementSession(r.session);assert.equal(s.counts.rounds,1);assert.equal(f.observed.experiments,1);assert.equal(s.status,'stopped');assert.equal(f.observed.profiles,0);
 });
+test('formal collection honors its own attempt limit and resumes when the budget is corrected',async t=>{
+  const f=await fixture(t);
+  const option=f.options[1];
+  f.config.options=[option];
+  option.formal.measurement.budget={maxAttempts:4};
+  const paused=await f.run(f.config);
+  assert.equal(paused.status,'formal-evidence-repair-required');
+  assert.equal(f.observed.formal,0);
+  const pending=await readImprovementSession(paused.session);
+  assert.equal(pending.error.code,'OPTIMIZATION_BUDGET');
+  assert.equal(pending.counts.attempted,6);
+  assert.equal(pending.active.formalCollection,undefined);
+  assert.equal((await sourceSnapshot(f.project)).hash,pending.active.sourceHash);
+
+  option.formal.measurement.budget.maxAttempts=5;
+  const resumed=await f.run({...f.config,previous:paused.session});
+  assert.equal(resumed.status,'optimization-accepted');
+  assert.equal(f.observed.formal,1);
+  assert.equal((await readImprovementSession(resumed.session)).counts.attempted,11);
+});
+
 test('formal collection failure retains samples and cannot remeasure on resume',async t=>{
   const f=await fixture(t);f.config.options=[f.options[1]];
   const fail={...f.deps,collectOptimizationEvidence:async args=>{const r=await f.deps.collectOptimizationEvidence(args);return {...r,error:{message:'missing behavior'}};}};

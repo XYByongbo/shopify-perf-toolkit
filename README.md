@@ -251,6 +251,7 @@ npm run test:lighthouse
 npm run test:browser # 自动发现全部 *-browser.test.mjs，串行执行
 npm run test:official # 已安装 Shopify CLI，对隔离本地主题运行 Theme Check
 npm run test:release # 以上四组依次检查；不构建、上传或发布
+npm run test:optimization-e2e # 单独运行隔离全链路，验证审计、部署绑定采样、补丁和正式验收
 npm run test:site
 npm run release -- --out /absolute/Codex-Outputs/shopify-perf-toolkit-v0.17.0.zip
 ```
@@ -264,6 +265,8 @@ npm run release -- --out /absolute/Codex-Outputs/shopify-perf-toolkit-v0.17.0.zi
 `test:offline`、`test:browser`、`test:official` 按测试文件名分组，隔离外部继承的启用开关。Node 入口通过时退出 `0`，断言失败、用例取消、TODO、任一测试文件没有实际用例结果或汇总不完整时退出 `1`，依赖预检受阻、启用 Node 测试筛选参数或入口配置有误时退出 `2`。可用 `node scripts/run_tests.mjs browser --list` 查看分组文件。本地使用 `PERF_KIT_BROWSER_EXECUTABLE` 或 `PERF_KIT_SHOPIFY_CLI` 指定已安装程序的绝对路径，测试入口本身不安装依赖。
 
 `test:lighthouse` 是 Python 汇总、评分与打包测试。`test:site` 使用隔离测试主题，运行首页和商品页、移动和桌面、修改前后各 5 次，共 40 次真实 Lighthouse，并验证补丁、交互、内容和回滚。它需要 Chrome 和 Playwright。
+
+`test:optimization-e2e` 在同一个隔离主题上验证审计到补丁的交接、采样预算、目标页面范围、验收策略一致性和缺证据后的继续验证。运行配置、输出位置和通过条件见 [五项改动的隔离全链路回归](references/architecture-e2e.md#五项改动的隔离全链路回归)。
 
 项目仅保留最新工具源码、测试、使用文档、配置模板和运行依赖。报告、测量结果、主题快照与回滚资料通过输出路径保存到工具目录之外的独立任务目录；工具目录不保留这些任务数据或生成的发行包。
 

@@ -80,15 +80,24 @@ export async function main(argv=process.argv.slice(2)) {
     const result = await validate(await readJSON(a.config));
     const measurement = a.command === 'measure' ? result
       : ['batch','optimize'].includes(a.command) ? result?.measurement : null;
-    const plannedSamples = measurement ? measurement.pages.length * measurement.devices.length * measurement.runs
+    const samplingBudget = result?.samplingBudget;
+    const plannedSamples = samplingBudget?.totalAttempts ?? (measurement ? measurement.pages.length * measurement.devices.length * measurement.runs
       : a.command === 'measure-interactions' ? result.runs
-      : a.command === 'experiment' ? result.runs * 2 : undefined;
+      : a.command === 'experiment' ? result.runs * 2 : undefined);
     const attemptLimit = a.command === 'batch' ? Math.min(result.limits.maxAttempts, measurement?.budget.maxAttempts ?? Infinity)
       : measurement?.budget.maxAttempts;
-    const warnings = plannedSamples > attemptLimit ? ['Planned samples exceed budget.maxAttempts. Execution may stop before completing the matrix.'] : undefined;
-    const plannedScenarioRuns = a.command === 'scenarios' ? result.scenarios.length * result.viewports.length : undefined;
-    console.log(JSON.stringify({kind:'config-validation', command:a.command, status:'valid', scope:'config-only', plannedSamples, plannedScenarioRuns, warnings}));
-    return 0;
+    const warnings = [];
+    if (plannedSamples > attemptLimit) warnings.push('Planned samples exceed budget.maxAttempts.');
+    if (samplingBudget && samplingBudget.timeoutEstimateMs > samplingBudget.maxWallTimeMs) {
+      warnings.push('Configured stage timeouts may exceed budget.maxWallTimeMs; the actual run remains time-bounded.');
+    }
+    const plannedScenarioRuns = samplingBudget?.scenarioRuns ?? (a.command === 'scenarios' ? result.scenarios.length * result.viewports.length : undefined);
+    const blocked = samplingBudget?.fits === false;
+    console.log(JSON.stringify({
+      kind:'config-validation', command:a.command, status:blocked?'insufficient-budget':'valid', scope:'config-only',
+      plannedSamples, plannedScenarioRuns, samplingBudget, warnings:warnings.length?warnings:undefined,
+    }));
+    return blocked ? 3 : 0;
   }
   if(['toolkit-manifest','theme-capabilities','resolve-adapter','verify-business','audit-policy','audit-window-budget','field-monitor','strategy-contract'].includes(command)){
     if(command!=='field-monitor')await newOutput(a.out);
@@ -277,6 +286,13 @@ export async function main(argv=process.argv.slice(2)) {
     await newOutput(a.out);
     try{const result=await checkThemeProject({project:a.project});await emit(result,a.out);return result.reviewRequired?3:0;}
     catch(error){if(error.themeCheck)await emit({...error.themeCheck,status:'failed',error:error.message},a.out);throw error;}
+  }
+  if(command==='plan-sampling'){
+    const {planAuditSampling}=await import('../lib/audit-sampling.mjs');
+    const result=await planAuditSampling({
+      audit:await readJSON(a.audit),findingId:a.finding,url:a.url,device:a.device,selector:a.selector,themeId:a['theme-id'],store:a.store,settleMs:a['settle-ms']===undefined?undefined:Number(a['settle-ms']),output:a.out,
+    });
+    await emit(result);return 0;
   }
   if(command==='plan-verification'){
     const {verificationPlan}=await import('../lib/standards-policy.mjs');

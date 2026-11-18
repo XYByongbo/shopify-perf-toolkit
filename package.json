@@ -40,6 +40,7 @@
     "test:demand": "node --test tests/demand-engine.test.mjs",
     "test:demand-live": "node scripts/validate_demand_pipeline.mjs",
     "test:architecture": "node scripts/validate_architecture_pipeline.mjs",
+    "test:optimization-e2e": "node scripts/validate_optimization_e2e.mjs",
     "test:improvement": "node --test tests/improvement-session.test.mjs",
     "test:improvement-live": "node scripts/validate_improvement_pipeline.mjs",
     "test:p0p1": "node --test tests/p0-p1.test.mjs",

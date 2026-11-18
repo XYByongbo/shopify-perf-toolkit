@@ -10,7 +10,13 @@
 
 ## 会话步骤
 
-正式验收的策略与证据位置见 [新旧验收策略](standards-upgrade.md#两种正式验收策略)。省略 acceptancePolicy 保留原流程；显式 standards-v1 时，collect 的 formal 或 verify 的 verification 中传入策略和 standardsEvidence，goal 沿用会话。第一次正式选择会固定，后续不能切换；新策略不放宽单补丁 experiment/verify-patch 的原门禁。
+在 `improve start` 的顶层选择 `acceptancePolicy`。省略字段使用旧评分策略，`standards-v1` 在实验和正式验收中均将评分用作诊断。后续步骤继承启动时的目标和策略。正式阶段在 `formal` 或 `verification` 中提供 `standardsEvidence`，详细要求见 [验收策略](standards-upgrade.md#两种正式验收策略)。
+
+如果只要求某些页面和设备改善，在启动配置中添加 `goal.requiredGroups`。例如下面的配置要求活动页移动端的 LCP 改善。基线必须覆盖该组合。实验选用其中一个目标组合，正式验证要求每个目标组合都有实质改善，同时检查整个测量矩阵的指标回退。
+
+```json
+{"kind":"loading","metric":"lcp","requiredGroups":[{"pageId":"campaign","device":"mobile"}]}
+```
 
 每一步使用新的输出目录，除 start 外传入上一步的 `session.json`。输出必须位于主题目录之外。所有配置使用 `schemaVersion:1`。
 
@@ -29,7 +35,7 @@ node scripts/perfkit.mjs improve --config /absolute/experiment-step.json --out /
 | apply | previous、reviewedPlanHash；校验整份计划和当前源码后实际写入 | awaiting-preview-sync |
 | sync | previous、preview；显式适配器同步或直接核验预览源码 | awaiting-preview-sync，成功后 previewSyncRequired=false |
 | collect | previous、formal；预算内采集正式矩阵及回归并执行原 verify；不允许重复采集 | 原正式验收结果或待修复证据 |
-| experiment | previous、experiment 配置或配置文件路径；运行两组已准备预览的交替测量、checkpoint 与目标收益验证 | formal-validation-required，或回滚后重新诊断 |
+| experiment | previous、experiment 配置或配置文件路径；运行两组已准备预览的交替测量、checkpoint 与目标收益验证 | 有收益时进入 formal-validation-required；证据不足时保留候选供重试；实测拒绝时回滚 |
 | verify | previous、verification 配置或路径；重算正式验收及相对最初基线的累计收益 | optimization-accepted / improved-below-target / 待补证据 |
 | rollback | previous；回滚当前 active 补丁，失败时保留冲突回执 | 重新诊断 / rollback-conflict |
 
@@ -63,7 +69,7 @@ verification 接受 after、before、regression、review、interactionEvidence�
 
 | 结果 | 自动处理 | 操作者下一步 |
 | --- | --- | --- |
-| invalid-evidence | 保留失败记录，回滚候选，提示证据修复 | 修复身份、环境、覆盖范围或警告；允许同补丁重试，但照常计入预算 |
+| invalid-evidence | 保留失败记录和已应用候选 | 修复身份、环境、覆盖范围或警告，再对同一候选重试，计入原预算 |
 | no-measurable-gain / hypothesis-not-confirmed | 回滚、记录失败假设、重新排序候选 | 换因果机制或下一个假设；不能重复同一补丁磨分 |
 | performance-regressed / functional-regressed | 回滚并记录实际回归 | 修复功能或性能问题后形成不同补丁 |
 | promising | 保留候选，要求正式验证 | 完整矩阵、回归、独立内容视觉审阅 |
@@ -83,7 +89,7 @@ verification 接受 after、before、regression、review、interactionEvidence�
 - 原有独立 experiment 的连续无收益早停保持不变。会话负责自己的全历史、总轮数、尝试/失败预算和方案去重，因此内部实验不重复套用另一个独立候选队列；不得通过新建会话删除失败历史。
 - budget 在全部步骤中累计，不随 resume 重置。时间统计为 CLI 主动执行耗时；外部同步、人工等待、独立 profile/正式采集的耗时与尝试数不在该计量内，必须另行设置各采集命令预算。
 - 配置调用方模型用量文件时，已观察到的 usedTokens 随会话保存；下一步读到更小的计数会停止，不能在 resume 之间重置计量文件。该文件仍是调用方报告，并非模型计费证明。
-- maxAttempts 统计会话执行的实验导航尝试；runner 异常且进度未知时，保守消耗该轮全部预留次数，记录失败并回滚，不能免费重试。maxCandidateRounds 在进入 apply 写入前计数；应用异常进入 apply-recovery-required，不能重复 apply。无效、无收益实验及正式退化均计入失败预算。到预算即停止新试验，但保留 rollback 和已有证据的 verify。
+- maxAttempts 统计会话执行的实验与正式导航尝试。正式采集前分别检查会话剩余预算和本次 measurement.budget.maxAttempts，任一不足时停止采样。只有本次配置不足时，可调正配置后续跑。runner 异常且进度未知时，保守消耗该轮全部预留次数，记录失败并保留候选供后续验证。maxCandidateRounds 在进入 apply 写入前计数；应用异常进入 apply-recovery-required，不能重复 apply。无效、无收益实验及正式退化均计入失败预算。到预算即停止新试验，但保留 rollback 和已有证据的 verify。
 - 每步写入独立 session.json；父链哈希防止无意修改或预算回退，next-step.json 独占占用阻止同一步被并发消费。续接必须从原输出目录进行，复制 session.json 不能绕过后继占用。哈希不是签名或批准证明。
 - 新会话固定基线、探索实验及提交过的正式测量的 manifest 和每份原始 LHR 内容指纹，后续步骤发现文件变化就拒绝继续；rollback 不受证据损坏阻挡。首份评分/收益证据有效的正式候选样本集固定，补功能或视觉审阅不能换一批更高分样本。已验证收益仍低于目标时，仅允许真实 targets-not-met，评分器失效或 review-required 不会推进中间基线。
 - 配置或验证错误会保存 error，继续时必须使用最新输出的 session.json。进程中断按下述 recover 流程恢复；不删除 next-step.json 或盲目重复执行。

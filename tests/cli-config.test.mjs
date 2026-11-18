@@ -76,6 +76,40 @@ test('config validation shares field diagnostics with execution and exposes nest
   assert.deepEqual(await readdir(f.root),['config.json']);
 });
 
+test('optimization preflight counts both stages and stops on an insufficient budget', async t => {
+  const f = await fixture(t);
+  const project = path.join(f.root,'theme');
+  const config = {
+    schemaVersion:1,action:'verify',project,plan:'plan.json',reviewedPlanHash:'a'.repeat(64),before:'baseline',
+    measurement:{...measurement,budget:{maxAttempts:10},deployment:{project,store:'example.myshopify.com',themeId:'123'}},
+    scenarios:{schemaVersion:1,url:measurement.pages[0].url,scenarios:[{name:'content',steps:[{action:'assert-visible',selector:'main'}]}]},
+  };
+  const blocked = await f.check('optimize',config);
+  assert.equal(blocked.status,3,blocked.stderr);
+  const report = JSON.parse(blocked.stdout);
+  assert.equal(report.status,'insufficient-budget');
+  assert.equal(report.plannedSamples,16);
+  assert.equal(report.samplingBudget.explorationAttempts,6);
+  assert.equal(report.samplingBudget.formalAttempts,10);
+  assert.equal(report.samplingBudget.missingAttempts,6);
+
+  for (const override of [
+    {exploreFirst:false},
+    {patchEvidence:'existing-experiment.json'},
+    {goal:{kind:'interaction',target:'button',event:'click'}},
+  ]) {
+    const after = await f.check('optimize',{...config,...override});
+    assert.equal(after.status,0,after.stderr || after.stdout);
+    assert.equal(JSON.parse(after.stdout).plannedSamples,10);
+  }
+  const timeBlocked = await f.check('optimize',{...config,measurement:{
+    ...config.measurement,budget:{maxAttempts:16,maxWallTimeMs:1000},
+  }});
+  assert.equal(timeBlocked.status,3);
+  assert.equal(JSON.parse(timeBlocked.stdout).samplingBudget.missingAttempts,0);
+  assert.deepEqual(await readdir(f.root),['config.json']);
+});
+
 test('preflight reports planned samples and operates without a browser, theme or output directory', async t => {
   const f = await fixture(t);
   const valid = await f.check('batch',{schemaVersion:1, project:path.join(f.root,'missing-theme'), measurement, budget:{maxAttempts:2}});

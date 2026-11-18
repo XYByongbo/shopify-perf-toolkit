@@ -59,6 +59,19 @@ node scripts/perfkit.mjs profile-liquid --config /absolute/run/liquid.json --out
 
 支持 evented、带 weights 的 sampled Speedscope，正确换算时间单位。父级 inclusive 包含子级，不相加。优先检查高 self time 的 lookup/filter、产品/变体循环和嵌套 render。文件/行号匹配是候选，导入旧 profile 仍须核验远端版本。Liquid 时间、TTFB、LCP 分开报告，不直接承诺提分。
 
+## 从审计发现生成采样配置
+
+从 `audit-performance --out` 保存的 JSON 取发现的 `id`，提供该区块实际渲染的页面 URL。当前支持双端主图、图片加载优先级、响应式尺寸、LCP 显示动画和背景图。默认生成移动端和桌面端配置，可用 `--device` 选择单端。没有稳定的字面选择器时，用 `--selector` 指定实际页面实例。首屏资源响应较慢时，可以用 `--settle-ms` 延长页面 load 后的观察窗口。
+
+```sh
+node scripts/perfkit.mjs plan-sampling --audit /absolute/audit.json --finding '<finding-id>' --url 'https://example.test/pages/campaign' --out /absolute/sampling
+node scripts/perfkit.mjs profile-runtime --config /absolute/sampling/profile-mobile.json --out /absolute/sampling/capture-mobile
+node scripts/perfkit.mjs profile-runtime --config /absolute/sampling/profile-desktop.json --out /absolute/sampling/capture-desktop
+node scripts/perfkit.mjs audit-performance --project /absolute/theme --profiles /absolute/sampling/profiles.json --out /absolute/audit-after-sampling.json
+```
+
+`sampling.json` 记录发现、源码指纹、选择器、配置与输出路径。使用 `initial.lcp`、`domainTargets`、`lcp` 和 `resources` 检查实际 LCP、选图、显示状态和请求时序。选择器匹配数为零或多于一个时需检查页面与区块实例。配置会校验审计时的本地源码，URL 中有 `preview_theme_id` 或显式提供 `--theme-id` 时也会核对渲染的主题 ID。需要把采样接入补丁流程时，生成配置加 `--store example.myshopify.com`，并在页面 URL 带上 `preview_theme_id` 或显式传 `--theme-id`。`sampling.json` 的命令会改为 `profile-domain`，配置文件和输出目录命名相同。运行时通过 Shopify CLI 将远端源码拉取到临时目录做两次身份核验。确认已授权此项读取后执行。完成的 `profiles.json` 可以交给 `diagnose-performance --profiles` 或 `improve start`；补丁生成器仍会核对渲染节点与源码。
+
 ## 执行策略与拆分
 
 `code-strategies` 提供十九项策略及参数、证据要求，见 [策略说明](code-strategies.md)。原十项策略保留，另有五项 P0 和四项 P1 [Shopify 性能策略](shopify-performance-rules.md)，覆盖图片、head、metafield、LCP 显示，以及重复资源提示、关键 CSS 同步、passive 输入监听器和过渡属性收窄。
@@ -78,8 +91,8 @@ evidence 包含当前 sourceHash、loaderHash、summary、dependencyReview/allSt
 2. batch 可配置 runtimeProfiles（最多 12 个状态配置）、liquidProfile、devtoolsProfile、recipe，串行产出诊断与待审补丁；探索样本也进入 audit-site。原 checks/resources/quality/验收保留。
 3. optimize prepare 配置 schemaVersion/action:"prepare"/project/recipe，生成 plan.json。审阅完整 diff。
 4. optimize apply 配置 action:"apply"/project/plan（绝对路径）/reviewedPlanHash，按计划改本地，输出 awaiting-preview-sync。哈希绑定计划，不是批准签名。随后同步到未发布预览；工具不 push/publish。
-5. optimize verify 配置 action:"verify"/project/plan/reviewedPlanHash/before/measurement/scenarios/review。measurement 为带 deployment 的正式配置；scenarios 覆盖每个测量 URL、mobile/desktop 命名视口和断言。先 3 次探索，有收益才正式 5–10 次；exploreFirst:false 可直接正式测量。
-6. review 包含 sourceHash/contentPreserved/visualsPreserved/summary，须有实际内容视觉证据。可显式 rollbackOnFailure:true 在失败或无收益后回滚本地；远端仍须单独同步。
+5. optimize verify 配置 action:"verify"/project/plan/reviewedPlanHash/before/measurement/scenarios/review。measurement 为带 deployment 的正式配置，页面和设备矩阵须在采样前与基线匹配。scenarios 覆盖每个测量 URL、mobile/desktop 命名视口和断言。每个组合先探索 3 次，有收益才正式采样 5–10 次。显式 `exploreFirst: false`、复用补丁实验或交互目标时只计本次正式采样。用 `validate-config --command optimize` 查看两阶段次数、总次数、按配置超时估算的时长及实际墙钟上限。确定不足会在首次导航前停止。执行时将计划保存为 `sampling-budget.json`，并为回归检查和最终部署核验预留时间。实际耗时随页面和环境变化。
+6. review 包含 sourceHash/contentPreserved/visualsPreserved/summary，须有实际内容视觉证据。显式设置 `rollbackOnFailure: true` 可在有效证据证实回退、无收益或明确拒绝时回滚本地。证据缺失或无效时保留候选。正式采样已经完成时，可补齐证据后用 `verify-optimization` 重用原样本。
 
 verify-optimization 直接验证已有数据：before、after、expectedSourceHash、regression（optimization-regression 对象）、review、可选 plan。缺项即不接受。未核验的历史基线不能补签身份，必须真实重测。
 

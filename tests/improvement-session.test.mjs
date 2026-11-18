@@ -104,9 +104,11 @@ test('invalid experiment evidence permits a bounded retry of the same implementa
   await f.step({action:'apply',reviewedPlanHash:f.state.active.planHash});
   let s=await f.step({action:'experiment',experiment:experimentConfig(f.project)},
     {runPatchExperiment:async({output})=>({output,status:'invalid-evidence',counts:{attempted:1,failed:1},verification:{outcome:'invalid-evidence',error:'Fixture warning'}})});
-  assert.equal(s.active,null);assert.equal(s.counts.attempted,1);assert.equal(s.counts.failed,1);
-  s=await f.prepare('function heavy(){ return 2; }');assert.equal(s.error,undefined);assert.equal(s.status,'review-required');
-  assert.equal(s.history.length,1);
+  assert.ok(s.active);assert.equal(s.counts.attempted,1);assert.equal(s.counts.failed,1);
+  s=await f.experiment({score:90,tbt:400});
+  assert.equal(s.error,undefined);assert.equal(s.status,'formal-validation-required');
+  assert.deepEqual(s.history.map(entry=>entry.outcome),['invalid-evidence','promising']);
+  assert.equal(s.counts.rounds,1);
 });
 
 test('formal regression rolls back even after a promising small experiment',async t=>{
@@ -166,14 +168,17 @@ test('wrong store, page or device is rejected before any experiment sampling',as
   }
 });
 
-test('runner exception consumes its reservation, records failure and restores actual source',async t=>{
+test('runner exception consumes its reservation and retains the patch for a valid retry',async t=>{
   const f=await setup(t);await f.step({action:'start'});await f.prepare('function heavy(){ return 2; }');
   await f.step({action:'apply',reviewedPlanHash:f.state.active.planHash});
   const s=await f.step({action:'experiment',experiment:experimentConfig(f.project)},
     {runPatchExperiment:async()=>{throw new Error('Runner failed after unknown progress');}});
-  assert.equal(s.active,null);assert.equal(s.counts.attempted,6);assert.equal(s.counts.failed,1);
+  assert.ok(s.active);assert.equal(s.counts.attempted,6);assert.equal(s.counts.failed,1);
   assert.equal(s.history[0].outcome,'invalid-evidence');assert.match(s.history[0].error,/unknown progress/);
-  assert.equal(await readFile(path.join(f.project,'assets/main.js'),'utf8'),'function heavy(){ return 1; }');
+  assert.equal(await readFile(path.join(f.project,'assets/main.js'),'utf8'),'function heavy(){ return 2; }');
+  const retried = await f.experiment({score:90,tbt:400});
+  assert.equal(retried.status,'formal-validation-required');
+  assert.equal(retried.counts.rounds,1);
 });
 
 async function formalCandidate(t,f) {

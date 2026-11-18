@@ -66,7 +66,7 @@ export async function setup(t, budget={maxCandidateRounds:4}, exploration=false)
       const plan=await read(config.plan),diagnosis=await read(config.diagnosis),snapshot=await sourceSnapshot(project);
       const after=await siteRun(t,{devices:['mobile'],offset:100+index*20,scores:{mobile:[score]},augment:r=>{r.audits['total-blocking-time'].numericValue=tbt;}});
       await proof(after,snapshot,project);
-      const input={plan,diagnosis,candidateId:config.candidateId,before,after:after.root,goal:config.goal,
+      const input={plan,diagnosis,candidateId:config.candidateId,before,after:after.root,goal:config.goal,acceptancePolicy:config.acceptancePolicy,
         regressionBefore:regression(baselineSnapshot.sourceHash),regressionAfter:regression(snapshot.hash)};
       const verification=await verifyPatchExperiment(input);
       if(external)for(const key of ['diagnosis','regressionBefore','regressionAfter']){const file=path.join(root,`${key}.json`);await writeFile(file,JSON.stringify(input[key]));input[key]=file;}

@@ -2,7 +2,7 @@ import {integrityForRun} from './helpers/standards-integrity.mjs';
 // All evidence below is synthetic contract data. No merchant/storefront claim.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readFile,realpath,cp,rm} from 'node:fs/promises';
 import path from 'node:path';
 import {acceptanceContract,verificationPlan} from '../lib/standards-policy.mjs';
 import {checkThemeProject,requiredThemeChecks} from '../lib/theme-check-project.mjs';
@@ -17,7 +17,8 @@ import {createSourceIndexSession,indexThemeSources} from '../lib/source-attribut
 import {renderReport} from '../lib/report.mjs';
 import {reportActions} from '../lib/report-actions.mjs';
 import {siteRun,regressionForRun} from './helpers/site-run.mjs';
-import {proof} from './helpers/improvement-fixture.mjs';
+import {proof,setup,read} from './helpers/improvement-fixture.mjs';
+import {patchGate} from '../lib/patch-verification.mjs';
 
 async function temp(t){const root=await mkdtemp('/private/tmp/perfkit-standards-upgrade-');t.after(()=>rm(root,{recursive:true,force:true}));return root;}
 async function file(root,name,value){await mkdir(path.dirname(root+'/'+name),{recursive:true});await writeFile(root+'/'+name,typeof value==='string'?value:JSON.stringify(value));return root+'/'+name;}
@@ -127,6 +128,91 @@ test('formal metric acceptance allows diagnostic score decline but keeps metric,
   assert.equal((await verifyOptimization({...withoutIntegrity,acceptancePolicy:'standards-v1'})).outcome,'not-accepted');
   const regressed=await siteRun(t,{devices:['mobile'],scores:{mobile:[90]},offset:2000,augment:r=>{r.audits['largest-contentful-paint'].numericValue=4000;}});
   assert.equal((await evaluateGain({before:before.root,after:regressed.root,goal,scoreDiagnosticOnly:true})).outcome,'performance-regressed');
+});
+
+test('formal acceptance requires each selected page/device to improve and guards the remaining matrix',async t=>{
+  const p = await pair(t);
+  const pages = [
+    {id:'home',url:'https://shop.example.test/'},
+    {id:'campaign',url:'https://shop.example.test/pages/campaign'},
+  ];
+  const options = {pages,devices:['mobile','desktop'],scores:{mobile:[85],desktop:[95]}};
+  const before = await siteRun(t,options);
+  await proof(before,await sourceSnapshot(p.before),p.before);
+  const goal = {kind:'loading',metric:'lcp',requiredGroups:[{pageId:'campaign',device:'mobile'}]};
+  for (const [campaignLcp, homeLcp, expectedResult, gain] of [
+    [2000,1500,'not-accepted','no-measurable-gain'],
+    [1500,1500,'optimization-accepted','measurable-gain'],
+    [1500,2500,'not-accepted','performance-regressed'],
+  ]) {
+    const after = await siteRun(t,{...options,offset:500,augment:(report,{page,device})=>{
+      report.audits['largest-contentful-paint'].numericValue = device==='desktop' ? 2000 : page.id==='home' ? homeLcp : campaignLcp;
+    }});
+    await proof(after,await sourceSnapshot(p.after),p.after);
+    const input = {before:before.root,after:after.root,goal,expectedSourceHash:p.b.sourceHash,
+      regression:regressionForRun(after),review:{sourceHash:p.b.sourceHash,contentPreserved:true,visualsPreserved:true,summary:'Synthetic review'}};
+    const result = await verifyOptimization(input);
+    assert.equal(result.outcome,expectedResult);
+    assert.equal(result.gain.outcome,gain);
+    assert.deepEqual(result.gain.groups.filter(g=>g.requiredImprovement).map(g=>[g.pageId,g.device]),[['campaign','mobile']]);
+    if (expectedResult==='optimization-accepted') {
+      const desktopAlsoRequired = {...goal,requiredGroups:[...goal.requiredGroups,{pageId:'campaign',device:'desktop'}]};
+      assert.equal((await verifyOptimization({...input,goal:desktopAlsoRequired})).outcome,'not-accepted');
+      const absent = {...goal,requiredGroups:[{pageId:'absent',device:'mobile'}]};
+      assert.equal((await verifyOptimization({...input,goal:absent})).gain.outcome,'invalid-evidence');
+    }
+  }
+});
+
+test('session policy survives experiment, formal replay and repair of missing review using the same samples',async t=>{
+  const f = await setup(t);
+  const goal = {kind:'loading',metric:'tbt',requiredGroups:[{pageId:'home',device:'mobile'}]};
+  const baselineSnapshot = await sourceSnapshot(f.project);
+  const baselineProject = f.root+'/unchanged-baseline';
+  await cp(f.project,baselineProject,{recursive:true});
+  const a = await checkThemeProject({project:baselineProject,dependencies:{runProcess:runner()}});
+  const initial = await f.step({action:'start',goal,acceptancePolicy:'standards-v1'});
+  assert.equal(initial.acceptancePolicy,'standards-v1');
+  await f.prepare('function heavy(){ return 2; }');
+  await f.step({action:'apply',reviewedPlanHash:f.state.active.planHash});
+  const experiment = await f.experiment({score:45,tbt:400});
+  assert.equal(experiment.status,'formal-validation-required',JSON.stringify(experiment.history.at(-1)));
+  assert.equal(experiment.history.at(-1).verification.gain.scoreDiagnosticOnly,true);
+  const plan = await read(experiment.active.plan);
+  await assert.rejects(patchGate(plan,experiment.active.patchEvidence,goal),/policy differs/);
+  const unlabeled = await read(experiment.active.patchEvidence);
+  delete unlabeled.acceptancePolicy;
+  const rejectedLegacyExperiment = await patchGate(plan,unlabeled,goal,undefined,'standards-v1');
+  assert.equal(rejectedLegacyExperiment.outcome,'performance-regressed');
+
+  const b = await checkThemeProject({project:f.project,dependencies:{runProcess:runner()}});
+  const after = await siteRun(t,{devices:['mobile'],offset:500,scores:{mobile:[45]},augment:report=>{
+    report.audits['total-blocking-time'].numericValue=400;
+  }});
+  const current = await sourceSnapshot(f.project);
+  await proof(after,current,f.project);
+  const standardsEvidence = await observations({
+    root:f.root,a,b,input:{before:await ref(f.root,'check-before.json',a),after:await ref(f.root,'check-after.json',b)},
+  },after.manifest.config.pages.map(page=>page.url));
+  const regression = regressionForRun(after);
+  regression.integrityProfiles = {
+    before:[integrityForRun(f.baseline,baselineSnapshot)],
+    after:[integrityForRun(after,current,1)],
+  };
+  const verification = {after:after.root,regression,standardsEvidence};
+  const pending = await f.step({action:'verify',verification});
+  assert.equal(pending.status,'formal-validation-required');
+  assert.equal(pending.active.formalAfter,await realpath(after.root));
+  assert.equal((await readFile(f.project+'/assets/main.js','utf8')),'function heavy(){ return 2; }');
+  assert.equal((await read(pending.verification)).patchExperiment.outcome,'promising');
+  const pendingResult = await read(pending.verification);
+  const failures = pendingResult.checks.filter(check=>!check.pass);
+  assert.deepEqual(failures.map(check=>check.id),['content-and-visual-review'],JSON.stringify({failures,integrity:pendingResult.runtimeIntegrity.issues}));
+  const resumed = await f.step({action:'verify',verification:{...verification,review:{
+    sourceHash:current.hash,contentPreserved:true,visualsPreserved:true,summary:'Synthetic review',
+  }}});
+  assert.equal(resumed.status,'optimization-accepted');
+  assert.equal(resumed.counts.attempted,pending.counts.attempted);
 });
 
 const image=extra=>({selector:'#image',src:'https://example.com/img.jpg',priority:'auto',width:100,height:100,sizes:'100px',declaredSizePx:100,declaredWidth:'100',declaredHeight:'100',hidden:false,downloaded:true,carouselCandidate:false,...extra});

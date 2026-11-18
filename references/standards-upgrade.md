@@ -17,22 +17,22 @@
 
 “实质退步/改善”按既有最小幅度与前后样本波动判断，不表示每个微小波动都失败，也不构成统计显著性或因果证明。规范 MEA-02 的每组至少 3 次是实验室对比的最低建议；工具探索默认 3 次，正式验收保持更严格的至少 5 次，探索报告不能充当正式证据。
 
-省略 `acceptancePolicy` 时，原 score 默认值、分数门槛、收益判定、部署、业务/视觉、回滚及 CLI 退出语义保持原样。
+省略 `acceptancePolicy` 时，继续使用原 score 默认值、分数门槛及评分退步保护。
 
 显式使用 `acceptancePolicy: "standards-v1"` 时：
 
 - 必须指定 `goal: {kind: "loading", metric: "lcp"}` 等具体指标，或原有 interaction 目标；不能默认使用 score。
 - 分数与原分数门槛仍输出供诊断，但不决定此策略的通过。目标指标必须有达到既有噪声/最小幅度要求的实测改善；其他导航指标不得实质退步。interaction 仍必须提供独立交互证据。
-- 正式每页每设备前后至少五次、环境匹配、源码/部署身份、单补丁实验、功能、内容视觉及已配置资源预算继续有效。不降低现有单补丁探索门禁。
+- 正式每页每设备前后至少五次、环境匹配、源码/部署身份、单补丁实验、功能、内容视觉及已配置资源预算继续有效。单补丁探索也采用所选指标策略，继续要求独立样本、源码身份和功能保留。
 - 必须提供部署绑定的 `regression.integrityProfiles`，检查 LCP 身份、重复请求与初始化；缺少或异常均拒绝。
 - 增加 Theme Check 前后差异门禁和按源码改动范围要求的观察记录。必要项目 `NOT RUN` 不能通过。
 - `field-follow-up` 在全局改动中明确列为上线后补充的 E3 项，缺失仍显示 `NOT RUN`，但不阻止开发主题的实验室验收。通过不代表真实用户 CWV 达标，也不授权发布。
 
 `policy: "delivery-v1"` 是另一项交付适配器策略，可与 `acceptancePolicy` 同时使用；不互相替代。
 
-`verify-optimization`、`optimize verify`、`improve collect` 和 `improve verify` 均接入新字段。collect 在正式导航前检查规范证据，缺失时不浪费测量预算。improve 第一次正式验证选择的策略会固定在会话中，后续不能换策略绕过失败。缺失证据可以补齐后继续复用已固定的样本。
+`verify-optimization`、`optimize verify`、`improve collect` 和 `improve verify` 均接入新字段。collect 在正式导航前检查规范证据，缺失时不浪费测量预算。improve 在 start 时固定策略，实验、正式验证和证据修复沿用该策略。缺失证据可以补齐后继续复用已固定的样本。
 
-配置位置：`verify-optimization` 与 `optimize` 在配置顶层提供 `acceptancePolicy`、`goal`、`standardsEvidence`；`improve collect` 在 `formal` 中提供策略与规范证据，`improve verify` 在 `verification` 中提供，目标沿用会话的 `goal`。`legacy-score` 是结果中的策略标识，不是可传入的配置值；保留旧流程应省略字段，不填写 null 或改写旧配置。
+配置位置：`verify-optimization` 与 `optimize` 在配置顶层提供 `acceptancePolicy`、`goal`、`standardsEvidence`；`experiment` 与 `verify-patch` 在配置顶层提供同一 `acceptancePolicy`。使用会话时，在 `improve start` 提供目标与策略，在 `improve collect` 的 `formal` 或 `improve verify` 的 `verification` 中提供规范证据。`legacy-score` 是结果中的策略标识，不是可传入的配置值；保留旧流程应省略字段，不填写 null 或改写旧配置。
 
 运行完整性证据的位置随入口不同：直接 verify-optimization 使用 `regression.integrityProfiles`，optimize verify 使用顶层 `integrityProfiles`，improve collect 使用 `formal.integrityProfiles`，improve verify 使用 `verification.regression.integrityProfiles`。这些字段引用实际采集的证据，不能用待执行清单或自行填入的 PASS 替代。
 

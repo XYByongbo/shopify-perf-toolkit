@@ -57,7 +57,7 @@ description: Diagnose and optimize Shopify Liquid themes at site, image, or comp
 
 ## 实测验收与交付
 
-开始时按 [新旧验收策略](references/standards-upgrade.md#两种正式验收策略) 确定口径。省略 acceptancePolicy 保留旧分数流程；显式要求按规范进行指标验收时使用 `acceptancePolicy: "standards-v1"`，明确 loading/interaction 目标，提供项目 Theme Check 前后原始报告、改动范围观察及部署绑定的 integrityProfiles，分数仅作诊断。只声明 loading/interaction 不会启用新策略；不得在失败后切换策略绕过门槛。PageOtter 导入是提议的 handoff v1 外部观察接口，不是正式验收证据。
+开始时按 [新旧验收策略](references/standards-upgrade.md#两种正式验收策略) 确定口径。省略 acceptancePolicy 保留旧分数流程；显式要求按规范进行指标验收时使用 `acceptancePolicy: "standards-v1"`，明确 loading/interaction 目标，提供项目 Theme Check 前后原始报告、改动范围观察及部署绑定的 integrityProfiles，分数仅作诊断。使用会话时在 `improve start` 固定策略，实验和正式验收沿用同一策略。使用 `goal.requiredGroups` 指定必须改善的页面 ID 与设备组合，其余测量组合继续承担回退检查。缺少证据时保留候选，利用已固定的正式样本继续验证。PageOtter 导入是提议的 handoff v1 外部观察接口，不是正式验收证据。
 
 - 两种策略均要求正式每页每设备前后各至少 **5 次独立报告**，锁定引擎/版本/状态/完整配置，保留全部有效样本与失败记录。探索显式 `purpose=exploration`（默认 3 次），不能充当正式验收。旧流程默认移动最低 75/中位 80，桌面最低 85/中位 90，见 [评分契约](references/score-acceptance.md)。
 - 新优化任务的两侧测量启用 deployment；测量前后核验远端文本源码、店铺/主题/页面身份。最终使用 `verify-optimization` 检查目标收益、关键指标无实质退步、部署身份、功能与内容视觉及所选策略要求；`verify-site` 或 CI 达标不等于完成优化。旧流程中 95→80 不因仍过门槛而接受；新策略仍保留具体指标的退步保护。

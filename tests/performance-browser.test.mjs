@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm, cp } from 'node:fs/promises';
 import path from 'node:path';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {fileURLToPath} from 'node:url';
 import { createHash } from 'node:crypto';
 import { chromium } from 'playwright-core';
 import { Liquid } from 'liquidjs';
@@ -10,6 +13,9 @@ import { browserExecutable, profileRuntime } from '../lib/runtime-profile.mjs';
 import { transformCode } from '../lib/code-strategies.mjs';
 import { performanceStrategies } from '../lib/performance-strategies.mjs';
 import { auditPerformance } from '../lib/performance-audit.mjs';
+import {fixturePNG} from './helpers/fixture-image.mjs';
+import {profileDomain} from '../lib/domain-profile.mjs';
+import {verifyDeployment} from '../lib/deployment.mjs';
 
 const enabled = process.env.PERF_KIT_BROWSER_TESTS === '1';
 const proof = (source, kind) => ({ ...Object.fromEntries(performanceStrategies.find(s => s.kind === kind).evidenceRequired.map(k => [k, true])),
@@ -19,7 +25,7 @@ async function fixture(t, html, files = {}) {
   await mkdir(path.join(project, 'assets'), { recursive: true });
   await mkdir(path.join(project, 'sections'), { recursive: true });
   await writeFile(path.join(project, 'sections/main.liquid'), '<section>Fixture</section>');
-  for (const [file, content] of Object.entries(files)) await writeFile(path.join(project, file), content);
+  for (const [file, content] of Object.entries(files)) if (!Buffer.isBuffer(content)) await writeFile(path.join(project, file), content);
   const requests = [];
   const server = http.createServer((req, res) => {
     requests.push(req.url);
@@ -29,7 +35,8 @@ async function fixture(t, html, files = {}) {
       res.setHeader('content-type', 'image/svg+xml');
       res.end('<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800"><rect width="1600" height="800" fill="steelblue"/><path d="M0 800L600 50L1200 800ZM600 800L1200 100L1600 800Z" fill="orange"/><circle cx="1300" cy="180" r="90" fill="white"/><text x="80" y="140" font-size="80">Performance fixture</text></svg>');
     } else if (files[pathname.slice(1)]) {
-      res.setHeader('content-type', 'text/css'); res.end(files[pathname.slice(1)]);
+      const body = files[pathname.slice(1)];
+      res.setHeader('content-type',Buffer.isBuffer(body)?'image/png':'text/css'); res.end(body);
     } else if (pathname === '/') { res.setHeader('content-type', 'text/html'); res.end(html); }
     else { res.writeHead(404); res.end(); }
   });
@@ -37,6 +44,91 @@ async function fixture(t, html, files = {}) {
   t.after(async () => { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); await rm(root, { recursive: true, force: true }); });
   return { root, project, requests, url: `http://127.0.0.1:${server.address().port}/` };
 }
+test('audit finding generates mobile and desktop configs consumed directly by the runtime CLI', { skip: !enabled, timeout: 90000 }, async t => {
+  const source = `<section>
+    <img src="/desktop.png" loading="lazy" class="hero--desktop" width="1600" height="800" alt="Desktop">
+    <img src="/mobile.png" loading="lazy" class="hero--mobile" width="800" height="400" alt="Mobile">
+  </section>`;
+  const f = await fixture(t, `<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>img{width:100%;max-width:1100px;height:auto;display:block}.hero--mobile{display:none}
+    @media(max-width:749px){.hero--mobile{display:block}.hero--desktop{display:none}}</style>
+    <script>window.Shopify={theme:{id:123},shop:'fixture.myshopify.com'};</script>${source}`,
+    {'desktop.png':fixturePNG(),'mobile.png':fixturePNG(600,300)});
+  await writeFile(path.join(f.project,'sections/main.liquid'),source);
+  const cli = fileURLToPath(new URL('../scripts/perfkit.mjs',import.meta.url));
+  const run = (...args) => promisify(execFile)(process.execPath,[cli,...args],{timeout:35000});
+  const auditPath = path.join(f.root,'audit.json');
+  try {
+    await run('audit-performance','--project',f.project,'--out',auditPath);
+  } catch (error) {
+    assert.equal(error.code,3,error.stderr);
+  }
+  const audit = JSON.parse(await readFile(auditPath,'utf8'));
+  const finding = audit.findings.find(entry=>entry.ruleId==='PERF_DUAL_HERO');
+  assert.ok(finding);
+  const out = path.join(f.root,'sampling');
+  await run('plan-sampling','--audit',auditPath,'--finding',finding.id,'--url',f.url,'--out',out);
+  assert.equal(f.requests.length,0);
+  const plan = JSON.parse(await readFile(path.join(out,'sampling.json'),'utf8'));
+  assert.deepEqual(plan.selectors,['img.hero--desktop','img.hero--mobile']);
+  assert.deepEqual(plan.captures.map(capture=>capture.device),['mobile','desktop']);
+  for (const capture of plan.captures) {
+    const options = ['--config',capture.config];
+    await run('validate-config','--command','profile-runtime',...options);
+    try {
+      await run(plan.command,...options,'--out',capture.output);
+    } catch (error) {
+      assert.equal(error.code,3,error.stderr);
+    }
+    const profile = JSON.parse(await readFile(path.join(capture.output,'profile.json'),'utf8'));
+    assert.equal(profile.status,'complete',JSON.stringify(profile.errors));
+    assert.equal(profile.snapshot.hash,audit.sourceHash);
+    const chosen = f.url+capture.device+'.png';
+    assert.equal(profile.initial.lcp?.presentation?.currentSrc,chosen,JSON.stringify({requests:f.requests,targets:profile.domainTargets}));
+    assert.equal(profile.lcp.status,'observed');
+    assert.ok(profile.resources.some(resource=>resource.url===chosen && resource.type==='Image'));
+    assert.deepEqual(profile.domainTargetCoverage.configuredSelectors.map(entry=>entry.count),[1,1]);
+    assert.ok(profile.domainTargets.some(target=>target.isLCP && target.currentSrc===chosen));
+  }
+  const profiles = JSON.parse(await readFile(plan.profiles,'utf8'));
+  assert.deepEqual(profiles,plan.captures.map(capture=>path.join(capture.output,'profile.json')));
+  const replayedAuditPath = path.join(f.root,'after-sampling-audit.json');
+  try {
+    await run('audit-performance','--project',f.project,'--profiles',plan.profiles,'--out',replayedAuditPath);
+  } catch (error) {
+    assert.equal(error.code,3,error.stderr);
+  }
+  const replayed = JSON.parse(await readFile(replayedAuditPath,'utf8'));
+  assert.equal(replayed.findings.filter(entry=>entry.id.startsWith('runtime:') && entry.ruleId==='PERF_IMAGE_TAG_LOADING').length,2);
+  const boundOutput = path.join(f.root,'bound-sampling');
+  await run('plan-sampling','--audit',auditPath,'--finding',finding.id,'--url',f.url+'?preview_theme_id=123',
+    '--store','fixture.myshopify.com','--device','mobile','--out',boundOutput);
+  const bound = JSON.parse(await readFile(path.join(boundOutput,'sampling.json'),'utf8'));
+  assert.equal(bound.command,'profile-domain');
+  const [boundCapture] = bound.captures;
+  await run('validate-config','--command',bound.command,'--config',boundCapture.config);
+  const boundInput = JSON.parse(await readFile(boundCapture.config,'utf8'));
+  const boundProfile = await profileDomain({config:boundInput,output:boundCapture.output,dependencies:{
+    verifyDeployment:args=>verifyDeployment({...args,dependencies:{runProcess:async(_command,argv)=>{
+      await cp(f.project,argv[argv.indexOf('--path')+1],{recursive:true});
+      return {code:0};
+    }}}),
+  }});
+  assert.equal(boundProfile.domainProof.before.sourceHash,audit.sourceHash);
+  assert.equal(boundProfile.domainProof.after.status,'verified');
+  assert.equal(boundProfile.initial.lcp?.presentation?.currentSrc,f.url+'mobile.png');
+  assert.deepEqual(boundProfile.config.targetSelectors,plan.selectors);
+
+  const requestCount = f.requests.length;
+  await writeFile(path.join(f.project,'sections/main.liquid'),source+'<!-- drift -->');
+  await assert.rejects(run('profile-runtime','--config',plan.captures[0].config,'--out',path.join(out,'drift')),
+    error=>error.code===2 && /Audited source changed before runtime capture/.test(error.stderr));
+  await assert.rejects(profileDomain({config:boundInput,output:path.join(boundOutput,'drift'),dependencies:{
+    verifyDeployment:()=>assert.fail('Stale audit must stop before checking deployment'),
+  }}),/Audited source changed before domain capture/);
+  assert.equal(f.requests.length,requestCount);
+});
+
 test('real Chrome: generated picture requests only the selected mobile/desktop source at DPR 1 and 2', { skip: !enabled, timeout: 60000 }, async t => {
   const desktop = "{{ section.settings.desktop | image_url: width: 1600 | image_tag: alt: 'Hero', class: 'hero--desktop' }}";
   const mobile = "{{ section.settings.mobile | image_url: width: 800 | image_tag: alt: 'Hero', class: 'hero--mobile' }}";

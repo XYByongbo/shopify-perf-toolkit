@@ -47,6 +47,7 @@ const definitions = {
   'precheck': ['--project <theme> [--config <precheck-options.json>] [--out <precheck.json>]', 'precheck', 'validatePrecheck'],
   'check-performance': ['--project <theme> [--config <official-options.json>] [--out <official-checks.json>]', 'official-performance', 'validateOfficialPerformance'],
   'check-theme': '--project <theme> --out <project-checks.json>',
+  'plan-sampling': '--audit <performance-audit.json> --finding <finding-id> --url <page-url> [--device <both|mobile|desktop>] [--selector <instance-selector>] [--theme-id <id>] [--store <store.myshopify.com>] [--settle-ms <0..10000>] --out <NEW-directory>',
   'plan-verification': ['--config <source-manifests-and-scope.json> --out <verification-plan.json>', 'standards-policy', 'verificationPlan'],
   'import-pageotter': '--input <handoff-v1.json> [--project <theme>] [--baseline <prior-import.json>] --out <import.json>',
   'audit-performance': '--project <theme> [--profiles <runtime-profile-array.json>] [--baseline <performance.json>] [--checks <check-import.json>] [--ownership <ownership.json>] [--out <performance.json>]',

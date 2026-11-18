@@ -206,7 +206,25 @@ test('verify workflow shares attempt budget, measures exploration then formal ca
   const config={schemaVersion:1,action:'verify',project,plan:planFile,reviewedPlanHash:plan.planHash,before:baseline.root,measurement,
     scenarios:{schemaVersion:1,url:measurement.pages[0].url,viewports:[{name:'mobile',width:390,height:844}],scenarios:[{name:'content',steps:[{action:'assert-text',selector:'main',text:'Fixture'}]}]},
     review:{sourceHash:snapshotAfter.hash,contentPreserved:true,visualsPreserved:true,summary:'Synthetic reviewer evidence.'}};
-  const result=await runOptimization({config,output:path.join(root,'verify'),dependencies:{
+  const budgetConfig = {...config,measurement:{...measurement,devices:['mobile','desktop'],budget:{maxAttempts:10}}};
+  const blocked = await runOptimization({config:budgetConfig,output:path.join(root,'budget-blocked'),dependencies:{
+    measureSite:()=>assert.fail('Insufficient total budget must stop before exploration'),
+  }});
+  assert.equal(blocked.status,'stopped');
+  assert.equal(blocked.error.code,'OPTIMIZATION_BUDGET');
+  assert.equal(blocked.measurementStarted,false);
+  assert.equal(blocked.budget.counts.attempted,0);
+  assert.equal(blocked.samplingBudget.totalAttempts,16);
+  const standardsBlocked = await runOptimization({
+    config:{...budgetConfig,goal:{kind:'loading',metric:'lcp'},acceptancePolicy:'standards-v1'},
+    output:path.join(root,'standards-budget-blocked'),
+    dependencies:{measureSite:()=>assert.fail('Budget must stop before measurement')},
+  });
+  assert.equal(standardsBlocked.error.code,'OPTIMIZATION_BUDGET');
+  assert.equal(standardsBlocked.budget.counts.attempted,0);
+  assert.equal(standardsBlocked.artifacts['standards-preflight.json'],undefined);
+  const exactBudget = {...config,measurement:{...measurement,budget:{maxAttempts:8}}};
+  const result=await runOptimization({config:exactBudget,output:path.join(root,'verify'),dependencies:{
     verifyOptimization:async input=>{verifications++;return verifyOptimization(input);},
     measureSite:async({config:c,output})=>{
       calls.push(c);const f=await siteRun(t,{devices:['mobile'],reports:c.runs,offset:c.purpose==='exploration'?10:20,scores:{mobile:[85]}});
@@ -221,12 +239,44 @@ test('verify workflow shares attempt budget, measures exploration then formal ca
       measureSite:async()=>assert.fail('Mismatched regression must stop before measurement') }});
     assert.equal(denied.status,'failed');assert.match(denied.error.message,/project\/theme differs/);
   }
-  const rollback=await runOptimization({config:{...config,exploreFirst:false,rollbackOnFailure:true},output:path.join(root,'rollback'),dependencies:{
+  const wrongMatrix = await runOptimization({
+    config:{...config,measurement:{...measurement,pages:[{...measurement.pages[0],id:'other'}]},rollbackOnFailure:true},
+    output:path.join(root,'wrong-matrix'),
+    dependencies:{measureSite:()=>assert.fail('A different page/device matrix must stop before measurement')},
+  });
+  assert.match(wrongMatrix.error.message,/page\/device matrix must match the baseline/);
+  assert.equal(wrongMatrix.measurementStarted,false);
+  assert.equal(wrongMatrix.budget.counts.attempted,0);
+  assert.equal(wrongMatrix.localRollback,'retained-pending-evidence');
+
+  const missingBaseline = await runOptimization({
+    config:{...config,before:path.join(root,'missing-baseline'),rollbackOnFailure:true},
+    output:path.join(root,'missing-evidence'),
+    dependencies:{measureSite:()=>assert.fail('Missing baseline must stop before measurement')},
+  });
+  assert.equal(missingBaseline.measurementStarted,false);
+  assert.equal(missingBaseline.localRollback,'retained-pending-evidence');
+  assert.equal((await sourceSnapshot(project)).hash,snapshotAfter.hash);
+
+  const pending=await runOptimization({config:{...config,exploreFirst:false,rollbackOnFailure:true},output:path.join(root,'pending'),dependencies:{
     measureSite:async({config:c,output})=>{const f=await siteRun(t,{devices:['mobile'],offset:30,scores:{mobile:[85]}});
       f.manifest.config={...c};await bind(f,snapshotAfter);regression=regressionForRun(f);await cp(f.root,output,{recursive:true});return {status:'complete',counts:{attempted:5,failed:0}};},
     runScenarios:async()=>({...regression.scenarios,sourceStable:false}),verifyDeployment:async()=>regression.remote,
   }});
-  assert.equal(rollback.status,'not-accepted');assert.equal(rollback.localRollback,'complete-preview-still-requires-sync');
+  assert.equal(pending.status,'not-accepted');
+  assert.equal(pending.localRollback,'retained-pending-evidence');
+  assert.equal((await sourceSnapshot(project)).hash,snapshotAfter.hash);
+  assert.equal((await verifyOptimization({...pending.verificationInput,regression})).outcome,'optimization-accepted');
+
+  const rejected = await runOptimization({config:{...config,exploreFirst:false,rollbackOnFailure:true},output:path.join(root,'rollback'),dependencies:{
+    measureSite:async({config:c,output})=>{
+      const f=await siteRun(t,{devices:['mobile'],offset:40,scores:{mobile:[50]}});
+      f.manifest.config={...c};await bind(f,snapshotAfter);regression=regressionForRun(f);
+      await cp(f.root,output,{recursive:true});return {status:'complete',counts:{attempted:5,failed:0}};
+    },
+    runScenarios:async()=>regression.scenarios,verifyDeployment:async()=>regression.remote,
+  }});
+  assert.equal(rejected.localRollback,'complete-preview-still-requires-sync');
   assert.equal((await sourceSnapshot(project)).hash,snapshotBefore.hash);
 });
 test('text identity includes protected config and ignores large media without exposing merchant settings', async t => {

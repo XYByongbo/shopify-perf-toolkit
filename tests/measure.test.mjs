@@ -137,6 +137,26 @@ test('Lighthouse matrix is serial, fixed engine, records every original report a
   assert.deepEqual(JSON.parse(await readFile(path.join(setup.output, 'run.json'), 'utf8')), result);
 });
 
+test('explicit DevTools throttling is passed through and checked against the saved sample', async t => {
+  const setup = await fixture(t);
+  const config = {...base,throttlingMethod:'devtools',purpose:'exploration',runs:1};
+  assert.throws(()=>validateMeasureConfig({...config,engine:'psi'}),/local Lighthouse only/);
+  const dependencies = {env:setup.env};
+  const transport = mockLighthouse(report => {
+    Object.assign(report.configSettings,{throttlingMethod:'devtools',throttling:{
+      requestLatencyMs:150,downloadThroughputKbps:1600,uploadThroughputKbps:750,cpuSlowdownMultiplier:4,
+    }});
+    return report;
+  });
+  const result = await measureSite({config,output:setup.output,dependencies:{...dependencies,spawn:transport.spawn}});
+  assert.equal(result.status,'complete');
+  assert.equal(result.config.throttlingMethod,'devtools');
+  assert.ok(transport.calls[0].args.includes('--throttling-method=devtools'));
+  const different = await measureSite({config,output:setup.output+'-mismatch',dependencies:{...dependencies,spawn:mockLighthouse().spawn}});
+  assert.equal(different.groups[0].attempts[0].error.code,'PROFILE_DRIFT');
+  assert.equal(different.counts.succeeded,0);
+});
+
 test('every invalid report remains evidence and prevents complete status', async t => {
   const cases = [
     ['DUPLICATE_FETCH_TIME', report => ({ ...report, fetchTime: lhr(report.requestedUrl, 'mobile', 1).fetchTime })],
